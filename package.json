@@ -15,7 +15,7 @@
     "extensible"
   ],
   "dependencies": {
-    "@ryusei/light": "^1.1.5"
+    "@ryusei/light": "^1.1.8"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

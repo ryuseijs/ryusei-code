@@ -57,7 +57,7 @@ export declare class RyuseiCode {
      *
      * @param options - Options to merge.
      */
-    private merge;
+    private mergeOptions;
     /**
      * Applies the editor to the target element.
      *

@@ -52,14 +52,6 @@ export declare class Caret extends Component {
      */
     private update;
     /**
-     * Finds the first text node in the specified node.
-     *
-     * @param node - A node to search in.
-     *
-     * @return A found text node if available, or otherwise `null`.
-     */
-    private findFirstTextNode;
-    /**
      * Registers a new caret.
      *
      * @param id - An ID for the caret to register.

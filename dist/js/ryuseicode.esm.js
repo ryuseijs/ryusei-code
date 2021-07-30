@@ -1933,28 +1933,6 @@ var Caret = /*#__PURE__*/function (_Component2) {
     this.primary.move(this.Selection.get(false).end);
   }
   /**
-   * Finds the first text node in the specified node.
-   *
-   * @param node - A node to search in.
-   *
-   * @return A found text node if available, or otherwise `null`.
-   */
-  ;
-
-  _proto4.findFirstTextNode = function findFirstTextNode(node) {
-    var childNode;
-
-    while (childNode = node.firstChild) {
-      if (isText(childNode)) {
-        return childNode;
-      }
-
-      node = childNode;
-    }
-
-    return null;
-  }
-  /**
    * Registers a new caret.
    *
    * @param id - An ID for the caret to register.
@@ -2933,7 +2911,7 @@ function matchesToken(token, matcher) {
 }
 /*!
  * RyuseiLight.js
- * Version  : 1.1.5
+ * Version  : 1.1.8
  * License  : MIT
  * Copyright: 2020 Naotoshi Fujita
  */
@@ -3422,7 +3400,7 @@ function javascript$1() {
       func: /[_$a-z\xA0-\uFFFF][_$a-z0-9\xA0-\uFFFF]*/
     },
     grammar: {
-      main: [[CATEGORY_STRING, REGEXP_QUOTE], [CATEGORY_STRING, REGEXP_DOUBLE_QUOTE], ['#backtick', /`/, '@rest'], [CATEGORY_COMMENT, REGEXP_MULTILINE_COMMENT], [CATEGORY_COMMENT, REGEXP_SLASH_COMMENT], [CATEGORY_REGEXP, /\/(\[.*[^\\]?]|\\\/|.)+?\/[gimsuy]*/], [CATEGORY_KEYWORD, REGEXP_GENERAL_KEYWORDS], [CATEGORY_KEYWORD, /\b(?:as|async|await|case|catch|const|debugger|default|delete|enum|export|from|import|let|package|private|protected|public|super|switch|static|this|typeof|undefined|var|void|with|yield)\b/], [CATEGORY_KEYWORD, /\b((get|set)(?=\s+%func))/i], [CATEGORY_CLASS, /\b[A-Z][\w$]*\b/], [CATEGORY_FUNCTION, /%func(?=\s*\()/i], [CATEGORY_BOOLEAN, REGEXP_BOOLEAN], [CATEGORY_DECORATOR, /@[^\s(@]+/], [CATEGORY_IDENTIFIER, /\b[a-z_$][\w$]*\b/], [CATEGORY_NUMBER, REGEXP_NUMBER], [CATEGORY_OPERATOR, /=>/], [CATEGORY_OPERATOR, /\+[+=]?|-[-=]?|\*\*?=?|[/%^]=?|&&?=?|\|\|?=?|\?\??=?|<<?=?|>>>=?|>>?=?|[!=]=?=?|[~:^]/], [CATEGORY_BRACKET, REGEXP_BRACKET], [CATEGORY_DELIMITER, /[;.,]+/], [CATEGORY_SPACE, REGEXP_SPACE]],
+      main: [[CATEGORY_STRING, REGEXP_QUOTE], [CATEGORY_STRING, REGEXP_DOUBLE_QUOTE], ['#backtick', /`/, '@rest'], [CATEGORY_COMMENT, REGEXP_MULTILINE_COMMENT], [CATEGORY_COMMENT, REGEXP_SLASH_COMMENT], [CATEGORY_REGEXP, /\/(\[.*?]|\\\/|.)+?\/[gimsuy]*/], [CATEGORY_KEYWORD, REGEXP_GENERAL_KEYWORDS], [CATEGORY_KEYWORD, /\b(?:as|async|await|case|catch|const|debugger|default|delete|enum|export|from|import|let|package|private|protected|public|super|switch|static|this|typeof|undefined|var|void|with|yield)\b/], [CATEGORY_KEYWORD, /\b((get|set)(?=\s+%func))/i], [CATEGORY_CLASS, /\b[A-Z][\w$]*\b/], [CATEGORY_FUNCTION, /%func(?=\s*\()/i], [CATEGORY_BOOLEAN, REGEXP_BOOLEAN], [CATEGORY_DECORATOR, /@[^\s(@]+/], [CATEGORY_IDENTIFIER, /\b[a-z_$][\w$]*\b/], [CATEGORY_NUMBER, REGEXP_NUMBER], [CATEGORY_OPERATOR, /=>/], [CATEGORY_OPERATOR, /\+[+=]?|-[-=]?|\*\*?=?|[/%^]=?|&&?=?|\|\|?=?|\?\??=?|<<?=?|>>>=?|>>?=?|[!=]=?=?|[~:^]/], [CATEGORY_BRACKET, REGEXP_BRACKET], [CATEGORY_DELIMITER, /[;.,]+/], [CATEGORY_SPACE, REGEXP_SPACE]],
       backtick: [[CATEGORY_STRING, /^`/], [CATEGORY_STRING, /(\$[^{]|\\[$`]|[^`$])+/], ['#expression', /\${/, '@rest'], [CATEGORY_STRING, /`/, '@break']],
       expression: [[CATEGORY_DELIMITER, /^\${/], [CATEGORY_DELIMITER, /}/, '@break'], ['#main']]
     }
@@ -9993,7 +9971,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    * @param options - Optional. Options.
    */
   function RyuseiCode(options) {
-    this.merge(options);
+    this.mergeOptions(options);
     this.language = RyuseiCode.get(this.options.language);
     this.Editor = new Editor(this.language, this.options, RyuseiCode.Extensions);
   }
@@ -10051,7 +10029,7 @@ var RyuseiCode = /*#__PURE__*/function () {
 
   var _proto35 = RyuseiCode.prototype;
 
-  _proto35.merge = function merge(options) {
+  _proto35.mergeOptions = function mergeOptions(options) {
     var _this55 = this;
 
     this.options = assign$1({}, DEFAULT_OPTIONS$6);
