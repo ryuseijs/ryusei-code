@@ -1,0 +1,67 @@
+@use '../../core/foundation/colors' with (
+  $main: #ed5f58,
+  $accent: #42b9c7,
+
+  $dark01: #202635,
+  $dark02: #232a3b,
+  $dark03: #2a3247,
+  $dark04: #2e374f,
+  $dark05: #333d57,
+  $dark06: #3e4a69,
+  $dark07: #4b5a80,
+
+  $light01: #f2f2f2,
+  $light02: #cad2e6,
+  $light03: #9faccc,
+  $light04: #7890cc,
+  $light05: #7890cc,
+
+  $shadow01: #000,
+
+  $text01: #cad2e6,
+  $text02: #9faccc,
+  $text03: #7890cc,
+  $text04: #7890cc,
+
+  $text-strong: #ed5f58,
+  $text-em: #42b9c7,
+
+  $marker01: #ed5f58,
+  $marker02: #42b9c7,
+  $marker03: #b9cd32,
+  $marker04: #527adf,
+
+  $selection01: #344879,
+  $selection02: #3e589b,
+
+  $caret: #9faccc
+);
+
+@use '../../core/object/token' with (
+  $keyword: #d774e8,
+  $constant: #ed5f58,
+  $symbol: #ed5f58,
+  $comment: #7890cc,
+  $tag: #d774e8,
+  $selector: #cfb053,
+  $atrule: #d774e8,
+  $attr: #b9cd32,
+  $prop: #b9cd32,
+  $value: #67cb78,
+  $variable: #ed5f58,
+  $entity: #527adf,
+  $cdata: #7890cc,
+  $prolog: #7890cc,
+  $string: #67cb78,
+  $number: #42b9c7,
+  $boolean: #ed5f58,
+  $function: #2abac4,
+  $class: #b9cd32,
+  $decorator: #527adf,
+  $regexp: #67cb78,
+  $operator: #42b9c7,
+  $bracket: #9faccc,
+  $delimiter: #9faccc
+);
+
+@forward '../../core';

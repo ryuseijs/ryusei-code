@@ -1,0 +1,55 @@
+@use '../foundation/colors';
+
+$toolbar-background: colors.$dark03 !default;
+$toolbar-color: colors.$light04 !default;
+$toolbar-font-size: .9em !default;
+$toolbar-padding: .15em .5em !default;
+$toolbar-box-shadow: 0 4px 10px -10px rgba( colors.$shadow01, .4 ) !default;
+$toolbar-span-padding: 0 .4em !default;
+
+.ryuseicode {
+  &__toolbar {
+    background: $toolbar-background;
+    box-shadow: $toolbar-box-shadow;
+    display: none;
+    flex-shrink: 0;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: $toolbar-padding;
+    position: relative;
+    z-index: 2;
+
+    &--sticky {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    &.is-active {
+      display: flex;
+    }
+
+    &__body {
+      flex: 1 1 90%;
+      min-width: 0;
+    }
+
+    &__group {
+    }
+
+    &__replace {
+      display: none;
+
+      &.is-active {
+        display: block;
+      }
+    }
+
+    span {
+      color: $toolbar-color;
+      font-size: $toolbar-font-size;
+      padding: $toolbar-span-padding;
+      vertical-align: middle;
+    }
+  }
+}

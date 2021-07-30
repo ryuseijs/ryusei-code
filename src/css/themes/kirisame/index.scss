@@ -1,0 +1,75 @@
+@use '../../core/foundation/colors' with (
+  $main: #2698d6,
+  $accent: #e75a77,
+
+  $dark01: #fafcff,
+  $dark02: #f1f7fc,
+  $dark03: #ebf3fb,
+  $dark04: #e4ecf6,
+  $dark05: #d8e3f1,
+  $dark06: #cddcef,
+  $dark07: #bed1e9,
+
+  $light01: #264461,
+  $light02: #4a6e9a,
+  $light03: #7699c4,
+  $light04: #8baad1,
+  $light05: #a2bdde,
+
+  $shadow01: #4a6e9a,
+
+  $text01: #264461,
+  $text02: #4a6e9a,
+  $text03: #4a6e9a,
+  $text04: #4a6e9a,
+
+  $text-strong: #e75a77,
+  $text-em: #2698d6,
+
+  $marker01: #e75a77,
+  $marker02: #72bc31,
+  $marker03: #8baad1,
+  $marker04: #e8932d,
+
+  $selection01: #d7eaf7,
+  $selection02: #c4e1f4,
+
+  $caret: #4a6e9a
+);
+
+@use '../../core/object/token' with (
+  $keyword: #e75a77,
+  $constant: #06b297,
+  $symbol: #06b297,
+  $comment: #8baad1,
+  $tag: #f75766,
+  $selector: #72bc31,
+  $atrule: #e75a77,
+  $attr: #06b297,
+  $prop: #06b297,
+  $value: #3d82e0,
+  $variable: #3d82e0,
+  $entity: #5d639e,
+  $cdata: #7699c4,
+  $prolog: #7699c4,
+  $string: #e8932d,
+  $number: #9b63f0,
+  $boolean: #e75a77,
+  $function: #2698d6,
+  $class: #06b297,
+  $decorator: #5d639e,
+  $regexp: #e8932d,
+  $operator: #e75a77,
+  $bracket: #8baad1,
+  $delimiter: #8baad1
+);
+
+@use '../../core/object/context-menu' with (
+  $box-shadow: 0 0 15px 4px rgba( #a2bdde, .08 ),
+);
+
+@use '../../core/extensions/dialog' with (
+  $box-shadow: 0 0 15px 4px rgba( #a2bdde, .08 ),
+);
+
+@forward '../../core';

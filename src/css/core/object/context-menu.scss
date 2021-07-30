@@ -1,0 +1,88 @@
+@use '../foundation/colors';
+
+$background: colors.$dark03 !default;
+$color: colors.$text01 !default;
+$min-width: 18em !default;
+$padding: 0 !default;
+$border: 1px solid colors.$dark04 !default;
+$border-radius: 4px !default;
+$box-shadow: 0 0 10px 4px rgba( colors.$shadow01, .15 ) !default;
+$list-border-bottom: 1px solid colors.$dark04 !default;
+$item-font-size: .9em !default;
+$item-padding: .5em 1em !default;
+$item-background-hover: colors.$main !default;
+$item-color-hover: colors.$dark04 !default;
+$item-opacity-disabled: .5 !default;
+$item-transition: none !default;
+
+
+.ryuseicode {
+  &__context-menu {
+    background: $background;
+    border: $border;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    color: $color;
+    display: none;
+    min-width: $min-width;
+    overflow: hidden;
+    padding: $padding;
+    position: absolute;
+    z-index: 1;
+
+    &.is-active {
+      display: block;
+      pointer-events: auto;
+    }
+
+    &__list {
+      border-bottom: $list-border-bottom;
+      margin: 0;
+      padding: 0;
+
+      &:last-child {
+        border: 0;
+      }
+    }
+
+    &__item {
+      list-style: none;
+    }
+
+    & &__button {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      color: inherit;
+      font-size: $item-font-size;
+      height: auto;
+      justify-content: space-between;
+      margin: 0;
+      padding: $item-padding;
+      transition: $item-transition;
+      width: 100%;
+
+      &:not(:disabled) {
+        &:not(.is-active):hover,
+        &:not(.is-active):focus {
+          background: $item-background-hover;
+          color: $item-color-hover;
+        }
+      }
+
+      &:focus {
+        border: 0;
+      }
+
+      &:disabled {
+        opacity: $item-opacity-disabled;
+      }
+
+      &__label {
+      }
+
+      &__shortcut {
+      }
+    }
+  }
+}

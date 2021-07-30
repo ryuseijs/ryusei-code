@@ -1,0 +1,33 @@
+.ryuseicode {
+  $root: &;
+
+  &__scroller {
+    box-sizing: border-box;
+    max-height: inherit;
+    min-height: inherit;
+    overflow: hidden;
+
+    // For IE
+    -ms-overflow-style: none;
+    position: relative;
+    width: 100%;
+    z-index: 0;
+
+    // For Firefox
+    @supports ( scrollbar-width: none ) {
+      scrollbar-width: none;
+    }
+
+    // For WebKit
+    &::-webkit-scrollbar {
+      height: 0;
+      width: 0;
+    }
+  }
+
+  &.is-initialized {
+    #{ $root }__scroller {
+      overflow: auto;
+    }
+  }
+}

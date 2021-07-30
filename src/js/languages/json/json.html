@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON</title>
+  <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
+</head>
+<body style="margin: 1em ">
+
+<pre id="code">
+{
+  "users": {
+    "title": "Users",
+    "list": [
+      {
+        "name": "John Doe",
+        "id": "001",
+        "age": 38,
+        "entries": [ 1, 3, 4 ],
+        "premium": true,
+        "icon": null
+      },
+      {
+        "name": "Jane Doe",
+        "id": "002",
+        "age": 27,
+        "entries": [ 1, 8, 12 ],
+        "premium": false,
+        "icon": "./images/002.jpg"
+      }
+    ]
+  }
+}</pre>
+
+<script src="../../../../dist/js/ryuseicode-extensions.min.js"></script>
+<script src="../../../../dist/js/languages/json.min.js"></script>
+<script>
+  new RyuseiCode( { language: 'json' } ).apply( '#code' );
+</script>
+</body>
+</html>

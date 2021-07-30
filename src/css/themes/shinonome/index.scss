@@ -1,0 +1,67 @@
+@use '../../core/foundation/colors' with (
+  $main: #6bc6cd,
+  $accent: #f5adb4,
+
+  $dark01: #213038,
+  $dark02: #253640,
+  $dark03: #303e45,
+  $dark04: #36444d,
+  $dark05: #425057,
+  $dark06: #525f66,
+  $dark07: #667780,
+
+  $light01: #f6fafc,
+  $light02: #d1e3e8,
+  $light03: #c3d4d9,
+  $light04: #99b2bf,
+  $light05: #80a2ad,
+
+  $shadow01: #000,
+
+  $text01: #d1e3e8,
+  $text02: #c3d4d9,
+  $text03: #99b2bf,
+  $text04: #80a2ad,
+
+  $text-strong: #f5adb4,
+  $text-em: #6bc6cd,
+
+  $marker01: #f5adb4,
+  $marker02: #6bc6cd,
+  $marker03: #6bc6cd,
+  $marker04: #88b1e6,
+
+  $selection01: #34565d,
+  $selection02: #467b83,
+
+  $caret: #99b2bf
+);
+
+@use '../../core/object/token' with (
+  $keyword: #f5adb4,
+  $constant: #e88ea1,
+  $symbol: #e88ea1,
+  $comment: #80a2ad,
+  $tag: #b898f2,
+  $selector: #6bc6cd,
+  $atrule: #f5adb4,
+  $attr: #92cef1,
+  $prop: #92cef1,
+  $value: #d3db9a,
+  $variable: #6bc39c,
+  $entity: #88b1e6,
+  $cdata: #80a2ad,
+  $prolog: #80a2ad,
+  $string: #d3db9a,
+  $number: #b898f2,
+  $boolean: #e88ea1,
+  $function: #6bc6cd,
+  $class: #92cef1,
+  $decorator: #8d91b6,
+  $regexp: #e3d09f,
+  $operator: #88b1e6,
+  $bracket: #80a2ad,
+  $delimiter: #80a2ad
+);
+
+@forward '../../core';

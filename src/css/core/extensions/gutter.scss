@@ -1,0 +1,94 @@
+@use '../object/editor';
+@use '../foundation/colors';
+@use '../foundation/typography';
+
+$background: colors.$dark02 !default;
+$row-background-active: colors.$dark03 !default;
+$cell-padding: 0 .7em !default;
+$cell-padding-left-first: calc( .8em - 2px ) !default;
+$cell-padding-right-last: .8em !default;
+$border-right: 1px solid colors.$dark04 !default;
+$border-left-active: 2px solid colors.$main !default;
+$border-left: 2px solid transparent !default;
+$number-font-family: typography.$font-family-monospace !default;
+$number-font-size: .9em !default;
+$number-color: colors.$text04 !default;
+$number-color-active: colors.$text02 !default;
+
+.ryuseicode {
+  &__gutter {
+    $parent: &;
+
+    background: $background;
+    border-right: $border-right;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    height: 100%;
+    min-height: inherit;
+    overflow: hidden;
+    padding: editor.$padding-top 0 editor.$padding-bottom;
+    position: relative;
+    user-select: none;
+    z-index: 1;
+
+    &--sticky {
+      left: 0;
+      position: sticky;
+    }
+
+    &__float {
+      display: table;
+      position: relative;
+      transform: translate3d( 0, 0, 0 );
+    }
+
+    &__row {
+      contain: strict;
+      display: table-row;
+      height: typography.$line-height + em;
+      line-height: typography.$line-height;
+
+      &:last-child {
+        visibility: hidden;
+      }
+
+      &.is-active {
+        background: $row-background-active;
+
+        #{ $parent }__number {
+          color: $number-color-active;
+        }
+
+        span {
+          &:first-child {
+            border-left: $border-left-active;
+          }
+        }
+      }
+
+      span {
+        box-sizing: border-box;
+        display: table-cell;
+        padding: $cell-padding;
+        vertical-align: middle;
+
+        &:first-child {
+          border-left: $border-left;
+          padding-left: $cell-padding-left-first;
+        }
+
+        &:last-child {
+          padding-right: $cell-padding-right-last;
+        }
+      }
+    }
+
+    &__number {
+      color: $number-color;
+      font-family: $number-font-family;
+      font-size: $number-font-size;
+      min-width: 1.5em;
+      text-align: right;
+    }
+  }
+}

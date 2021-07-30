@@ -1,0 +1,22 @@
+@use '../foundation/mixin';
+@use '../foundation/colors';
+
+.ryuseicode {
+  $root: &;
+
+  &__lines {
+    @include mixin.code;
+
+    caret-color: transparent;
+    position: relative;
+    transform: translate3d( 0, 0, 0 );
+    user-select: text;
+    z-index: 1;
+  }
+
+  &.is-mobile {
+    #{ $root }__lines {
+      caret-color: colors.$caret !important;
+    }
+  }
+}

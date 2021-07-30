@@ -1,0 +1,38 @@
+@use '../foundation/mixin';
+@use '../foundation/typography';
+
+$padding-top: 1em !default;
+$padding-bottom: 1em !default;
+
+/**
+ * - Do not set overflow:hidden
+ * - Do not set width, min-width and flex-basis
+ */
+.ryuseicode {
+  $root: &;
+
+  &__editor {
+    @include mixin.code;
+    box-sizing: border-box;
+    cursor: text;
+    flex: 1 1 auto;
+    font-family: typography.$font-family-monospace;
+    line-height: typography.$line-height;
+    min-height: 100%;
+    padding: $padding-top 0 $padding-bottom;
+    position: relative;
+    z-index: 0;
+
+    ::selection {
+      color: inherit;
+    }
+  }
+
+  &.is-initialized:not(.is-mobile) {
+    #{ $root }__editor {
+      ::selection {
+        background: transparent !important;
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+.ryuseicode {
+  &__overlay {
+    height: 100%;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    &.is-active {
+      pointer-events: auto;
+    }
+  }
+}

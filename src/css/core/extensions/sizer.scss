@@ -1,0 +1,46 @@
+@use 'sass:math';
+
+$bar-size: 8px !default;
+
+.ryuseicode {
+  &__sizer {
+    &.is-dragging {
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: 0;
+
+      &--vertical {
+        cursor: row-resize;
+      }
+
+      &--horizontal {
+        cursor: col-resize;
+      }
+    }
+
+    &__bar {
+      background: transparent;
+      pointer-events: auto;
+      position: absolute;
+
+      &--vertical {
+        bottom: - math.div( $bar-size, 2 );
+        cursor: row-resize;
+        height: $bar-size;
+        left: 0;
+        width: 100%;
+      }
+
+      &--horizontal {
+        cursor: col-resize;
+        height: 100%;
+        right: - math.div( $bar-size, 2 );
+        top: 0;
+        width: $bar-size;
+      }
+    }
+  }
+}

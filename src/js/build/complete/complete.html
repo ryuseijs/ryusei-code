@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Complete</title>
+  <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
+</head>
+<body style="margin: 1em 1em;">
+
+<pre id="code">
+import { Components, Elements, Extensions, Language, Options } from &#039;@ryusei/code&#039;;
+import { AnyFunction } from &#039;@ryusei/light/dist/types/types&#039;;
+import * as CoreComponents from &#039;../../components&#039;;
+import { ATTRIBUTES_EDITABLE_AREA } from &#039;../../constants/attributes&#039;;
+import {
+  CLASS_BACKGROUND,
+  CLASS_BODY,
+  CLASS_CONTAINER,
+  CLASS_EDITOR,
+  CLASS_EMPTY,
+  CLASS_FOCUSED,
+  CLASS_INITIALIZED,
+  CLASS_LINES,
+  CLASS_OVERLAY,
+  CLASS_READONLY,
+  CLASS_RENDERED,
+  CLASS_SCROLLER,
+  CLASS_TEXTAREA,
+  CLASS_VIEW,
+} from &#039;../../constants/classes&#039;;
+import {
+  EVENT_BLUR,
+  EVENT_CHANGED,
+  EVENT_DESTROYED,
+  EVENT_FOCUS,
+  EVENT_MOUNT,
+  EVENT_MOUNTED,
+  EVENT_READONLY,
+} from &#039;../../constants/events&#039;;
+import { EventBus } from &#039;../../event/EventBus&#039;;
+import {
+  activeElement,
+  addClass,
+  assert,
+  assign,
+  create,
+  debounce,
+  div,
+  escapeHtml,
+  focus,
+  forOwn,
+  hasClass,
+  isFunction,
+  isHTMLElement,
+  isString,
+  isUndefined,
+  on,
+  query,
+  remove,
+  removeClass,
+  styles,
+  text,
+  toggleClass,
+  unit,
+} from &#039;../../utils&#039;;
+import { Renderer } from &#039;../Renderer/Renderer&#039;;
+
+
+/**
+ * The debounce duration for evaluating `focusout` of the editor.
+ *
+ * @since 0.1.0
+ */
+const FOCUSOUT_DEBOUNCE_DURATION = 10;
+
+/**
+ * The core class for the editor.
+ *
+ * @since 0.1.0
+ */
+export class Editor {
+  /**
+   * Holds collection of editor elements.
+   */
+  elements: Elements;
+
+  /**
+   * Holds Component instances.
+   */
+  Components: Partial&lt;Components&gt; = {};
+
+  /**
+   * Holds Extension instances.
+   */
+  protected Extensions: Partial&lt;Extensions&gt; = {};
+
+  /**
+   * Holds options.
+   */
+  readonly options: Options;
+
+  /**
+   * Holds the EventBus instance.
+   */
+  readonly event: EventBus;
+
+  /**
+   * Holds the source element.
+   */
+  protected source: HTMLElement;
+
+  /**
+   * Holds the root element.
+   */
+  protected root: HTMLElement;
+
+  /**
+   * Holds the language object.
+   */
+  readonly language: Language;
+
+  /**
+   * Indicates whether the editor is readonly or not.
+   */
+  protected _readOnly: boolean;
+
+  /**
+   * The Editor constructor.
+   *
+   * @param language   - A Language object.
+   * @param options    - Options.
+   * @param extensions - An object with additional components.
+   */
+  constructor( language: Language, options: Options, extensions: Partial&lt;Extensions&gt; = {} ) {
+    this.language = language;
+    this.options  = options;
+    this.event    = new EventBus();
+
+    forOwn( CoreComponents, ( Component, name ) =&gt; {
+      this.Components[ name ] = new Component( this );
+    } );
+
+    forOwn( extensions, ( Extension, name ) =&gt; {
+      const value = this.options[ name.charAt( 0 ).toLowerCase() + name.slice( 1 ) ];
+
+      if ( isUndefined( value ) || value ) {
+        this.Extensions[ name ] = new Extension( this );
+      }
+    } );
+  }
+
+  /**
+   * Initializes the editor and components.
+   */
+  protected mount(): void {
+    const { options, event, elements } = this;
+
+    this.listen();
+    event.emit( EVENT_MOUNT, elements );
+
+    forOwn( this.Components, Component =&gt; {
+      Component.mount( elements );
+    } );
+
+    forOwn( this.Extensions, Extension =&gt; {
+      Extension.mount( elements );
+    } );
+
+    event.emit( EVENT_MOUNTED, elements );
+
+    this.readOnly = options.readOnly;
+
+    if ( options.autofocus ) {
+      this.focus();
+    }
+  }
+
+  /**
+   * Collects essential elements that constitute the code editor.
+   */
+  protected collect(): void {
+    const { root } = this;
+    const editor = query&lt;HTMLDivElement&gt;( root, `.${ CLASS_EDITOR }` );
+    const lines  = query&lt;HTMLDivElement&gt;( root, `.${ CLASS_LINES }` );
+
+    lines.contentEditable = &#039;true&#039;;
+
+    this.elements = Object.freeze( {
+      root,
+      editor,
+      lines,
+      editable  : lines,
+      view      : query&lt;HTMLDivElement&gt;( root, `.${ CLASS_VIEW }` ),
+      body      : query&lt;HTMLDivElement&gt;( root, `.${ CLASS_BODY }` ),
+      scroller  : query&lt;HTMLDivElement&gt;( root, `.${ CLASS_SCROLLER }` ),
+      container : query&lt;HTMLDivElement&gt;( root, `.${ CLASS_CONTAINER }` ),
+      input     : create( &#039;textarea&#039;, assign( { class: CLASS_TEXTAREA }, ATTRIBUTES_EDITABLE_AREA ), editor ),
+      overlay   : div( CLASS_OVERLAY, root ),
+      background: div( { class: CLASS_BACKGROUND, &#039;aria-hidden&#039;: true }, editor ),
+    } );
+  }
+
+  /**
+   * Listens to some events.
+   */
+  protected listen(): void {
+    const { elements, elements: { root }, event } = this;
+    const isFocused = this.isFocused.bind( this );
+
+    let type: string;
+
+    this.bind( root, &#039;pointerdown&#039;, () =&gt; {
+      type = &#039;pointer&#039;;
+    } );
+
+    this.bind( elements.editor, &#039;click&#039;, () =&gt; {
+      if ( ! isFocused() ) {
+        this.focus( true );
+      }
+    } );
+
+    this.bind( root, &#039;focusin&#039;, () =&gt; {
+      if ( isFocused() &amp;&amp; ! hasClass( root, CLASS_FOCUSED ) ) {
+        addClass( root, CLASS_FOCUSED );
+        event.emit( EVENT_FOCUS, type );
+      }
+    } );
+
+    this.bind( root, &#039;focusout&#039;, debounce( () =&gt; {
+      if ( ! isFocused() &amp;&amp; hasClass( root, CLASS_FOCUSED ) ) {
+        removeClass( root, CLASS_FOCUSED );
+        event.emit( EVENT_BLUR );
+        type = &#039;&#039;;
+      }
+    }, FOCUSOUT_DEBOUNCE_DURATION ) );
+
+    event.on( [ EVENT_MOUNTED, EVENT_CHANGED ], () =&gt; {
+      toggleClass( elements.root, CLASS_EMPTY, ! this.value );
+    } );
+  }
+
+  /**
+   * Listens to native events.
+   *
+   * @param elm      - A document, a window or an element.
+   * @param events   - An event name or names.
+   * @param callback - A callback function.
+   */
+  protected bind( elm: Document | Window | Element, events: string, callback: ( e: Event ) =&gt; void ): void {
+    on( elm, events, callback, this );
+  }
+
+  /**
+   * Applies the editor to the target element.
+   *
+   * @param target - A selector to find the target element, or a target element itself.
+   * @param code   - Optional. The code to overwrite the content of the target element.
+   */
+  apply( target: string | Element, code?: string ): void {
+    const elm = isString( target ) ? query( document, target ) : target;
+
+    if ( isHTMLElement( elm ) ) {
+      this.source = elm;
+
+      if ( hasClass( elm, CLASS_RENDERED ) ) {
+        this.root = elm;
+        const pre = query( elm, &#039;pre&#039; );
+        this.Components.Code.init( text( pre ) || &#039;&#039; );
+        remove( pre )
+      } else {
+        elm.insertAdjacentHTML( &#039;afterend&#039;, this.html( isUndefined( code ) ? text( elm ) : code, false ) );
+        styles( elm, { display: &#039;none&#039; } );
+        this.root = elm.nextElementSibling as HTMLElement;
+      }
+
+      addClass( this.root, CLASS_INITIALIZED );
+
+      this.collect();
+      this.mount();
+    } else {
+      assert( false, `${ target } is invalid.` );
+    }
+  }
+
+  /**
+   * Returns HTML of the editor.
+   * This may not contain all lines because IE can not render tons of HTML tags at the same time.
+   * The number of lines can be specified by options.
+   *
+   * @param code   - A code string.
+   * @param source - Whether to embed the source code into the editor or not.
+   *
+   * @return The HTML of the editor.
+   */
+  html( code: string, source?: boolean ): string {
+    const { Code } = this.Components;
+    Code.init( code );
+    return new Renderer( Code, this.event, this.options ).html( source );
+  }
+
+  /**
+   * Saves the content to the source element.
+   */
+  save(): void {
+    const { source, value } = this;
+
+    if ( source instanceof HTMLTextAreaElement ) {
+      source.value = value;
+    } else {
+      text( source, escapeHtml( value ) );
+    }
+  }
+
+  /**
+   * Focuses to the editable area.
+   *
+   * @param reselect - Determines whether to reselect the last position or not.
+   */
+  focus( reselect?: boolean ): void {
+    if ( reselect ) {
+      this.Components.Selection.reselect();
+    } else {
+      focus( this.elements.editable );
+    }
+  }
+
+  /**
+   * Removes the focus from the editor.
+   */
+  blur(): void {
+    const elm = activeElement();
+
+    if ( this.isFocused() &amp;&amp; isHTMLElement( elm ) ) {
+      elm.blur();
+    }
+  }
+
+  /**
+   * Attempts to invoke the method of the specified extension.
+   *
+   * @param name   - A name of the extension.
+   * @param method - A method name to invoke.
+   * @param args   - Optional. Arguments for the method.
+   *
+   * @return The return value of the method.
+   */
+  invoke&lt;K extends keyof Extensions, P extends keyof Extensions[ K ], V extends Extensions[ K ][ P ]&gt;(
+    name: K,
+    method: P,
+    ...args: V extends AnyFunction ? Parameters&lt;V&gt; : any[]
+  ): V extends AnyFunction ? ReturnType&lt;V&gt; : void {
+    const extension = this.Extensions[ name ];
+
+    if ( extension &amp;&amp; isFunction( extension[ method ] ) ) {
+      return extension[ method ]( ...args );
+    }
+  }
+
+  /**
+   * Returns the extension of the specified name.
+   *
+   * @param name - A name of an extension.
+   *
+   * @return An extension if found, or otherwise `undefined`.
+   */
+  require&lt;K extends keyof Extensions&gt;( name: K ): Extensions[ K ] | undefined {
+    return this.Extensions[ name ];
+  }
+
+  /**
+   * Checks if the editor is focused or not.
+   *
+   * @return `true` if the editor is focused, or otherwise `false`.
+   */
+  isFocused(): boolean {
+    return this.root.contains( activeElement() );
+  }
+
+  /**
+   * Destroys the editor.
+   */
+  destroy(): void {
+    const { event } = this;
+
+    this.save();
+
+    forOwn( assign( this.Components, this.Extensions ), Component =&gt; {
+      Component.destroy();
+    } );
+
+    delete this.Components;
+    delete this.Extensions;
+
+    styles( this.source, { display: &#039;&#039; } );
+    remove( this.elements.root );
+
+    event.emit( EVENT_DESTROYED );
+    event.destroy();
+  }
+
+  /**
+   * Sets a new value to the editor.
+   *
+   * @param value - A value to set.
+   */
+  set value( value: string ) {
+    const { Components, Components: { Code } } = this;
+    Code.value = value;
+
+    Components.View.jump( 0 );
+    Components.Sync.sync( 0, Code.size - 1 );
+    Components.Selection.set( [ 0, 0 ] );
+
+    this.event.emit( &#039;refresh&#039; );
+  }
+
+  /**
+   * Returns the current value of the editor.
+   *
+   * @return The current value.
+   */
+  get value(): string {
+    return this.Components.Code.value;
+  }
+
+  /**
+   * Sets the width of the root element.
+   *
+   * @param width - Width to set as pixel or CSS styles.
+   */
+  set width( width: number | string ) {
+    styles( this.root, { width: unit( width ) } );
+    this.Components.View.emitResize();
+  }
+
+  /**
+   * Returns the width of the editor in pixel.
+   *
+   * @return The width of the editor.
+   */
+  get width(): number {
+    return this.root.clientWidth;
+  }
+
+  /**
+   * Sets the height of the root element.
+   *
+   * @param height - Height to set as pixel or CSS styles.
+   */
+  set height( height: number | string ) {
+    styles( this.root, { height: unit( height ) } );
+    this.Components.View.emitResize();
+  }
+
+  /**
+   * Returns the height of the editor in pixel.
+   *
+   * @return The height of the editor.
+   */
+  get height(): number {
+    return this.root.clientHeight;
+  }
+
+  /**
+   * Makes the editor mutable or immutable.
+   *
+   * @param readOnly - Whether to make the editor immutable or mutable.
+   */
+  set readOnly( readOnly: boolean ) {
+    const { elements } = this;
+    const { editable } = elements;
+
+    editable.contentEditable = readOnly ? &#039;false&#039; : &#039;true&#039;;
+
+    this.Components.Input.readOnly = readOnly;
+    this._readOnly = readOnly;
+
+    toggleClass( elements.root, CLASS_READONLY, readOnly );
+
+    this.event.emit( EVENT_READONLY, readOnly );
+  }
+
+  /**
+   * Indicates whether the editor is disabled or not.
+   *
+   * @return - `true` if the input is read-only or `false` if not.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+}</pre>
+
+<script src="../../../../dist/js/ryuseicode-complete.min.js"></script>
+<script>
+  const ryuseicode = new RyuseiCode( { language: 'typescript', maxHeight: '60em' } );
+  ryuseicode.apply( '#code' );
+</script>
+</body>
+</html>

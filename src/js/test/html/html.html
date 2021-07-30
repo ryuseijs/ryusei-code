@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML</title>
+  <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
+</head>
+<body style="margin: 1em ">
+
+<script src="../../../../dist/js/ryuseicode-complete.min.js"></script>
+<script>
+  function generate( length ) {
+    return Array.from( { length } ).map( ( item, index ) => `\t\t${ index }` ).join( '\n' );
+  }
+
+  const ryuseicode = new RyuseiCode( { rootClasses: 'code-editor', language: 'typescript' } );
+  document.body.innerHTML = ryuseicode.html( generate( 1000 ) );
+
+  setTimeout( function() {
+    ryuseicode.apply( '.code-editor' );
+  }, 5000 );
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JavaScript</title>
+  <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
+</head>
+<body style="margin: 1em ">
+
+<pre id="code">
+import { Elements, EventBusEvent, KeyMatcher } from &#039;@ryusei/code&#039;;
+import { Component } from &#039;../../classes/Component/Component&#039;;
+import { EVENT_KEYDOWN, EVENT_KEYMAP } from &#039;../../constants/events&#039;;
+import { KEYMAP, MODIFIER_KEYS } from &#039;../../constants/keymap&#039;;
+import { assign, forOwn, includes, isArray, isMac, isString, matchesKey, normalizeKey, toArray } from &#039;../../utils&#039;;
+
+
+/**
+ * The component for detecting keyboard shortcuts and distributing them as internal events.
+ *
+ * @since 0.1.0
+ */
+export class Keymap extends Component {
+  /**
+   * Stores the target keys.
+   */
+  protected keys: string[] = [];
+
+  /**
+   * The collection of shortcuts.
+   */
+  protected keymap: Record&lt;string, KeyMatcher| KeyMatcher[] | null | false&gt;;
+
+  /**
+   * Initializes the component.
+   *
+   * @param elements - A collection of essential elements.
+   */
+  mount( elements: Elements ): void {
+    super.mount( elements );
+
+    this.keymap = assign( {}, KEYMAP, this.options.keymap );
+
+    forOwn( this.keymap, matchers =&gt; {
+      if ( matchers ) {
+        this.keys.push( ...toArray( matchers, true ).map( matcher =&gt; {
+          return matcher[ 0 ].toUpperCase();
+        } ) );
+      }
+    } );
+
+    this.on( EVENT_KEYDOWN, this.onKeydown, this, 0 );
+  }
+
+  /**
+   * Called when any key is pressed.
+   *
+   * @param e  - An EventBusEvent object.
+   * @param ke - A KeyboardEvent object.
+   */
+  protected onKeydown( e: EventBusEvent, ke: KeyboardEvent ): void {
+    if ( ! this.Editor.readOnly ) {
+      if ( includes( this.keys, normalizeKey( ke.key ).toUpperCase() ) ) {
+        const action = this.find( ke );
+
+        if ( action ) {
+          this.emit( `${ EVENT_KEYMAP }:${ action }`, ke, action );
+        }
+      }
+    }
+  }
+
+  /**
+   * Finds the shortcut action from keymap definition.
+   *
+   * @param e - A KeyboardEvent object.
+   *
+   * @return A found action.
+   */
+  protected find( e: KeyboardEvent ): string {
+    let action  = &#039;&#039;;
+
+    forOwn( this.keymap, ( matchers, id ) =&gt; {
+      if ( this.matches( e, id ) ) {
+        action = id;
+        return false;
+      }
+    } );
+
+    return action;
+  }
+
+  /**
+   * Checks if the keyboard event matches keys of the provided ID or not.
+   *
+   * @param e  - A KeyboardEvent object.
+   * @param id - An ID.
+   *
+   * @return `true` if the keyboard event matches keys of the ID, or otherwise `false`.
+   */
+  matches( e: KeyboardEvent, id: string ): boolean {
+    const matchers = this.keymap[ id ];
+    return matchers &amp;&amp; matchesKey( e, matchers );
+  }
+
+  /**
+   * Builds a shortcut that describes keys of the provided keymap ID or a KeyMatcher object.
+   * For example, `undo` or `[ &#039;Z&#039;, true ]` will be `Ctrl + Z`.
+   *
+   * @param id - An ID in a keymap or a KeyMatcher object.
+   *
+   * @return A built shortcut as a string.
+   */
+  getShortcut( id: string | KeyMatcher ): string {
+    const matchers = isString( id ) ? this.keymap[ id ] : id;
+
+    if ( matchers ) {
+      const matcher = isArray( matchers[ 0 ] ) ? matchers[ 0 ] : matchers as KeyMatcher;
+
+      if ( matcher ) {
+        const modifiers = MODIFIER_KEYS[ isMac() ? &#039;mac&#039; : &#039;default&#039; ];
+        const keys      = matcher.slice( 1 ).map( ( use, index ) =&gt; use &amp;&amp; modifiers[ index ] ).filter( Boolean );
+        return keys.concat( matcher[ 0 ] ).join( &#039;+&#039; );
+      }
+    }
+
+    return &#039;&#039;;
+  }
+}</pre>
+
+<script src="../../../../dist/js/ryuseicode-extensions.min.js"></script>
+<script src="../../../../dist/js/languages/javascript.min.js"></script>
+<script>
+  new RyuseiCode( { language: 'javascript' } ).apply( '#code' );
+</script>
+</body>
+</html>

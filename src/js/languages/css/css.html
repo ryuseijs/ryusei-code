@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CSS</title>
+  <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
+</head>
+<body style="margin: 1em ">
+
+<pre id="code">
+/*
+ * Main styles
+ */
+:root {
+  --text-color: #333;
+}
+
+body {
+  color: var( --text-color );
+  padding: 0 !important;
+}
+
+#container {
+  padding: 2rem 2rem 4rem;
+}
+
+@media ( /* ( max-width: 900px ) */ max-width: 1200px ) {
+  #toc {
+     padding: 1rem;
+  }
+}
+
+/*
+ * Components
+ */
+.button {
+  display: inline-flex;
+  padding: .3em 2em;
+  border: 2px solid hsla( 0, 0%, 100%, .3 );
+  border-radius: 10px;
+  background: white;
+  color: var( --text-color );
+  text-align: center;
+  /*
+    font-family: Roboto, 'Avenir Next Pro', sans-serif;
+    font-size: .9rem;
+  */
+  line-height: 1.5;
+  text-transform: uppercase;
+  transform: translate( 10px, 10px ) scaleY( .9 );
+}
+
+.button:hover {
+  background: rgba( 255, 255, 0, .1 );
+}
+
+.button:active {
+  outline: 2px solid hsla( 0, 0%, 100%, .6 );
+}
+
+.button::before {
+  content: attr( data-title number, 0 );
+}
+
+@import 'components.css';</pre>
+
+<script src="../../../../dist/js/ryuseicode-extensions.min.js"></script>
+<script src="../../../../dist/js/languages/css.min.js"></script>
+<script>
+  new RyuseiCode( { language: 'css' } ).apply( '#code' );
+</script>
+</body>
+</html>

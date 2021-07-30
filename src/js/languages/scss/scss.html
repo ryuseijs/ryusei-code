@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SCSS</title>
+  <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
+</head>
+<body style="margin: 1em ">
+
+<pre id="code">
+/*
+ * Main styles
+ */
+:root {
+  --text-color: #333;
+}
+
+body {
+  color: var( --text-color );
+  padding: 0 !important;
+}
+
+#container {
+  padding: 2rem 2rem 4rem;
+}
+
+@media only screen
+  and (min-width: 320px)
+  and (max-width: 480px)
+  and (resolution: 150dpi) {
+    body { line-height: 1.4; }
+}
+
+@media ( /* ( max-width: 900px ) */ max-width: calc( ( 100px ) - 10 ) ) {
+  #toc {
+    background-image: url("/ico\ns/#{ $name }.\"svg");
+    position: absolute;
+    #{ $top-or-bottom }: 0;
+    #{ $left-or-right }: 0;
+  }
+}
+
+@mixin inline-animation( #{ $duration } ) {
+  $name: inline-#{unique-id()};
+
+  @keyframes #{$name} {
+    @content;
+  }
+
+  animation-name: $name;
+  animation-duration: $duration;
+  animation-iteration-count: infinite;
+}
+
+.pulse {
+  @include inline-animation( 2s ) {
+    from { background-color: yellow }
+    to { background-color: red }
+  }
+}
+
+#{ $type } {
+  color: red;
+}
+
+/*
+ * Components
+ */
+.button {
+  $root: &;
+  $inner: 'inner';
+
+  #{ $type } {
+    color: red;
+  }
+
+  /*
+    font-family: Roboto, 'Avenir Next Pro', sans-serif;
+    font-size: .9rem;
+  */
+
+  &__#{ $inner } {
+    padding: 1rem;
+  }
+
+  &--primary {
+    color: white;
+
+    #{$root}__inner {
+      background: $main-color;
+    }
+  }
+
+  &:hover {
+    background: rgba( 255, 255, 0, .1 );
+  }
+
+  &:active {
+    outline: 2px solid hsla( 0, 0%, 100%, .6 );
+  }
+
+  &:active {
+    content: attr( data-title number, 0 );
+  }
+}
+
+@import 'components.css';</pre>
+
+<script src="../../../../dist/js/ryuseicode-extensions.min.js"></script>
+<script src="../../../../dist/js/languages/scss.min.js"></script>
+<script>
+  new RyuseiCode( { language: 'scss' } ).apply( '#code' );
+</script>
+</body>
+</html>

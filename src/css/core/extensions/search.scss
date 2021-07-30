@@ -1,0 +1,18 @@
+$matches-min-width: 5em !default;
+$controls-margin: .3em 0 0 !default;
+
+.ryuseicode {
+  $root: &;
+
+  &__search {
+    &__matches {
+      display: inline-block;
+      min-width: $matches-min-width;
+      text-align: center;
+    }
+
+    &__controls {
+      display: inline-block;
+    }
+  }
+}

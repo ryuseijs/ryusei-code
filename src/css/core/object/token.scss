@@ -1,0 +1,128 @@
+$keyword: #5fbef5 !default;
+$constant: #f88792 !default;
+$symbol: #f88792 !default;
+$comment: #7b92a8 !default;
+$tag: #5fbef5 !default;
+$selector: #2abac4 !default;
+$atrule: #f88792 !default;
+$attr: #549bf7 !default;
+$prop: #549bf7 !default;
+$value: #b8c754 !default;
+$variable: #549bf7 !default;
+$entity: #9a68f5 !default;
+$cdata: #7b92a8 !default;
+$prolog: #7b92a8 !default;
+$string: #b8c754 !default;
+$number: #f88792 !default;
+$boolean: #f88792 !default;
+$function: #2abac4 !default;
+$class: #2bbd8f !default;
+$decorator: #5d639e !default;
+$regexp: #b8c754 !default;
+$operator: #549bf7 !default;
+$bracket: #a9c7e3 !default;
+$delimiter: #a9c7e3 !default;
+
+.rc {
+  &__keyword {
+    color: $keyword;
+  }
+
+  &__constant {
+    color: $constant;
+  }
+
+  &__symbol {
+    color: $symbol;
+  }
+
+  &__comment {
+    color: $comment;
+  }
+
+  &__tag {
+    color: $tag;
+  }
+
+  &__selector {
+    color: $selector;
+  }
+
+  &__atrule {
+    color: $atrule;
+  }
+
+  &__attr {
+    color: $attr;
+  }
+
+  &__prop {
+    color: $prop;
+  }
+
+  &__value {
+    color: $value;
+  }
+
+  &__variable {
+    color: $variable;
+  }
+
+  &__entity {
+    color: $entity;
+  }
+
+  &__cdata {
+    color: $cdata;
+  }
+
+  &__prolog {
+    color: $prolog;
+  }
+
+  &__identifier {
+  }
+
+  &__string {
+    color: $string;
+  }
+
+  &__number {
+    color: $number;
+  }
+
+  &__boolean {
+    color: $boolean;
+  }
+
+  &__function {
+    color: $function;
+  }
+
+  &__class {
+    color: $class;
+  }
+
+  &__decorator {
+    color: $decorator;
+  }
+
+  &__regexp {
+    color: $regexp;
+  }
+
+  &__operator {
+    color: $operator;
+  }
+
+  &__bracket {
+    color: $bracket;
+  }
+
+  &__delimiter {
+    color: $delimiter;
+  }
+
+  &__space {
+  }
+}

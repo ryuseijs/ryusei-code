@@ -1,0 +1,48 @@
+@use 'editor';
+@use '../foundation/typography';
+
+$padding-left-with-gutter: 5px !default;
+$padding-left: 1.5em !default;
+$padding-right: 1.5em !default;
+
+/**
+ * - A line must not have any dimension styles so that IE does not show resize handles for editable elements
+ * - A line must have explicit height for zooming, except for IE
+ * - A line should have padding on its side to start selection by a mouse
+ */
+.ryuseicode {
+  $root: &;
+
+  &__line {
+    font-feature-settings: 'liga' 0, 'calt' 0;
+    font-kerning: none;
+    height: typography.$line-height + em;
+    letter-spacing: 0;
+    padding: 0 $padding-right 0 $padding-left;
+
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+      height: initial;
+    }
+
+    &.is-preserved {
+      height: 0;
+      opacity: 0;
+    }
+
+    &.is-empty {
+      height: 0;
+      visibility: hidden !important;
+    }
+
+    code {
+      font-family: inherit;
+      pointer-events: auto;
+    }
+  }
+
+  &.has-gutter {
+    #{ $root }__line {
+      padding-left: $padding-left-with-gutter;
+    }
+  }
+}

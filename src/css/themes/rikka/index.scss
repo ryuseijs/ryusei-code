@@ -1,0 +1,93 @@
+@use '../../core/foundation/colors' with (
+  $main: #0085b5,
+  $accent: #c4498c,
+
+  $dark01: #f7f9fc,
+  $dark02: #f2f4f7,
+  $dark03: #e9edf2,
+  $dark04: #e4e8ed,
+  $dark05: #dce2e8,
+  $dark06: #d3d9e0,
+  $dark07: #b8c0cc,
+
+  $light01: #000000,
+  $light02: #1a1a1a,
+  $light03: #333333,
+  $light04: #484a4d,
+  $light05: #8d97a6,
+
+  $shadow01: #8d97a6,
+
+  $text01: #484a4d,
+  $text02: #484a4d,
+  $text03: #484a4d,
+  $text04: #484a4d,
+
+  $text-strong: #c4498c,
+  $text-em: #0085b5,
+
+  $marker01: #c4498c,
+  $marker02: #d27d45,
+  $marker03: #b8c0cc,
+  $marker04: #2fa270,
+
+  $selection01: #d9e1eb,
+  $selection02: #c0cfe0,
+
+  $caret: #333333
+);
+
+@use '../../core/object/token' with (
+  $keyword: #c4498c,
+  $constant: #c4498c,
+  $symbol: #c4498c,
+  $comment: #8d97a6,
+  $tag: #c4498c,
+  $selector: #2fa270,
+  $atrule: #c4498c,
+  $attr: #0085b5,
+  $prop: #0085b5,
+  $value: #394aa7,
+  $variable: #394aa7,
+  $entity: #5560cb,
+  $cdata: #8d97a6,
+  $prolog: #8d97a6,
+  $string: #d27d45,
+  $number: #a33bc5,
+  $boolean: #c4498c,
+  $function: #0085b5,
+  $class: #2fa270,
+  $decorator: #5560cb,
+  $regexp: #d27d45,
+  $operator: #0085b5,
+  $bracket: #8d97a6,
+  $delimiter: #8d97a6
+);
+
+@use '../../core/object/button' with (
+  $border-focus: 1px solid #0085b5,
+);
+
+@use '../../core/object/input' with (
+  $border-focus: 1px solid #0085b5,
+);
+
+@use '../../core/object/marker' with (
+  $match-background: rgba( #d27d45, .15 ),
+  $match-background-active: rgba( #d27d45, .2 ),
+  $match-border-active: 1px solid #8d97a6,
+);
+
+@use '../../core/object/context-menu' with (
+  $item-background-hover: #333333,
+);
+
+@use '../../core/extensions/gutter' with (
+  $border-left-active: 2px solid #333333,
+);
+
+@use '../../core/extensions/dialog' with (
+  $box-shadow: 0 0 15px 4px rgba( #8d97a6, .08 ),
+);
+
+@forward '../../core';

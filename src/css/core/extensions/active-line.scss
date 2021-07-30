@@ -1,0 +1,18 @@
+@use '../foundation/colors';
+@use '../foundation/typography';
+
+$background: rgba( colors.$dark03, .5 );
+
+.ryuseicode {
+  &__active-line {
+    background: $background;
+    display: none;
+    height: typography.$line-height + em;
+    position: absolute;
+    width: 100%;
+
+    &.is-active {
+      display: block;
+    }
+  }
+}

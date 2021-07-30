@@ -1,0 +1,76 @@
+@use '../foundation/colors';
+@use '../foundation/typography';
+
+$match-background: rgba( colors.$marker02, .3 ) !default;
+$match-background-active: rgba( colors.$marker02, .3 ) !default;
+$match-border: 0 !default;
+$match-border-active: 1px solid colors.$light04 !default;
+$match-border-radius: 2px !default;
+$indent-border-right: 1px solid colors.$dark04 !default;
+$brackets-border: 0 !default;
+$brackets-border-radius: 2px !default;
+$brackets-background: rgba( colors.$marker03, .3 ) !default;
+
+
+.ryuseicode {
+  $root: &;
+
+  &__markers {
+    &--selection {
+      #{ $root }__marker {
+        background: colors.$selection01;
+        z-index: 1;
+      }
+    }
+
+    &--match {
+      #{ $root }__marker {
+        background: $match-background;
+        border: $match-border;
+        border-radius: $match-border-radius;
+        z-index: 2;
+      }
+    }
+
+    &--active-match {
+      #{ $root }__marker {
+        background: $match-background-active;
+        border: $match-border-active;
+        border-radius: $match-border-radius;
+        z-index: 2;
+      }
+    }
+
+    &--indent {
+      #{ $root }__marker {
+        background: transparent;
+        border-right: $indent-border-right;
+        z-index: 3;
+      }
+    }
+
+    &--brackets {
+      #{ $root }__marker {
+        background: $brackets-background;
+        border: $brackets-border;
+        border-radius: $brackets-border-radius;
+      }
+    }
+  }
+
+  &__marker {
+    background: rgba( colors.$marker01, .3 );
+    box-sizing: border-box;
+    min-height: typography.$line-height + em;
+    position: absolute;
+    z-index: 1;
+  }
+
+  &.is-mobile {
+    #{ $root }__markers {
+      &--selection {
+        display: none;
+      }
+    }
+  }
+}

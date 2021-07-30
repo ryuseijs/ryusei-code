@@ -1,0 +1,83 @@
+@use '../foundation/colors';
+@use 'body';
+
+$width: 8px !default;
+$min-height: 64px !default;
+$offset: 0 !default;
+$vertical-padding: 12px !default;
+$side-padding: 5px !default;
+$thumb-radius: 5px !default;
+$thumb-background: rgba( colors.$dark07, .8 ) !default;
+$thumb-background-hover: rgba( colors.$main, .8 ) !default;
+$thumb-background-active: rgba( colors.$main, 1 ) !default;
+$thumb-transition: background-color 100ms ease !default;
+
+.ryuseicode {
+  $root: &;
+
+  &__scrollbars {
+    height: 100%;
+    left: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  &__scrollbar {
+    box-sizing: border-box;
+    position: absolute;
+    visibility: hidden;
+
+    &::before {
+      background: $thumb-background;
+      border-radius: $thumb-radius;
+      contain: strict;
+      content: '';
+      display: block;
+      transition: $thumb-transition;
+    }
+
+    &--vertical {
+      min-height: $min-height;
+      padding: $vertical-padding $side-padding;
+      right: $offset;
+      top: 0;
+
+      &::before {
+        height: 100%;
+        width: $width;
+      }
+    }
+
+    &--horizontal {
+      bottom: $offset;
+      left: 0;
+      min-width: $min-height;
+      padding: $side-padding $vertical-padding;
+
+      &::before {
+        height: $width;
+        width: 100%;
+      }
+    }
+
+    &.is-active {
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    &.is-dragging {
+      &::before {
+        background: $thumb-background-active;
+      }
+    }
+
+    &:hover {
+      &::before {
+        background: $thumb-background-hover;
+      }
+    }
+  }
+}

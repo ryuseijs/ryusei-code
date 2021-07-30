@@ -1,0 +1,15 @@
+.ryuseicode {
+  $root: &;
+
+  &__replace {
+    display: none;
+
+    &.is-active {
+      display: block;
+    }
+
+    &__controls {
+      display: inline-block;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+@use '../foundation/colors';
+
+$height: 2em !default;
+$width: 20em !default;
+$margin: .3em .3em .3em 0 !default;
+$radius: 3px !default;
+$background: colors.$dark05 !default;
+$background-focus: colors.$dark05 !default;
+$color: colors.$light02 !default;
+$color-placeholder: colors.$light05 !default;
+$padding: 0 .5em !default;
+$border: 1px solid transparent !default;
+$border-focus: 1px solid colors.$light03 !default;
+
+.ryuseicode {
+  &__input {
+    background: $background;
+    border: $border;
+    border-radius: $radius;
+    box-sizing: border-box;
+    color: $color;
+    font-family: inherit;
+    height: $height;
+    margin: $margin;
+    max-width: 90%;
+    outline: 0;
+    padding: $padding;
+    vertical-align: middle;
+    width: $width;
+
+    &:focus {
+      background: $background-focus;
+      border: $border-focus;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    &::placeholder {
+      color: $color-placeholder;
+    }
+  }
+}

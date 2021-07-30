@@ -1,0 +1,31 @@
+@use 'editor';
+@use 'line';
+@use '../foundation/colors';
+
+$color: colors.$light05 !default;
+
+.ryuseicode {
+  $root: &;
+
+  &__placeholder {
+    color: $color;
+    display: none;
+    left: 0;
+    padding: editor.$padding-top line.$padding-right editor.$padding-bottom line.$padding-left;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+  }
+
+  &.is-empty {
+    #{ $root }__placeholder {
+      display: block;
+    }
+  }
+
+  &.has-gutter {
+    #{ $root }__placeholder {
+      padding-left: line.$padding-left-with-gutter;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+import { PROJECT_CODE } from './project';
+
+
+export const CLASS_ROOT                  = PROJECT_CODE;
+export const CLASS_BODY                  = `${ PROJECT_CODE }__body`;
+export const CLASS_SCROLLER              = `${ PROJECT_CODE }__scroller`;
+export const CLASS_CONTAINER             = `${ PROJECT_CODE }__container`;
+export const CLASS_EDITOR                = `${ PROJECT_CODE }__editor`;
+export const CLASS_TEXTAREA              = `${ PROJECT_CODE }__textarea`;
+export const CLASS_SCROLLBARS            = `${ PROJECT_CODE }__scrollbars`;
+export const CLASS_SCROLLBAR             = `${ PROJECT_CODE }__scrollbar`;
+export const CLASS_LINES                 = `${ PROJECT_CODE }__lines`;
+export const CLASS_LINE                  = `${ PROJECT_CODE }__line`;
+export const CLASS_SOURCE                = `${ PROJECT_CODE }__source`;
+export const CLASS_BACKGROUND            = `${ PROJECT_CODE }__background`;
+export const CLASS_CARETS                = `${ PROJECT_CODE }__carets`;
+export const CLASS_CARET                 = `${ PROJECT_CODE }__caret`;
+export const CLASS_MARKERS               = `${ PROJECT_CODE }__markers`;
+export const CLASS_MARKER                = `${ PROJECT_CODE }__marker`;
+export const CLASS_OVERLAY               = `${ PROJECT_CODE }__overlay`;
+export const CLASS_CONTEXT_MENU          = `${ PROJECT_CODE }__context-menu`;
+export const CLASS_CONTEXT_MENU_GROUP    = `${ CLASS_CONTEXT_MENU }__group`;
+export const CLASS_CONTEXT_MENU_LIST     = `${ CLASS_CONTEXT_MENU }__list`;
+export const CLASS_CONTEXT_MENU_ITEM     = `${ CLASS_CONTEXT_MENU }__item`;
+export const CLASS_CONTEXT_MENU_BUTTON   = `${ CLASS_CONTEXT_MENU }__button`;
+export const CLASS_CONTEXT_MENU_LABEL    = `${ CLASS_CONTEXT_MENU_BUTTON }__label`;
+export const CLASS_CONTEXT_MENU_SHORTCUT = `${ CLASS_CONTEXT_MENU_BUTTON }__shortcut`;
+export const CLASS_TOKEN                 = `${ PROJECT_CODE }__token`;
+export const CLASS_INPUT                 = `${ PROJECT_CODE }__input`;
+export const CLASS_BUTTON                = `${ PROJECT_CODE }__button`;
+export const CLASS_ICON                  = `${ PROJECT_CODE }__icon`;
+export const CLASS_PLACEHOLDER           = `${ PROJECT_CODE }__placeholder`;
+
+export const CLASS_ACTIVE      = 'is-active';
+export const CLASS_RENDERED    = 'is-rendered';
+export const CLASS_INITIALIZED = 'is-initialized';
+export const CLASS_ANCHOR      = 'is-anchor';
+export const CLASS_FOCUS       = 'is-focus';
+export const CLASS_PRESERVED   = 'is-preserved';
+export const CLASS_FOCUSED     = 'is-focused';
+export const CLASS_READONLY    = 'is-readonly';
+export const CLASS_DRAGGING    = 'is-dragging';
+export const CLASS_EMPTY       = 'is-empty';
+export const CLASS_MOBILE      = 'is-mobile';
