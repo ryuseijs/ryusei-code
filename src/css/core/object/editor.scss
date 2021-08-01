@@ -12,7 +12,6 @@ $padding-bottom: 1em !default;
   $root: &;
 
   &__editor {
-    @include mixin.code;
     box-sizing: border-box;
     cursor: text;
     flex: 1 1 auto;

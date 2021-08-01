@@ -3,6 +3,7 @@
 @use '../foundation/typography';
 
 $background: colors.$dark02 !default;
+$font-family: typography.$font-family-monospace !default;
 $row-background-active: colors.$dark03 !default;
 $cell-padding: 0 .7em !default;
 $cell-padding-left-first: calc( .8em - 2px ) !default;
@@ -10,7 +11,6 @@ $cell-padding-right-last: .8em !default;
 $border-right: 1px solid colors.$dark04 !default;
 $border-left-active: 2px solid colors.$main !default;
 $border-left: 2px solid transparent !default;
-$number-font-family: typography.$font-family-monospace !default;
 $number-font-size: .9em !default;
 $number-color: colors.$text04 !default;
 $number-color-active: colors.$text02 !default;
@@ -23,6 +23,7 @@ $number-color-active: colors.$text02 !default;
     border-right: $border-right;
     box-sizing: border-box;
     flex: 0 0 auto;
+    font-family: $font-family;
     height: 100%;
     min-height: inherit;
     overflow: hidden;
@@ -85,7 +86,6 @@ $number-color-active: colors.$text02 !default;
 
     &__number {
       color: $number-color;
-      font-family: $number-font-family;
       font-size: $number-font-size;
       min-width: 1.5em;
       text-align: right;
