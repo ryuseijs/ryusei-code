@@ -225,10 +225,11 @@ export class Input extends Component {
 
     if ( this.col === this.value.length && row < lines.length - 1 ) {
       this.apply( {
-        type  : 'deleteNext',
-        key   : 'Delete',
-        value : this.value + lines[ row + 1 ].text,
-        endRow: row + 1,
+        type    : 'deleteNext',
+        key     : 'Delete',
+        value   : this.value + lines[ row + 1 ].text,
+        startRow: row,
+        endRow  : row + 1,
       } );
 
       prevent( e );
@@ -271,9 +272,10 @@ export class Input extends Component {
   /**
    * Settles the final value to apply.
    *
-   * @param value - A value to settle.
+   * @param value  - A value to settle.
+   * @param endRow - An end row index.
    */
-  private settleValue( value: string ): string {
+  private settleValue( value: string, endRow: number ): string {
     const { state } = this;
 
     if ( state ) {
@@ -284,7 +286,7 @@ export class Input extends Component {
       }
     }
 
-    return this.appendLineBreak( value );
+    return this.appendLineBreak( value, endRow );
   }
 
   /**
@@ -360,7 +362,7 @@ export class Input extends Component {
     }
 
     this.View.jump( endRow );
-    this.Code.replaceLines( startRow, endRow, this.settleValue( this.value ) );
+    this.Code.replaceLines( startRow, endRow, this.settleValue( this.value, endRow ) );
     this.Sync.sync( startRow, endRow );
 
     Selection.set( this.settlePosition( position ) );
