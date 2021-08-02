@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.2
+ * Version  : 0.1.3
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -5857,6 +5857,7 @@ var Input = /*#__PURE__*/function (_Component7) {
         type: 'deleteNext',
         key: 'Delete',
         value: this.value + lines[row + 1].text,
+        startRow: row,
         endRow: row + 1
       });
       prevent(e);
@@ -5902,11 +5903,12 @@ var Input = /*#__PURE__*/function (_Component7) {
   /**
    * Settles the final value to apply.
    *
-   * @param value - A value to settle.
+   * @param value  - A value to settle.
+   * @param endRow - An end row index.
    */
   ;
 
-  _proto14.settleValue = function settleValue(value) {
+  _proto14.settleValue = function settleValue(value, endRow) {
     var state = this.state;
 
     if (state) {
@@ -5917,7 +5919,7 @@ var Input = /*#__PURE__*/function (_Component7) {
       }
     }
 
-    return this.appendLineBreak(value);
+    return this.appendLineBreak(value, endRow);
   }
   /**
    * Settles the final position to apply.
@@ -6010,7 +6012,7 @@ var Input = /*#__PURE__*/function (_Component7) {
     }
 
     this.View.jump(endRow);
-    this.Code.replaceLines(startRow, endRow, this.settleValue(this.value));
+    this.Code.replaceLines(startRow, endRow, this.settleValue(this.value, endRow));
     this.Sync.sync(startRow, endRow);
     Selection.set(this.settlePosition(position));
     this.emit(EVENT_CHANGED, type);
@@ -9452,10 +9454,10 @@ var View = /*#__PURE__*/function (_Component15) {
       var _Measure = this.Measure,
           padding = this.Measure.padding;
 
-      var _height = _Measure.lineHeight * (length || 1);
+      var _height = _Measure.lineHeight * (length || 1) + padding.top + padding.bottom;
 
       styles(this.elements.container, {
-        height: unit(_height + padding.top + padding.bottom)
+        height: unit(max(_height, _Measure.scrollerRect.height))
       });
       this.lastLength = length;
       this.emit(EVENT_SCROLL_HEIGHT_CHANGED);

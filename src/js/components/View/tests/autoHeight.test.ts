@@ -1,5 +1,5 @@
 import { EVENT_SCROLL_HEIGHT_CHANGED } from '../../../constants/events';
-import { generate, init, LINE_HEIGHT, refresh } from '../../../test';
+import { EDITOR_HEIGHT, generate, init, LINE_HEIGHT, refresh } from '../../../test';
 
 
 describe( 'View#autoHeight()', () => {
@@ -12,17 +12,23 @@ describe( 'View#autoHeight()', () => {
   } );
 
   test( 'can determines the editor height according to the number of lines.', () => {
-    expect( container.style.height ).toBe( `${ LINE_HEIGHT }px` );
-
-    refresh( Editor, generate( 5 ) );
+    refresh( Editor, generate( 20 ) );
     View.autoHeight();
 
-    expect( container.style.height ).toBe( `${ LINE_HEIGHT * 5 }px` );
+    expect( container.style.height ).toBe( `${ LINE_HEIGHT * 20 }px` );
 
     refresh( Editor, generate( 999 ) );
     View.autoHeight();
 
     expect( container.style.height ).toBe( `${ LINE_HEIGHT * 999 }px` );
+  } );
+
+
+  test( 'should not make the editor height smaller than the scroller element.', () => {
+    refresh( Editor, generate( 1 ) );
+    View.autoHeight();
+
+    expect( container.style.height ).toBe( `${ EDITOR_HEIGHT }px` );
   } );
 
   test( 'should emit the event when the height is changed.', done => {

@@ -227,9 +227,9 @@ export class View extends Component {
 
     if ( skipLengthCheck || length !== this.lastLength ) {
       const { Measure, Measure: { padding } } = this;
-      const height = Measure.lineHeight * ( length || 1 );
+      const height = Measure.lineHeight * ( length || 1 ) + padding.top + padding.bottom;
 
-      styles( this.elements.container, { height: unit( height + padding.top + padding.bottom ) } );
+      styles( this.elements.container, { height: unit( max( height, Measure.scrollerRect.height ) ) } );
       this.lastLength = length;
 
       this.emit( EVENT_SCROLL_HEIGHT_CHANGED );

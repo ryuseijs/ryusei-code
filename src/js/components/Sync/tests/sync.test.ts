@@ -1,4 +1,4 @@
-import { CODE_TRIPLE_NUMBERS, init, LINE_HEIGHT, refresh } from '../../../test';
+import { CODE_TRIPLE_NUMBERS, generate, init, LINE_HEIGHT, refresh } from '../../../test';
 
 
 describe( 'Sync#sync()', () => {
@@ -35,8 +35,8 @@ describe( 'Sync#sync()', () => {
   test( 'can sync the height.', () => {
     const { container } = Editor.elements;
 
-    Code.value = CODE_TRIPLE_NUMBERS;
-    Sync.sync( 0, 2 );
-    expect( container.style.height ).toBe( `${ LINE_HEIGHT * 3 }px` );
+    Code.value = generate( 20 );
+    Sync.sync( 0, 19 );
+    expect( container.style.height ).toBe( `${ LINE_HEIGHT * 20 }px` );
   } );
 } );

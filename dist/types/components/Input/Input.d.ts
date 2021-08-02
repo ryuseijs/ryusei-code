@@ -99,7 +99,8 @@ export declare class Input extends Component {
     /**
      * Settles the final value to apply.
      *
-     * @param value - A value to settle.
+     * @param value  - A value to settle.
+     * @param endRow - An end row index.
      */
     private settleValue;
     /**
