@@ -13,6 +13,7 @@ $background: colors.$dark01 !default;
   font-size: typography.$font-size;
   letter-spacing: 0;
   position: relative;
+  text-align: left;
   touch-action: none;
 
   ::selection {
