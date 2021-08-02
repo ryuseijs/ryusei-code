@@ -12,7 +12,9 @@ import { EVENT_INIT_STYLE } from '../../constants/events';
 import { Editor } from '../../core/Editor/Editor';
 import {
   append,
+  camelToKebab,
   forOwn,
+  isGecko,
   isIE,
   isString,
   isUndefined,
@@ -20,9 +22,8 @@ import {
   remove,
   text,
   unit,
-  camelToKebab,
-  isGecko,
 } from '../../utils';
+import { FontObserver } from './FontObserver';
 
 
 /**
@@ -74,7 +75,12 @@ export class Style extends Component {
     const height = lineHeight ? `${ lineHeight }em` : undefined;
 
     this.add( 'root', isGecko() ? '-moz-tab-size' : 'tabSize', options.tabSize );
-    this.add( `.${ CLASS_EDITOR }`, 'lineHeight', lineHeight );
+
+    this.add( `.${ CLASS_EDITOR }`, {
+      lineHeight: lineHeight,
+      fontFamily: options.monospaceFont,
+    } );
+
     this.add( `.${ CLASS_MARKER }`, 'minHeight', height );
     this.add( `.${ CLASS_CARET }`, 'height', height );
 
@@ -116,6 +122,10 @@ export class Style extends Component {
   mount( elements: Elements ): void {
     this.style = query( elements.root, 'style' );
     append( query( document, 'head' ), this.style );
+
+    if ( this.options.monospaceFont ) {
+      new FontObserver( this.Editor );
+    }
   }
 
   /**
@@ -127,10 +137,12 @@ export class Style extends Component {
    */
   add( selector: string, prop: string | Record<string, number | string>, value?: number | string ): void {
     if ( isString( prop ) ) {
-      const { selectors } = this;
-      selector = `#${ this.options.id }${ selector === 'root' ? '' : ' ' + selector }`;
-      selectors[ selector ] = selectors[ selector ] || {};
-      selectors[ selector ][ prop ] = value;
+      if ( ! isUndefined( value ) ) {
+        const { selectors } = this;
+        selector = `#${ this.options.id }${ selector === 'root' ? '' : ' ' + selector }`;
+        selectors[ selector ] = selectors[ selector ] || {};
+        selectors[ selector ][ prop ] = value;
+      }
     } else {
       forOwn( prop, ( value, key ) => {
         this.add( selector, key, value );

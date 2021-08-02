@@ -1,7 +1,7 @@
 import { Elements, Range as PositionRange, RangeData } from '@ryusei/code';
 import { Component } from '../../classes/Component/Component';
 import { CLASS_MARKERS } from '../../constants/classes';
-import { EVENT_CHUNK_MOVED, EVENT_RESIZE, EVENT_SCROLLED } from '../../constants/events';
+import { EVENT_CHUNK_MOVED, EVENT_FONT_LOADED, EVENT_RESIZE, EVENT_SCROLLED } from '../../constants/events';
 import { between, compare, div, forOwn, text, throttle } from '../../utils';
 import { Marker } from './Marker';
 import { SelectionMarker } from './SelectionMarker';
@@ -54,7 +54,7 @@ export class Range extends Component {
     const observe = this.observe.bind( this, false );
     this.on( EVENT_CHUNK_MOVED, throttle( observe, OBSERVE_THROTTLE_DURATION ) );
     this.on( EVENT_SCROLLED, observe );
-    this.on( EVENT_RESIZE, this.observe.bind( this, true ) );
+    this.on( [ EVENT_FONT_LOADED, EVENT_RESIZE ], this.observe.bind( this, true ) );
   }
 
   /**

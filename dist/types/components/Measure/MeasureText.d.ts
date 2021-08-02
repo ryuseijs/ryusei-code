@@ -22,7 +22,8 @@ export declare class MeasureText {
      * Returns the width of the provided character.
      * Note that IE rounds the width of the text.
      *
-     * @param char - A character to measure.
+     * @param char     - A character to measure.
+     * @param useCache - Optional. Determines whether to use the cached width or not.
      *
      * @return The width of the character in pixel.
      */
@@ -30,8 +31,13 @@ export declare class MeasureText {
     /**
      * Returns the width of the provided text.
      *
-     * @param text - A text to measure.
+     * @param text     - A text to measure.
+     * @param useCache - Optional. Determines whether to use the cached width or not.
      */
-    measure(text: string): number;
+    measure(text: string, useCache?: boolean): number;
+    /**
+     * Clears cached width.
+     */
+    clear(): void;
 }
 //# sourceMappingURL=../../../../src/js/components/Measure/MeasureText.d.ts.map

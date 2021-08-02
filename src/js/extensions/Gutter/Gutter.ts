@@ -81,6 +81,11 @@ export class Gutter extends Component {
 
     this.opts  = this.getOptions<GutterOptions>( 'gutter', DEFAULT_OPTIONS );
     this.start = this.opts.start;
+
+    this.on( EVENT_INIT_STYLE, ( e, add ) => {
+      add( `.${ CLASS_GUTTER }`, 'fontFamily', this.options.monospaceFont );
+    } );
+
     this.render();
   }
 

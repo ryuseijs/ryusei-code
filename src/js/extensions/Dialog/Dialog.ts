@@ -1,6 +1,7 @@
 import { DialogGroupData, Elements, UIButtonSettings } from '@ryusei/code';
 import { UIComponent } from '../../classes/UIComponent/UIComponent';
 import { CLASS_ACTIVE } from '../../constants/classes';
+import { EVENT_INIT_STYLE } from '../../constants/events';
 import { PROJECT_CODE } from '../../constants/project';
 import { addClass, append, assert, attr, create, div, isString, removeClass, text } from '../../utils';
 import { GENERAL_UI_BUTTONS } from './buttons';
@@ -45,6 +46,10 @@ export class Dialog extends UIComponent<DialogGroupData> {
       if ( ! this.wrapper.contains( e.target as Node ) ) {
         this.hide();
       }
+    } );
+
+    this.on( EVENT_INIT_STYLE, ( e, add ) => {
+      add( `.${ CLASS_DIALOG } code`, 'fontFamily', this.options.monospaceFont );
     } );
   }
 

@@ -35,5 +35,6 @@ export declare const EVENT_CONTEXT_MENU_CLOSED = "contextMenuClosed";
 export declare const EVENT_CONTEXT_MENU_CLICKED = "contextMenuClicked";
 export declare const EVENT_RESET = "reset";
 export declare const EVENT_INIT_STYLE = "initStyle";
+export declare const EVENT_FONT_LOADED = "fontLoaded";
 export declare const EVENT_DESTROYED = "destroyed";
 //# sourceMappingURL=../../../src/js/constants/events.d.ts.map

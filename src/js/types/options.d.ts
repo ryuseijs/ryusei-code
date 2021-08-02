@@ -57,6 +57,11 @@ declare module '@ryusei/code' {
     maxHeight?: number | string;
 
     /**
+     * Overwrites the CSS font family.
+     */
+    monospaceFont?: string;
+
+    /**
      * Overwrites the CSS font size.
      */
     fontSize?: number | string;

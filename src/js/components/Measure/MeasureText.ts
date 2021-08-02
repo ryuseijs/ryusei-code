@@ -31,14 +31,15 @@ export class MeasureText {
    * Returns the width of the provided character.
    * Note that IE rounds the width of the text.
    *
-   * @param char - A character to measure.
+   * @param char     - A character to measure.
+   * @param useCache - Optional. Determines whether to use the cached width or not.
    *
    * @return The width of the character in pixel.
    */
-  private getCharWidth( char: string ): number {
+  private getCharWidth( char: string, useCache = true ): number {
     const { chars, context } = this;
 
-    return chars[ char ] || ( chars[ char ] = isIE()
+    return ( useCache && chars[ char ] ) || ( chars[ char ] = isIE()
       ? context.measureText( repeat( char, 10 ) ).width / 10
       : context.measureText( char ).width );
   }
@@ -46,15 +47,23 @@ export class MeasureText {
   /**
    * Returns the width of the provided text.
    *
-   * @param text - A text to measure.
+   * @param text     - A text to measure.
+   * @param useCache - Optional. Determines whether to use the cached width or not.
    */
-  measure( text: string ): number {
+  measure( text: string, useCache = true ): number {
     let width = 0;
 
     for ( let i = 0; i < text.length; i++ ) {
-      width += this.getCharWidth( text.charAt( i ) );
+      width += this.getCharWidth( text.charAt( i ), useCache );
     }
 
     return width;
+  }
+
+  /**
+   * Clears cached width.
+   */
+  clear(): void {
+    this.chars = {};
   }
 }

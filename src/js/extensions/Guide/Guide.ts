@@ -1,7 +1,7 @@
 import { Elements, Range } from '@ryusei/code';
 import { Component } from '../../classes/Component/Component';
 import { EVENT_CHANGED, EVENT_CHUNK_MOVED, EVENT_MOUNTED } from '../../constants/events';
-import { rafThrottle } from '../../utils';
+import { max, rafThrottle } from '../../utils';
 import { IndentMarker } from './IndentMarker';
 
 
@@ -58,7 +58,7 @@ export class Guide extends Component {
 
     let prev = 0;
 
-    for ( let i = start; i <= end; i++ ) {
+    for ( let i = max( start, 0 ); i <= end; i++ ) {
       const line = this.lines[ i ];
 
       if ( ! line ) {

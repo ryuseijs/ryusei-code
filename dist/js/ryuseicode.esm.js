@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /*!
  * RyuseiCode.js
- * Version  : 0.1.0
+ * Version  : 0.1.2
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -1674,6 +1674,7 @@ var EVENT_CONTEXT_MENU_CLOSED = 'contextMenuClosed';
 var EVENT_CONTEXT_MENU_CLICKED = 'contextMenuClicked';
 var EVENT_RESET = 'reset';
 var EVENT_INIT_STYLE = 'initStyle';
+var EVENT_FONT_LOADED = 'fontLoaded';
 var EVENT_DESTROYED = 'destroyed';
 /**
  * The editor is not active.
@@ -6296,7 +6297,8 @@ var MeasureText = /*#__PURE__*/function () {
    * Returns the width of the provided character.
    * Note that IE rounds the width of the text.
    *
-   * @param char - A character to measure.
+   * @param char     - A character to measure.
+   * @param useCache - Optional. Determines whether to use the cached width or not.
    *
    * @return The width of the character in pixel.
    */
@@ -6304,26 +6306,43 @@ var MeasureText = /*#__PURE__*/function () {
 
   var _proto16 = MeasureText.prototype;
 
-  _proto16.getCharWidth = function getCharWidth(_char2) {
+  _proto16.getCharWidth = function getCharWidth(_char2, useCache) {
+    if (useCache === void 0) {
+      useCache = true;
+    }
+
     var chars = this.chars,
         context = this.context;
-    return chars[_char2] || (chars[_char2] = isIE() ? context.measureText(repeat(_char2, 10)).width / 10 : context.measureText(_char2).width);
+    return useCache && chars[_char2] || (chars[_char2] = isIE() ? context.measureText(repeat(_char2, 10)).width / 10 : context.measureText(_char2).width);
   }
   /**
    * Returns the width of the provided text.
    *
-   * @param text - A text to measure.
+   * @param text     - A text to measure.
+   * @param useCache - Optional. Determines whether to use the cached width or not.
    */
   ;
 
-  _proto16.measure = function measure(text) {
+  _proto16.measure = function measure(text, useCache) {
+    if (useCache === void 0) {
+      useCache = true;
+    }
+
     var width = 0;
 
     for (var i = 0; i < text.length; i++) {
-      width += this.getCharWidth(text.charAt(i));
+      width += this.getCharWidth(text.charAt(i), useCache);
     }
 
     return width;
+  }
+  /**
+   * Clears cached width.
+   */
+  ;
+
+  _proto16.clear = function clear() {
+    this.chars = {};
   };
 
   return MeasureText;
@@ -6391,6 +6410,9 @@ var Measure = /*#__PURE__*/function (_Component9) {
       _this28.createMeasureText();
 
       _this28.clearRectCaches();
+    }, 1);
+    this.on(EVENT_FONT_LOADED, function () {
+      _this28.measureText.clear();
     }, 1);
     this.on([EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLLED, EVENT_WINDOW_SCROLL], this.clearRectCaches, this, 1);
   }
@@ -6485,14 +6507,19 @@ var Measure = /*#__PURE__*/function (_Component9) {
   /**
    * Measures the provided string and returns the width.
    *
-   * @param string - A string to measure.
+   * @param string   - A string to measure.
+   * @param useCache - Optional. Determines whether to use the cached width or not..
    *
    * @return The width of the string.
    */
   ;
 
-  _proto17.measureWidth = function measureWidth(string) {
-    return this.measureText.measure(string);
+  _proto17.measureWidth = function measureWidth(string, useCache) {
+    if (useCache === void 0) {
+      useCache = true;
+    }
+
+    return this.measureText.measure(string, useCache);
   }
   /**
    * Converts the passed position to the BoundaryRect object.
@@ -6893,7 +6920,7 @@ var Range = /*#__PURE__*/function (_Component10) {
     var observe = this.observe.bind(this, false);
     this.on(EVENT_CHUNK_MOVED, throttle(observe, OBSERVE_THROTTLE_DURATION));
     this.on(EVENT_SCROLLED, observe);
-    this.on(EVENT_RESIZE, this.observe.bind(this, true));
+    this.on([EVENT_FONT_LOADED, EVENT_RESIZE], this.observe.bind(this, true));
   }
   /**
    * Observes ranges and draw/hide them.
@@ -8308,6 +8335,64 @@ var Selection = /*#__PURE__*/function (_Component12) {
   return Selection;
 }(Component);
 /**
+ * The sample string.
+ *
+ * @since 0.1.3
+ */
+
+
+var SAMPLE = '    ';
+/**
+ * The timeout duration in milliseconds.
+ *
+ * @since 0.1.3
+ */
+
+var TIMEOUT = 5000;
+/**
+ * The class for observing the font loading.
+ *
+ * @since 0.1.3
+ */
+
+var FontObserver = /*#__PURE__*/function () {
+  /**
+   * The Observer constructor.
+   *
+   * @param Editor - An Editor instance.
+   */
+  function FontObserver(Editor) {
+    /**
+     * Keeps the time when the instance is created.
+     */
+    this.time = Date.now();
+    this.Editor = Editor;
+    this.Measure = this.Editor.Components.Measure;
+    this.initialWidth = this.Measure.measureWidth(SAMPLE);
+    this.observe();
+  }
+  /**
+   * Observes the font loading.
+   */
+
+
+  var _proto27 = FontObserver.prototype;
+
+  _proto27.observe = function observe() {
+    var width = this.Measure.measureWidth(SAMPLE, false);
+
+    if (width !== this.initialWidth) {
+      this.Editor.event.emit(EVENT_FONT_LOADED);
+    } else {
+      if (Date.now() - this.time < TIMEOUT) {
+        requestAnimationFrame(this.observe.bind(this));
+      }
+    }
+  };
+
+  return FontObserver;
+}();
+/**
  * The component for customizing some styles of the editor.
  *
  * @since 0.1.0
@@ -8347,9 +8432,9 @@ var Style = /*#__PURE__*/function (_Component13) {
    */
 
 
-  var _proto27 = Style.prototype;
+  var _proto28 = Style.prototype;
 
-  _proto27.init = function init() {
+  _proto28.init = function init() {
     var _this43 = this;
 
     var options = this.options,
@@ -8363,7 +8448,10 @@ var Style = /*#__PURE__*/function (_Component13) {
     });
     var height = lineHeight ? lineHeight + "em" : undefined;
     this.add('root', isGecko() ? '-moz-tab-size' : 'tabSize', options.tabSize);
-    this.add("." + CLASS_EDITOR, 'lineHeight', lineHeight);
+    this.add("." + CLASS_EDITOR, {
+      lineHeight: lineHeight,
+      fontFamily: options.monospaceFont
+    });
     this.add("." + CLASS_MARKER, 'minHeight', height);
     this.add("." + CLASS_CARET, 'height', height);
 
@@ -8378,7 +8466,7 @@ var Style = /*#__PURE__*/function (_Component13) {
    */
   ;
 
-  _proto27.build = function build() {
+  _proto28.build = function build() {
     var html = '';
     forOwn$1(this.selectors, function (styles, selector) {
       var props = '';
@@ -8401,10 +8489,14 @@ var Style = /*#__PURE__*/function (_Component13) {
    */
   ;
 
-  _proto27.mount = function mount(elements) {
+  _proto28.mount = function mount(elements) {
     this.style = query(elements.root, 'style');
 
     _append(query(document, 'head'), this.style);
+
+    if (this.options.monospaceFont) {
+      new FontObserver(this.Editor);
+    }
   }
   /**
    * Adds a style to the specified selector.
@@ -8415,14 +8507,16 @@ var Style = /*#__PURE__*/function (_Component13) {
    */
   ;
 
-  _proto27.add = function add(selector, prop, value) {
+  _proto28.add = function add(selector, prop, value) {
     var _this44 = this;
 
     if (isString(prop)) {
-      var selectors = this.selectors;
-      selector = "#" + this.options.id + (selector === 'root' ? '' : ' ' + selector);
-      selectors[selector] = selectors[selector] || {};
-      selectors[selector][prop] = value;
+      if (!isUndefined$1(value)) {
+        var selectors = this.selectors;
+        selector = "#" + this.options.id + (selector === 'root' ? '' : ' ' + selector);
+        selectors[selector] = selectors[selector] || {};
+        selectors[selector][prop] = value;
+      }
     } else {
       forOwn$1(prop, function (value, key) {
         _this44.add(selector, key, value);
@@ -8434,7 +8528,7 @@ var Style = /*#__PURE__*/function (_Component13) {
    */
   ;
 
-  _proto27.apply = function apply() {
+  _proto28.apply = function apply() {
     text(this.style, this.build());
   }
   /**
@@ -8442,7 +8536,7 @@ var Style = /*#__PURE__*/function (_Component13) {
    */
   ;
 
-  _proto27.destroy = function destroy() {
+  _proto28.destroy = function destroy() {
     _Component13.prototype.destroy.call(this);
 
     _remove(this.style);
@@ -8509,9 +8603,9 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
 
 
-  var _proto28 = Sync.prototype;
+  var _proto29 = Sync.prototype;
 
-  _proto28.sync = function sync(startRow, endRow, jumpTo) {
+  _proto29.sync = function sync(startRow, endRow, jumpTo) {
     var Chunk = this.Chunk,
         View = this.View;
     var diff = this.lines.syncSize(startRow, this.Code.size);
@@ -8543,7 +8637,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.run = function run(row, limit, strict) {
+  _proto29.run = function run(row, limit, strict) {
     if (strict === void 0) {
       strict = true;
     }
@@ -8576,7 +8670,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.syncLines = function syncLines(startRow, endRow) {
+  _proto29.syncLines = function syncLines(startRow, endRow) {
     var _this46 = this;
 
     this.minStart = min(startRow, this.minStart);
@@ -8599,7 +8693,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.syncRanges = function syncRanges(ranges, callback) {
+  _proto29.syncRanges = function syncRanges(ranges, callback) {
     var _this47 = this;
 
     var range = ranges.shift();
@@ -8633,7 +8727,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.splitRows = function splitRows(startRow, endRow) {
+  _proto29.splitRows = function splitRows(startRow, endRow) {
     var ranges = [];
 
     while (startRow <= endRow) {
@@ -8653,7 +8747,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.find = function find(row, limit) {
+  _proto29.find = function find(row, limit) {
     if (this.isEmbedded(row)) {
       return this.findStartInLanguageBlock(row, limit);
     }
@@ -8686,7 +8780,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.compress = function compress(startRow, row, before, limit) {
+  _proto29.compress = function compress(startRow, row, before, limit) {
     if (row - startRow > limit) {
       var _start3 = this.lines.findBlockStart([row - 1, 0]);
 
@@ -8725,7 +8819,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.findRoot = function findRoot(row, depth) {
+  _proto29.findRoot = function findRoot(row, depth) {
     if (depth === void 0) {
       depth = 0;
     }
@@ -8758,7 +8852,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.findStartInLanguageBlock = function findStartInLanguageBlock(row, limit) {
+  _proto29.findStartInLanguageBlock = function findStartInLanguageBlock(row, limit) {
     var lines = this.lines;
     var lang = lines[row].language;
     var config = this.language.use[lang];
@@ -8783,7 +8877,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    */
   ;
 
-  _proto28.isEmbedded = function isEmbedded(row) {
+  _proto29.isEmbedded = function isEmbedded(row) {
     var line = this.lines[row];
 
     if (line) {
@@ -8875,9 +8969,9 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
 
 
-  var _proto29 = AbstractDraggableBar.prototype;
+  var _proto30 = AbstractDraggableBar.prototype;
 
-  _proto29.bind = function bind() {
+  _proto30.bind = function bind() {
     this.onDrag = this.onDrag.bind(this);
     this.onDragging = this.onDragging.bind(this);
     this.onDragged = this.onDragged.bind(this);
@@ -8890,7 +8984,7 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
   ;
 
-  _proto29.onDrag = function onDrag(e) {
+  _proto30.onDrag = function onDrag(e) {
     on(window, DRAG_END_EVENTS, this.onDragged);
     on(window, DRAGGING_EVENTS, this.onDragging);
     this.startCoord = this.getCoord(e);
@@ -8905,7 +8999,7 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
   ;
 
-  _proto29.onDragging = function onDragging(e) {
+  _proto30.onDragging = function onDragging(e) {
     prevent(e);
   }
   /**
@@ -8913,7 +9007,7 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
   ;
 
-  _proto29.onDragged = function onDragged() {
+  _proto30.onDragged = function onDragged() {
     off(window, DRAG_END_EVENTS, this.onDragged);
     off(window, DRAGGING_EVENTS, this.onDragging);
     this.toggleClass(false);
@@ -8927,7 +9021,7 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
   ;
 
-  _proto29.getCoord = function getCoord(e) {
+  _proto30.getCoord = function getCoord(e) {
     return e[this.names.pageY];
   }
   /**
@@ -8937,7 +9031,7 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
   ;
 
-  _proto29.toggleClass = function toggleClass(add) {
+  _proto30.toggleClass = function toggleClass(add) {
     _toggleClass(this.elm, CLASS_DRAGGING, add);
 
     _toggleClass(this.parent, [CLASS_DRAGGING, CLASS_DRAGGING + "--" + this.names.vertical], add);
@@ -8947,7 +9041,7 @@ var AbstractDraggableBar = /*#__PURE__*/function () {
    */
   ;
 
-  _proto29.destroy = function destroy() {
+  _proto30.destroy = function destroy() {
     off(this.elm, DRAG_START_EVENTS, this.onDrag);
     off(window, DRAG_END_EVENTS, this.onDragged);
     off(window, DRAGGING_EVENTS, this.onDragging);
@@ -9009,9 +9103,9 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
    */
 
 
-  var _proto30 = Scrollbar.prototype;
+  var _proto31 = Scrollbar.prototype;
 
-  _proto30.init = function init() {
+  _proto31.init = function init() {
     var Editor = this.Editor,
         scroller = this.scroller;
     attr(this.elm, {
@@ -9028,7 +9122,7 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
    */
   ;
 
-  _proto30.listen = function listen() {
+  _proto31.listen = function listen() {
     var update = rafThrottle(this.update);
     on(this.scroller, 'scroll', update, this);
     this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE], update);
@@ -9040,7 +9134,7 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
    */
   ;
 
-  _proto30.onDragging = function onDragging(e) {
+  _proto31.onDragging = function onDragging(e) {
     _AbstractDraggableBar.prototype.onDragging.call(this, e);
 
     var coord = this.getCoord(e);
@@ -9053,7 +9147,7 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
    */
   ;
 
-  _proto30.update = function update() {
+  _proto31.update = function update() {
     var scroller = this.scroller,
         names = this.names,
         elm = this.elm;
@@ -9087,7 +9181,7 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
    */
   ;
 
-  _proto30.destroy = function destroy() {
+  _proto31.destroy = function destroy() {
     off(null, '', this);
 
     _AbstractDraggableBar.prototype.destroy.call(this);
@@ -9109,12 +9203,12 @@ var EditorScrollbar = /*#__PURE__*/function (_Scrollbar) {
     return _Scrollbar.apply(this, arguments) || this;
   }
 
-  var _proto31 = EditorScrollbar.prototype;
+  var _proto32 = EditorScrollbar.prototype;
 
   /**
    * Listens to some events.
    */
-  _proto31.listen = function listen() {
+  _proto32.listen = function listen() {
     this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], rafThrottle(this.update));
   };
 
@@ -9153,9 +9247,9 @@ var View = /*#__PURE__*/function (_Component15) {
    */
 
 
-  var _proto32 = View.prototype;
+  var _proto33 = View.prototype;
 
-  _proto32.mount = function mount(elements) {
+  _proto33.mount = function mount(elements) {
     _Component15.prototype.mount.call(this, elements);
 
     this.emitResize = rafThrottle(this.emit.bind(this, 'resize'));
@@ -9169,7 +9263,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.listen = function listen() {
+  _proto33.listen = function listen() {
     this.bind(window, 'resize', this.emitResize);
     this.on([EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLLED], this.autoWidth, this);
     this.on(EVENT_RESIZE, this.autoHeight.bind(this, true), null, 2);
@@ -9184,7 +9278,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.onSelected = function onSelected(e, Selection) {
+  _proto33.onSelected = function onSelected(e, Selection) {
     if (Selection.is(START, EXTEND) && Selection.state.device === 'keyboard') {
       this.jump(Selection.focus[0]);
     }
@@ -9198,7 +9292,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.create = function create() {
+  _proto33.create = function create() {
     var _this51 = this;
 
     var elements = this.elements,
@@ -9225,7 +9319,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.clipScrollOffset = function clipScrollOffset() {
+  _proto33.clipScrollOffset = function clipScrollOffset() {
     var caretRect = this.Caret.rect;
     var focus = this.Selection.focus;
 
@@ -9280,7 +9374,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.getWidthBeforeContainer = function getWidthBeforeContainer() {
+  _proto33.getWidthBeforeContainer = function getWidthBeforeContainer() {
     var Measure = this.Measure;
     return Measure.editorRect.left - Measure.containerRect.left;
   }
@@ -9294,7 +9388,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.jump = function jump(row, middle, lineOffset) {
+  _proto33.jump = function jump(row, middle, lineOffset) {
     if (lineOffset === void 0) {
       lineOffset = JUMP_OFFSET;
     }
@@ -9327,7 +9421,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.autoWidth = function autoWidth() {
+  _proto33.autoWidth = function autoWidth() {
     var Measure = this.Measure;
     var width = Measure.editorRect.width;
 
@@ -9346,7 +9440,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.autoHeight = function autoHeight(skipLengthCheck) {
+  _proto33.autoHeight = function autoHeight(skipLengthCheck) {
     var length = this.lines.length;
 
     if (skipLengthCheck || length !== this.lastLength) {
@@ -9372,7 +9466,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.isVisible = function isVisible(row, lineOffset) {
+  _proto33.isVisible = function isVisible(row, lineOffset) {
     if (lineOffset === void 0) {
       lineOffset = 0;
     }
@@ -9398,7 +9492,7 @@ var View = /*#__PURE__*/function (_Component15) {
    */
   ;
 
-  _proto32.destroy = function destroy() {
+  _proto33.destroy = function destroy() {
     this.scrollbars.forEach(function (bar) {
       bar.destroy();
     });
@@ -9471,9 +9565,9 @@ var Renderer = /*#__PURE__*/function () {
    */
 
 
-  var _proto33 = Renderer.prototype;
+  var _proto34 = Renderer.prototype;
 
-  _proto33.renderLines = function renderLines(append) {
+  _proto34.renderLines = function renderLines(append) {
     var lines = this.lines;
     var max = min(lines.length, this.options.maxInitialLines);
 
@@ -9490,7 +9584,7 @@ var Renderer = /*#__PURE__*/function () {
    */
   ;
 
-  _proto33.html = function html(source) {
+  _proto34.html = function html(source) {
     var _this52 = this;
 
     var html = '';
@@ -9585,9 +9679,9 @@ var Editor = /*#__PURE__*/function () {
    */
 
 
-  var _proto34 = Editor.prototype;
+  var _proto35 = Editor.prototype;
 
-  _proto34.mount = function mount() {
+  _proto35.mount = function mount() {
     var options = this.options,
         event = this.event,
         elements = this.elements;
@@ -9611,7 +9705,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.collect = function collect() {
+  _proto35.collect = function collect() {
     var root = this.root;
     var editor = query(root, "." + CLASS_EDITOR);
     var lines = query(root, "." + CLASS_LINES);
@@ -9639,7 +9733,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.listen = function listen() {
+  _proto35.listen = function listen() {
     var _this54 = this;
 
     var elements = this.elements,
@@ -9683,7 +9777,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.bind = function bind(elm, events, callback) {
+  _proto35.bind = function bind(elm, events, callback) {
     on(elm, events, callback, this);
   }
   /**
@@ -9694,7 +9788,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.apply = function apply(target, code) {
+  _proto35.apply = function apply(target, code) {
     assert$1(!this.root, 'Already initialized.');
     var elm = isString(target) ? query(document, target) : target;
 
@@ -9734,7 +9828,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.html = function html(code, source) {
+  _proto35.html = function html(code, source) {
     var Code = this.Components.Code;
     Code.init(code);
     return new Renderer(Code, this.event, this.options).html(source);
@@ -9744,7 +9838,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.save = function save() {
+  _proto35.save = function save() {
     var source = this.source,
         value = this.value;
 
@@ -9761,7 +9855,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.focus = function focus(reselect) {
+  _proto35.focus = function focus(reselect) {
     if (reselect) {
       this.Components.Selection.reselect();
     } else {
@@ -9773,7 +9867,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.blur = function blur() {
+  _proto35.blur = function blur() {
     var elm = activeElement();
 
     if (this.isFocused() && isHTMLElement(elm)) {
@@ -9791,7 +9885,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.invoke = function invoke(name, method) {
+  _proto35.invoke = function invoke(name, method) {
     var extension = this.Extensions[name];
 
     if (extension && isFunction(extension[method])) {
@@ -9811,7 +9905,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.require = function require(name) {
+  _proto35.require = function require(name) {
     return this.Extensions[name];
   }
   /**
@@ -9821,7 +9915,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.isFocused = function isFocused() {
+  _proto35.isFocused = function isFocused() {
     return this.root.contains(activeElement());
   }
   /**
@@ -9829,7 +9923,7 @@ var Editor = /*#__PURE__*/function () {
    */
   ;
 
-  _proto34.destroy = function destroy() {
+  _proto35.destroy = function destroy() {
     var event = this.event;
     this.save();
     forOwn$1(assign$1(this.Components, this.Extensions), function (Component) {
@@ -10027,9 +10121,9 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  var _proto35 = RyuseiCode.prototype;
+  var _proto36 = RyuseiCode.prototype;
 
-  _proto35.mergeOptions = function mergeOptions(options) {
+  _proto36.mergeOptions = function mergeOptions(options) {
     var _this55 = this;
 
     this.options = assign$1({}, DEFAULT_OPTIONS$6);
@@ -10053,7 +10147,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.apply = function apply(target, code) {
+  _proto36.apply = function apply(target, code) {
     this.Editor.apply(target, code);
   }
   /**
@@ -10065,7 +10159,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.html = function html(code) {
+  _proto36.html = function html(code) {
     return this.Editor.html(code, true);
   }
   /**
@@ -10076,7 +10170,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.on = function on(events, callback) {
+  _proto36.on = function on(events, callback) {
     this.Editor.event.on(events, callback);
   }
   /**
@@ -10086,7 +10180,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.off = function off(events) {
+  _proto36.off = function off(events) {
     this.Editor.event.off(events);
   }
   /**
@@ -10094,7 +10188,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.save = function save() {
+  _proto36.save = function save() {
     this.Editor.save();
   }
   /**
@@ -10104,7 +10198,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.focus = function focus(reselect) {
+  _proto36.focus = function focus(reselect) {
     this.Editor.focus(reselect);
   }
   /**
@@ -10115,7 +10209,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.setRange = function setRange(start, end) {
+  _proto36.setRange = function setRange(start, end) {
     this.Editor.Components.Selection.set(start, end);
   }
   /**
@@ -10125,7 +10219,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.toString = function toString() {
+  _proto36.toString = function toString() {
     return this.value;
   }
   /**
@@ -10134,7 +10228,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    */
   ;
 
-  _proto35.destroy = function destroy() {
+  _proto36.destroy = function destroy() {
     this.Editor.destroy();
     delete this.Editor;
   }
@@ -10213,9 +10307,9 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
    */
 
 
-  var _proto36 = ActiveLine.prototype;
+  var _proto37 = ActiveLine.prototype;
 
-  _proto36.mount = function mount(elements) {
+  _proto37.mount = function mount(elements) {
     var _this57 = this;
 
     _Component16.prototype.mount.call(this, elements);
@@ -10240,7 +10334,7 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
    */
   ;
 
-  _proto36.activate = function activate() {
+  _proto37.activate = function activate() {
     var Editor = this.Editor;
 
     if (Editor.isFocused() && !Editor.readOnly) {
@@ -10255,7 +10349,7 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
    */
   ;
 
-  _proto36.offset = function offset() {
+  _proto37.offset = function offset() {
     if (this.isActive()) {
       var _Measure2 = this.Measure;
 
@@ -10274,7 +10368,7 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
    */
   ;
 
-  _proto36.deactivate = function deactivate() {
+  _proto37.deactivate = function deactivate() {
     removeClass(this.line, CLASS_ACTIVE);
     this.top = -1;
     this.emit('activeLine:deactivated');
@@ -10286,7 +10380,7 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
    */
   ;
 
-  _proto36.isActive = function isActive() {
+  _proto37.isActive = function isActive() {
     return hasClass(this.line, CLASS_ACTIVE);
   };
 
@@ -10306,14 +10400,14 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
     return _Component17.apply(this, arguments) || this;
   }
 
-  var _proto37 = AutoClose.prototype;
+  var _proto38 = AutoClose.prototype;
 
   /**
    * Initializes the component.
    *
    * @param elements - A collection of essential elements.
    */
-  _proto37.mount = function mount(elements) {
+  _proto38.mount = function mount(elements) {
     var _this58 = this;
 
     _Component17.prototype.mount.call(this, elements);
@@ -10334,7 +10428,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.close = function close() {
+  _proto38.close = function close() {
     var Input = this.Input;
 
     if (!Input.composing) {
@@ -10356,7 +10450,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.skip = function skip(e) {
+  _proto38.skip = function skip(e) {
     var Input = this.Input;
 
     if (!Input.composing) {
@@ -10383,7 +10477,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.remove = function remove(e) {
+  _proto38.remove = function remove(e) {
     var Input = this.Input;
 
     if (e.key === 'Backspace') {
@@ -10409,7 +10503,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.getChars = function getChars(closing) {
+  _proto38.getChars = function getChars(closing) {
     return this.getConfig().map(function (chars) {
       var value = chars[closing ? 1 : 0];
       return isString(value) ? value : '';
@@ -10424,7 +10518,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.getClosingString = function getClosingString(index) {
+  _proto38.getClosingString = function getClosingString(index) {
     var config = this.getConfig()[index];
     var closer = config && config[1];
     return isFunction(closer) ? closer(this.Editor) : closer || '';
@@ -10438,7 +10532,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.getOffset = function getOffset(index) {
+  _proto38.getOffset = function getOffset(index) {
     var config = this.getConfig()[index];
     var data = config && config[2];
     return data ? data.offset || 0 : 0;
@@ -10453,7 +10547,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.validate = function validate(index, key) {
+  _proto38.validate = function validate(index, key) {
     var Scope = this.Scope;
     var config = this.getConfig()[index];
     var data = config[2];
@@ -10492,7 +10586,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.validateQuote = function validateQuote(key) {
+  _proto38.validateQuote = function validateQuote(key) {
     var _this$Selection$get = this.Selection.get(),
         start = _this$Selection$get.start;
 
@@ -10520,7 +10614,7 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    */
   ;
 
-  _proto37.getConfig = function getConfig() {
+  _proto38.getConfig = function getConfig() {
     return this.getLanguage().autoClose || [];
   };
 
@@ -10564,14 +10658,14 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
     return _Component18.apply(this, arguments) || this;
   }
 
-  var _proto38 = BracketMatching.prototype;
+  var _proto39 = BracketMatching.prototype;
 
   /**
    * Initializes the component.
    *
    * @param elements - A collection of essential elements.
    */
-  _proto38.mount = function mount(elements) {
+  _proto39.mount = function mount(elements) {
     var _this59 = this;
 
     var options = this.getOptions('bracketMatching', DEFAULT_OPTIONS$5);
@@ -10599,7 +10693,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
    */
   ;
 
-  _proto38.onSelected = function onSelected(e, Selection) {
+  _proto39.onSelected = function onSelected(e, Selection) {
     if (Selection.is(START, SELECTING, EXTEND)) {
       this.clear();
     } else if (Selection.is(CHANGED)) {
@@ -10613,7 +10707,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
    */
   ;
 
-  _proto38.update = function update() {
+  _proto39.update = function update() {
     var _this60 = this;
 
     var focus = this.Selection.focus;
@@ -10635,7 +10729,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
    */
   ;
 
-  _proto38.draw = function draw(row, info) {
+  _proto39.draw = function draw(row, info) {
     var match = this.find(false, row, info) || this.find(true, row, info);
 
     if (match) {
@@ -10657,7 +10751,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
    */
   ;
 
-  _proto38.find = function find(findClosing, row, info) {
+  _proto39.find = function find(findClosing, row, info) {
     var brackets = this.brackets;
     var index = brackets[Number(!findClosing)].indexOf(info.code);
 
@@ -10676,7 +10770,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
    */
   ;
 
-  _proto38.infoToRange = function infoToRange(row, info) {
+  _proto39.infoToRange = function infoToRange(row, info) {
     return {
       start: [row, info.from],
       end: [row, info.to]
@@ -10733,9 +10827,9 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
 
 
-  var _proto39 = Comment.prototype;
+  var _proto40 = Comment.prototype;
 
-  _proto39.mount = function mount(elements) {
+  _proto40.mount = function mount(elements) {
     _Component19.prototype.mount.call(this, elements);
 
     var language = this.language;
@@ -10755,7 +10849,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.toggleBlock = function toggleBlock() {
+  _proto40.toggleBlock = function toggleBlock() {
     var _this$Selection$get2 = this.Selection.get(),
         start = _this$Selection$get2.start,
         end = _this$Selection$get2.end;
@@ -10779,7 +10873,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.toggleLine = function toggleLine() {
+  _proto40.toggleLine = function toggleLine() {
     var _this$Selection$get3 = this.Selection.get(),
         start = _this$Selection$get3.start,
         end = _this$Selection$get3.end;
@@ -10819,7 +10913,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.commentOut = function commentOut(start, end, line) {
+  _proto40.commentOut = function commentOut(start, end, line) {
     var Code = this.Code;
     var comment = this.getConfig(line ? [start[0], 0] : start, line);
 
@@ -10837,7 +10931,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.uncomment = function uncomment(start, end, line) {
+  _proto40.uncomment = function uncomment(start, end, line) {
     var Code = this.Code;
     var comment = this.getConfig(start, line);
 
@@ -10857,7 +10951,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.sync = function sync(start, end, uncommented, line) {
+  _proto40.sync = function sync(start, end, uncommented, line) {
     var lines = this.lines;
     var range = this.Selection.get();
     var comment = this.getConfig(start, line);
@@ -10900,7 +10994,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.getConfig = function getConfig(position, line) {
+  _proto40.getConfig = function getConfig(position, line) {
     return this.getLanguage(position)[(line ? 'line' : 'block') + "Comment"];
   }
   /**
@@ -10913,7 +11007,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.detectBlockComment = function detectBlockComment(position) {
+  _proto40.detectBlockComment = function detectBlockComment(position) {
     var lines = this.lines;
     var info = lines.getInfoAt(position);
 
@@ -10943,7 +11037,7 @@ var Comment = /*#__PURE__*/function (_Component19) {
    */
   ;
 
-  _proto39.detectLineComment = function detectLineComment(position) {
+  _proto40.detectLineComment = function detectLineComment(position) {
     var _this$getConfig = this.getConfig(position, true),
         head = _this$getConfig[0],
         tail = _this$getConfig[1];
@@ -11018,14 +11112,14 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
     return _UIComponent2.apply(this, arguments) || this;
   }
 
-  var _proto40 = Dialog.prototype;
+  var _proto41 = Dialog.prototype;
 
   /**
    * Initializes the component.
    *
    * @param elements - A collection of editor elements.
    */
-  _proto40.mount = function mount(elements) {
+  _proto41.mount = function mount(elements) {
     _UIComponent2.prototype.mount.call(this, elements);
 
     this.register(COMMON_DIALOG_GROUP, div(), '');
@@ -11035,13 +11129,16 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.listen = function listen() {
+  _proto41.listen = function listen() {
     var _this62 = this;
 
     this.bind(window, 'click', function (e) {
       if (!_this62.wrapper.contains(e.target)) {
         _this62.hide();
       }
+    });
+    this.on(EVENT_INIT_STYLE, function (e, add) {
+      add("." + CLASS_DIALOG + " code", 'fontFamily', _this62.options.monospaceFont);
     });
   }
   /**
@@ -11054,7 +11151,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.create = function create() {
+  _proto41.create = function create() {
     var elements = this.elements;
     var id = elements.root.id + "-dialog";
     this.wrapper = div({
@@ -11070,7 +11167,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.confirm = function confirm() {
+  _proto41.confirm = function confirm() {
     this.emit("dialog:" + this.group + ":confirmed", this);
     this.hide();
   }
@@ -11084,7 +11181,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.register = function register(group, elm, title, buttons) {
+  _proto41.register = function register(group, elm, title, buttons) {
     var settings = (buttons || ['confirm']).map(function (settings) {
       return isString(settings) ? GENERAL_UI_BUTTONS[settings] : settings;
     }).filter(Boolean);
@@ -11127,7 +11224,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.show = function show(group) {
+  _proto41.show = function show(group) {
     this.hide();
 
     _UIComponent2.prototype.show.call(this, group);
@@ -11142,7 +11239,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.hide = function hide() {
+  _proto41.hide = function hide() {
     if (this.isActive()) {
       this.Editor.readOnly = false;
 
@@ -11161,7 +11258,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
    */
   ;
 
-  _proto40.message = function message(_message, title) {
+  _proto41.message = function message(_message, title) {
     var data = this.groups[COMMON_DIALOG_GROUP];
     text(data.title, title || this.i18n.notice);
     text(data.body, _message);
@@ -11184,7 +11281,7 @@ var IndentMarker = /*#__PURE__*/function (_Marker2) {
     return _Marker2.apply(this, arguments) || this;
   }
 
-  var _proto41 = IndentMarker.prototype;
+  var _proto42 = IndentMarker.prototype;
 
   /**
    * Calculates boundaries for drawing the marker.
@@ -11194,7 +11291,7 @@ var IndentMarker = /*#__PURE__*/function (_Marker2) {
    *
    * @return An object with start and end boundaries.
    */
-  _proto41.calcBoundaries = function calcBoundaries(anchor) {
+  _proto42.calcBoundaries = function calcBoundaries(anchor) {
     var indent = this.Editor.options.indent;
     var _this$Editor$Componen2 = this.Editor.Components,
         Measure = _this$Editor$Componen2.Measure,
@@ -11237,14 +11334,14 @@ var Guide = /*#__PURE__*/function (_Component20) {
     return _Component20.apply(this, arguments) || this;
   }
 
-  var _proto42 = Guide.prototype;
+  var _proto43 = Guide.prototype;
 
   /**
    * Initializes the component.
    *
    * @param elements - A collection of editor elements.
    */
-  _proto42.mount = function mount(elements) {
+  _proto43.mount = function mount(elements) {
     _Component20.prototype.mount.call(this, elements);
 
     this.listen();
@@ -11254,7 +11351,7 @@ var Guide = /*#__PURE__*/function (_Component20) {
    */
   ;
 
-  _proto42.listen = function listen() {
+  _proto43.listen = function listen() {
     var draw = this.draw.bind(this);
     this.on(EVENT_CHANGED, rafThrottle(draw));
     this.on([EVENT_MOUNTED, EVENT_CHUNK_MOVED], draw);
@@ -11264,7 +11361,7 @@ var Guide = /*#__PURE__*/function (_Component20) {
    */
   ;
 
-  _proto42.draw = function draw() {
+  _proto43.draw = function draw() {
     var Range = this.Range;
     var ranges = this.parse();
     Range.clearRanges(MARKER_ID$1);
@@ -11277,14 +11374,14 @@ var Guide = /*#__PURE__*/function (_Component20) {
    */
   ;
 
-  _proto42.parse = function parse() {
+  _proto43.parse = function parse() {
     var _this$Chunk = this.Chunk,
         start = _this$Chunk.start,
         end = _this$Chunk.end;
     var ranges = [];
     var prev = 0;
 
-    for (var i = start; i <= end; i++) {
+    for (var i = max(start, 0); i <= end; i++) {
       var line = this.lines[i];
 
       if (!line) {
@@ -11392,6 +11489,10 @@ var Gutter = /*#__PURE__*/function (_Component21) {
     _this63.opts = _this63.getOptions('gutter', DEFAULT_OPTIONS$4);
     _this63.start = _this63.opts.start;
 
+    _this63.on(EVENT_INIT_STYLE, function (e, add) {
+      add("." + CLASS_GUTTER, 'fontFamily', _this63.options.monospaceFont);
+    });
+
     _this63.render();
 
     return _this63;
@@ -11401,9 +11502,9 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
 
 
-  var _proto43 = Gutter.prototype;
+  var _proto44 = Gutter.prototype;
 
-  _proto43.render = function render() {
+  _proto44.render = function render() {
     var _this64 = this;
 
     this.on('root:open', function (e, append, classes) {
@@ -11434,7 +11535,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.renderRows = function renderRows(lines, append) {
+  _proto44.renderRows = function renderRows(lines, append) {
     var html = [];
     var max = min(lines.length, this.options.maxInitialLines) + 1;
 
@@ -11455,7 +11556,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.mount = function mount(elements) {
+  _proto44.mount = function mount(elements) {
     _Component21.prototype.mount.call(this, elements);
 
     this.gutter = query(elements.root, "." + CLASS_GUTTER);
@@ -11482,7 +11583,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.supply = function supply(length) {
+  _proto44.supply = function supply(length) {
     for (var i = 0; i < length; i++) {
       _create('span', CLASS_LINE_NUMBER, div(CLASS_GUTTER_ROW, this["float"]));
     }
@@ -11492,7 +11593,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.listen = function listen() {
+  _proto44.listen = function listen() {
     var _this65 = this;
 
     this.on(EVENT_CHUNK_SUPPLIED, function (e, chunk, diff) {
@@ -11513,7 +11614,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.onPointerDown = function onPointerDown(e) {
+  _proto44.onPointerDown = function onPointerDown(e) {
     var target = e.target;
 
     if (isHTMLElement(target) && hasClass(target, CLASS_LINE_NUMBER)) {
@@ -11530,7 +11631,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.update = function update() {
+  _proto44.update = function update() {
     var chunkStart = this.Chunk.start,
         start = this.start;
     var length = this.lines.length;
@@ -11550,7 +11651,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.offset = function offset() {
+  _proto44.offset = function offset() {
     var Chunk = this.Chunk,
         start = this.Chunk.start;
     var offset = Chunk.offsetY + (start < 0 ? start * this.Measure.lineHeight : 0);
@@ -11563,7 +11664,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.activate = function activate() {
+  _proto44.activate = function activate() {
     var row = this.Selection.focus[0];
     var elm = this.getElm(row);
     this.deactivate();
@@ -11579,7 +11680,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.deactivate = function deactivate() {
+  _proto44.deactivate = function deactivate() {
     var activeElm = this.activeElm;
 
     if (activeElm) {
@@ -11598,7 +11699,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    */
   ;
 
-  _proto43.getElm = function getElm(row) {
+  _proto44.getElm = function getElm(row) {
     return row > -1 ? this["float"].children[row - this.Chunk.start] : undefined;
   };
 
@@ -11671,9 +11772,9 @@ var History = /*#__PURE__*/function (_Component22) {
    */
 
 
-  var _proto44 = History.prototype;
+  var _proto45 = History.prototype;
 
-  _proto44.mount = function mount(elements) {
+  _proto45.mount = function mount(elements) {
     _Component22.prototype.mount.call(this, elements);
 
     this.opts = this.getOptions('history', DEFAULT_OPTIONS$3);
@@ -11685,7 +11786,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.listen = function listen() {
+  _proto45.listen = function listen() {
     var _this67 = this;
 
     this.on(EVENT_CHANGE, this.onChange, this);
@@ -11708,7 +11809,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.record = function record() {
+  _proto45.record = function record() {
     return {
       range: this.Selection.get(),
       value: this.Code.value,
@@ -11723,7 +11824,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.restore = function restore(record) {
+  _proto45.restore = function restore(record) {
     var range = record.range,
         length = record.length;
     var start = range.start,
@@ -11743,7 +11844,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.push = function push(record) {
+  _proto45.push = function push(record) {
     var current = this.history[this.index];
 
     if (current && this.isSame(current, record)) {
@@ -11770,7 +11871,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.isSame = function isSame(record1, record2) {
+  _proto45.isSame = function isSame(record1, record2) {
     return record1.value === record2.value && !compare(record1.range.start, record2.range.start) && !compare(record1.range.end, record2.range.end);
   }
   /**
@@ -11780,7 +11881,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.isUndoing = function isUndoing() {
+  _proto45.isUndoing = function isUndoing() {
     return this.index !== this.length - 1;
   }
   /**
@@ -11791,7 +11892,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.onChange = function onChange(e, type) {
+  _proto45.onChange = function onChange(e, type) {
     if (type !== RESTORATION_INPUT_TYPE) {
       var history = this.history;
 
@@ -11812,7 +11913,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.onChanged = function onChanged(e, type) {
+  _proto45.onChanged = function onChanged(e, type) {
     if (!this.Input.composing && type !== RESTORATION_INPUT_TYPE) {
       if (type === 'input') {
         this.debouncedPush(this.record());
@@ -11826,7 +11927,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.undo = function undo() {
+  _proto45.undo = function undo() {
     this.debouncedPush.invoke();
 
     if (0 < this.index && this.index < this.length) {
@@ -11838,7 +11939,7 @@ var History = /*#__PURE__*/function (_Component22) {
    */
   ;
 
-  _proto44.redo = function redo() {
+  _proto45.redo = function redo() {
     if (this.index < this.length - 1) {
       this.restore(this.history[++this.index]);
     }
@@ -11937,9 +12038,9 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
 
 
-  var _proto45 = Indentation.prototype;
+  var _proto46 = Indentation.prototype;
 
-  _proto45.mount = function mount(elements) {
+  _proto46.mount = function mount(elements) {
     if (!(this.Dialog = this.require('Dialog'))) {
       return;
     }
@@ -11959,7 +12060,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.setDisabled = function setDisabled(disabled) {
+  _proto46.setDisabled = function setDisabled(disabled) {
     this.disabled = disabled;
     Indentation.noticed = true;
   }
@@ -11968,7 +12069,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.listen = function listen() {
+  _proto46.listen = function listen() {
     var _this69 = this;
 
     var focused;
@@ -12012,7 +12113,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.onKeydown = function onKeydown(e, ke) {
+  _proto46.onKeydown = function onKeydown(e, ke) {
     if (this.opts.help && !Indentation.noticed && ke.key === 'Tab') {
       this.Dialog.show(DIALOG_ID);
       Indentation.noticed = true;
@@ -12027,7 +12128,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.register = function register() {
+  _proto46.register = function register() {
     var _this70 = this;
 
     var i18n = this.i18n;
@@ -12047,7 +12148,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.indent = function indent() {
+  _proto46.indent = function indent() {
     var Input = this.Input,
         Selection = this.Selection,
         space = this.space,
@@ -12079,7 +12180,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.unindent = function unindent() {
+  _proto46.unindent = function unindent() {
     var _this71 = this;
 
     var space = this.space;
@@ -12127,7 +12228,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.indentNewline = function indentNewline() {
+  _proto46.indentNewline = function indentNewline() {
     var Input = this.Input;
     var indent = this.lines[Input.row].getIndent();
 
@@ -12143,7 +12244,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.indentDeep = function indentDeep() {
+  _proto46.indentDeep = function indentDeep() {
     var index = this.findConfigIndex();
 
     if (index > -1 && this.shouldIndentDeep(index)) {
@@ -12168,7 +12269,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.findConfigIndex = function findConfigIndex() {
+  _proto46.findConfigIndex = function findConfigIndex() {
     var config = this.getConfig();
 
     for (var i = 0; i < config.length; i++) {
@@ -12196,7 +12297,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.shouldIndentDeep = function shouldIndentDeep(index) {
+  _proto46.shouldIndentDeep = function shouldIndentDeep(index) {
     var config = this.getConfig()[index];
     var condition = config && config[2];
 
@@ -12215,7 +12316,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.isClosed = function isClosed(index) {
+  _proto46.isClosed = function isClosed(index) {
     var config = this.getConfig()[index];
     var condition = config && config[1];
 
@@ -12238,7 +12339,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.remove = function remove(e) {
+  _proto46.remove = function remove(e) {
     var Selection = this.Selection;
 
     if (e.key === 'Backspace' && Selection.isCollapsed()) {
@@ -12276,7 +12377,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    */
   ;
 
-  _proto45.getConfig = function getConfig() {
+  _proto46.getConfig = function getConfig() {
     return this.getLanguage().indent || [];
   };
 
@@ -12348,9 +12449,9 @@ var Jump = /*#__PURE__*/function (_Component24) {
    */
 
 
-  var _proto46 = Jump.prototype;
+  var _proto47 = Jump.prototype;
 
-  _proto46.mount = function mount(elements) {
+  _proto47.mount = function mount(elements) {
     if (!(this.Toolbar = this.require('Toolbar'))) {
       return;
     }
@@ -12365,7 +12466,7 @@ var Jump = /*#__PURE__*/function (_Component24) {
    */
   ;
 
-  _proto46.create = function create() {
+  _proto47.create = function create() {
     var wrapper = div();
     this.field = this.Toolbar.createField({
       id: 'jumpToLine',
@@ -12383,7 +12484,7 @@ var Jump = /*#__PURE__*/function (_Component24) {
    */
   ;
 
-  _proto46.listen = function listen() {
+  _proto47.listen = function listen() {
     var _this73 = this;
 
     this.on(EVENT_KEYMAP + ":jumpToLine", function (e, ke) {
@@ -12405,7 +12506,7 @@ var Jump = /*#__PURE__*/function (_Component24) {
    */
   ;
 
-  _proto46.jump = function jump() {
+  _proto47.jump = function jump() {
     var row = parseInt(this.field.value) - 1;
 
     if (!isNaN(row) && between(row, 0, this.lines.length - 1)) {
@@ -12421,7 +12522,7 @@ var Jump = /*#__PURE__*/function (_Component24) {
    */
   ;
 
-  _proto46.update = function update() {
+  _proto47.update = function update() {
     if (this.location) {
       text(this.location, this.Selection.getLocation());
     }
@@ -12490,9 +12591,9 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    */
 
 
-  var _proto47 = ResizeBar.prototype;
+  var _proto48 = ResizeBar.prototype;
 
-  _proto47.init = function init() {
+  _proto48.init = function init() {
     var _this75 = this;
 
     var Editor = this.Editor;
@@ -12517,7 +12618,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    */
   ;
 
-  _proto47.onDrag = function onDrag(e) {
+  _proto48.onDrag = function onDrag(e) {
     _AbstractDraggableBar2.prototype.onDrag.call(this, e);
 
     this.startSize = this.Editor[this.names.height];
@@ -12529,7 +12630,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    */
   ;
 
-  _proto47.onDragging = function onDragging(e) {
+  _proto48.onDragging = function onDragging(e) {
     _AbstractDraggableBar2.prototype.onDragging.call(this, e);
 
     var diff = this.getCoord(e) - this.startCoord;
@@ -12541,7 +12642,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    */
   ;
 
-  _proto47.updateAria = function updateAria() {
+  _proto48.updateAria = function updateAria() {
     var names = this.names;
     var min = this.convertValueToPixel(names.minHeight) || 0;
     var max = this.convertValueToPixel(names.maxHeight);
@@ -12562,7 +12663,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    */
   ;
 
-  _proto47.convertValueToPixel = function convertValueToPixel(prop) {
+  _proto48.convertValueToPixel = function convertValueToPixel(prop) {
     var names = this.names;
     var root = this.Editor.elements.root;
     var value = styles(root, prop);
@@ -12578,7 +12679,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    */
   ;
 
-  _proto47.destroy = function destroy() {
+  _proto48.destroy = function destroy() {
     off(null, '', this);
 
     _AbstractDraggableBar2.prototype.destroy.call(this);
@@ -12621,9 +12722,9 @@ var Resize = /*#__PURE__*/function (_Component25) {
    */
 
 
-  var _proto48 = Resize.prototype;
+  var _proto49 = Resize.prototype;
 
-  _proto48.mount = function mount(elements) {
+  _proto49.mount = function mount(elements) {
     _Component25.prototype.mount.call(this, elements);
 
     var Editor = this.Editor,
@@ -12645,7 +12746,7 @@ var Resize = /*#__PURE__*/function (_Component25) {
    */
   ;
 
-  _proto48.destroy = function destroy() {
+  _proto49.destroy = function destroy() {
     this.bars.forEach(function (bar) {
       bar.destroy();
     });
@@ -12849,9 +12950,9 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
 
 
-  var _proto49 = Search.prototype;
+  var _proto50 = Search.prototype;
 
-  _proto49.mount = function mount(elements) {
+  _proto50.mount = function mount(elements) {
     if (!(this.Toolbar = this.require('Toolbar'))) {
       return;
     }
@@ -12869,7 +12970,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.create = function create() {
+  _proto50.create = function create() {
     var _this78 = this;
 
     var Toolbar = this.Toolbar;
@@ -12907,7 +13008,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.listen = function listen() {
+  _proto50.listen = function listen() {
     var _this79 = this;
 
     var searchField = this.searchField;
@@ -12950,7 +13051,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.onSearchFieldKeydown = function onSearchFieldKeydown(e) {
+  _proto50.onSearchFieldKeydown = function onSearchFieldKeydown(e) {
     if (e.key === 'Enter') {
       this.next();
       prevent(e);
@@ -12966,7 +13067,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.onReplaceFieldKeydown = function onReplaceFieldKeydown(e) {
+  _proto50.onReplaceFieldKeydown = function onReplaceFieldKeydown(e) {
     if (e.key === 'Enter') {
       this.replace();
       prevent(e);
@@ -12982,7 +13083,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.onKeydown = function onKeydown(e) {
+  _proto50.onKeydown = function onKeydown(e) {
     var key = e.key.toUpperCase();
     var Keymap = this.Keymap;
     var matches = Keymap.matches.bind(Keymap, e);
@@ -13011,7 +13112,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.onInput = function onInput() {
+  _proto50.onInput = function onInput() {
     var value = this.searchField.value;
 
     if (value) {
@@ -13031,7 +13132,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.search = function search(_search2, index) {
+  _proto50.search = function search(_search2, index) {
     if (_search2 === void 0) {
       _search2 = this.searchField.value;
     }
@@ -13068,7 +13169,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.rematch = function rematch(index) {
+  _proto50.rematch = function rematch(index) {
     this.search(undefined, index);
   }
   /**
@@ -13076,7 +13177,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.updateMatchesCount = function updateMatchesCount() {
+  _proto50.updateMatchesCount = function updateMatchesCount() {
     if (this.counter) {
       var length = this.ranges.length;
       var string;
@@ -13097,7 +13198,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toggleDisabled = function toggleDisabled() {
+  _proto50.toggleDisabled = function toggleDisabled() {
     var _this80 = this;
 
     ['prevMatch', 'nextMatch', 'replace', 'replaceAll'].forEach(function (name) {
@@ -13115,7 +13216,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.jump = function jump(index) {
+  _proto50.jump = function jump(index) {
     var range = this.ranges[index];
 
     if (range) {
@@ -13129,7 +13230,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.move = function move(prev) {
+  _proto50.move = function move(prev) {
     var length = this.ranges.length;
     var index = this.index + (prev ? -1 : 1);
 
@@ -13152,7 +13253,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toggleChecked = function toggleChecked(button, checked) {
+  _proto50.toggleChecked = function toggleChecked(button, checked) {
     _toggleClass(button, CLASS_ACTIVE, checked);
 
     attr(button, {
@@ -13166,7 +13267,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toggleReplace = function toggleReplace(show) {
+  _proto50.toggleReplace = function toggleReplace(show) {
     _toggleClass(this.replaceBar, CLASS_ACTIVE, show && !this.Editor.readOnly && !this.opts.hideReplace);
   }
   /**
@@ -13176,7 +13277,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.isActive = function isActive() {
+  _proto50.isActive = function isActive() {
     return this.Toolbar.isActive(TOOLBAR_ID);
   }
   /**
@@ -13186,7 +13287,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toggleMatchCase = function toggleMatchCase(activate) {
+  _proto50.toggleMatchCase = function toggleMatchCase(activate) {
     if (activate === void 0) {
       activate = !this.matchCase;
     }
@@ -13201,7 +13302,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toggleRegExp = function toggleRegExp(activate) {
+  _proto50.toggleRegExp = function toggleRegExp(activate) {
     if (activate === void 0) {
       activate = !this.regexp;
     }
@@ -13216,7 +13317,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toggleWholeWord = function toggleWholeWord(wholeWord) {
+  _proto50.toggleWholeWord = function toggleWholeWord(wholeWord) {
     if (wholeWord === void 0) {
       wholeWord = !this.wholeWord;
     }
@@ -13231,7 +13332,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.activate = function activate(index) {
+  _proto50.activate = function activate(index) {
     var activeRange = this.ranges[index];
 
     if (activeRange) {
@@ -13247,7 +13348,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.next = function next() {
+  _proto50.next = function next() {
     this.move(false);
   }
   /**
@@ -13255,7 +13356,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.prev = function prev() {
+  _proto50.prev = function prev() {
     this.move(true);
   }
   /**
@@ -13268,7 +13369,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.replace = function replace(replacement, index) {
+  _proto50.replace = function replace(replacement, index) {
     var _this81 = this;
 
     if (replacement === void 0) {
@@ -13316,7 +13417,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.toIndex = function toIndex(range) {
+  _proto50.toIndex = function toIndex(range) {
     var ranges = this.ranges;
 
     for (var i = 0; i < ranges.length; i++) {
@@ -13334,7 +13435,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.replaceAll = function replaceAll(replacement) {
+  _proto50.replaceAll = function replaceAll(replacement) {
     var _this82 = this;
 
     if (replacement === void 0) {
@@ -13362,7 +13463,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.show = function show(replace) {
+  _proto50.show = function show(replace) {
     var Selection = this.Selection,
         searchField = this.searchField;
     this.toggleReplace(replace);
@@ -13381,7 +13482,7 @@ var Search = /*#__PURE__*/function (_Component26) {
    */
   ;
 
-  _proto49.clear = function clear() {
+  _proto50.clear = function clear() {
     var Range = this.Range;
     Range.clear(MARKER_ID);
     Range.clear(ACTIVE_MARKER_ID);
@@ -13436,9 +13537,9 @@ var Shortcut = /*#__PURE__*/function (_Component27) {
    */
 
 
-  var _proto50 = Shortcut.prototype;
+  var _proto51 = Shortcut.prototype;
 
-  _proto50.mount = function mount(elements) {
+  _proto51.mount = function mount(elements) {
     _Component27.prototype.mount.call(this, elements);
 
     var Selection = this.Selection,
@@ -13490,12 +13591,12 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
     return _UIComponent3.apply(this, arguments) || this;
   }
 
-  var _proto51 = Toolbar.prototype;
+  var _proto52 = Toolbar.prototype;
 
   /**
    * Listens to some events and receives requests from other components.
    */
-  _proto51.listen = function listen() {
+  _proto52.listen = function listen() {
     _UIComponent3.prototype.listen.call(this);
 
     this.on(EVENT_RESIZE, this.resize, this);
@@ -13507,7 +13608,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
    */
   ;
 
-  _proto51.create = function create() {
+  _proto52.create = function create() {
     var elements = this.elements;
     var id = elements.root.id + "-toolbar";
     var wrapper = div({
@@ -13532,7 +13633,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
    */
   ;
 
-  _proto51.append = function append(group) {
+  _proto52.append = function append(group) {
     _append(this.body, this.groups[group].elm);
   }
   /**
@@ -13540,7 +13641,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
    */
   ;
 
-  _proto51.resize = function resize() {
+  _proto52.resize = function resize() {
     if (isIE() && this.isActive()) {
       var maxHeight = styles(this.elements.root, 'maxHeight');
       styles(this.elements.body, {
@@ -13557,7 +13658,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
    */
   ;
 
-  _proto51.register = function register(group, elm, label) {
+  _proto52.register = function register(group, elm, label) {
     addClass(elm, CLASS_TOOLBAR_GROUP);
     this.groups[group] = {
       elm: elm,
@@ -13571,7 +13672,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
    */
   ;
 
-  _proto51.show = function show(group) {
+  _proto52.show = function show(group) {
     var _window2 = window,
         pageXOffset = _window2.pageXOffset,
         pageYOffset = _window2.pageYOffset;
@@ -13599,7 +13700,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
    */
   ;
 
-  _proto51.hide = function hide() {
+  _proto52.hide = function hide() {
     var _window3 = window,
         pageXOffset = _window3.pageXOffset,
         pageYOffset = _window3.pageYOffset;
@@ -13649,7 +13750,7 @@ var Lexer = /*#__PURE__*/function (_Lexer$) {
     return _Lexer$.apply(this, arguments) || this;
   }
 
-  var _proto52 = Lexer.prototype;
+  var _proto53 = Lexer.prototype;
 
   /**
    * Runs the tokenization and adds custom data to each token.
@@ -13659,7 +13760,7 @@ var Lexer = /*#__PURE__*/function (_Lexer$) {
    *
    * @return An array with arrays of tokens.
    */
-  _proto52.run = function run(text, limit) {
+  _proto53.run = function run(text, limit) {
     var lines = this.tokenize(text, limit);
 
     for (var i = 0; i < lines.length; i++) {

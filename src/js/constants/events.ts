@@ -35,4 +35,5 @@ export const EVENT_CONTEXT_MENU_CLOSED   = 'contextMenuClosed';
 export const EVENT_CONTEXT_MENU_CLICKED  = 'contextMenuClicked';
 export const EVENT_RESET                 = 'reset';
 export const EVENT_INIT_STYLE            = 'initStyle';
+export const EVENT_FONT_LOADED           = 'fontLoaded';
 export const EVENT_DESTROYED             = 'destroyed';

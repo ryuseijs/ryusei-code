@@ -96,11 +96,12 @@ export declare class Measure extends Component {
     /**
      * Measures the provided string and returns the width.
      *
-     * @param string - A string to measure.
+     * @param string   - A string to measure.
+     * @param useCache - Optional. Determines whether to use the cached width or not..
      *
      * @return The width of the string.
      */
-    measureWidth(string: string): number;
+    measureWidth(string: string, useCache?: boolean): number;
     /**
      * Converts the passed position to the BoundaryRect object.
      *

@@ -2,6 +2,7 @@ import { Elements, EventBusEvent, OffsetPosition, Position } from '@ryusei/code'
 import { Component } from '../../classes/Component/Component';
 import { CLASS_LINE } from '../../constants/classes';
 import {
+  EVENT_FONT_LOADED,
   EVENT_MOUNT,
   EVENT_RESIZE,
   EVENT_SCROLL_HEIGHT_CHANGED,
@@ -78,6 +79,10 @@ export class Measure extends Component {
       this.updatePadding();
       this.createMeasureText();
       this.clearRectCaches();
+    }, 1 );
+
+    this.on( EVENT_FONT_LOADED, () => {
+      this.measureText.clear();
     }, 1 );
 
     this.on( [ EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLLED, EVENT_WINDOW_SCROLL ], this.clearRectCaches, this, 1 );
@@ -168,12 +173,13 @@ export class Measure extends Component {
   /**
    * Measures the provided string and returns the width.
    *
-   * @param string - A string to measure.
+   * @param string   - A string to measure.
+   * @param useCache - Optional. Determines whether to use the cached width or not..
    *
    * @return The width of the string.
    */
-  measureWidth( string: string ): number {
-    return this.measureText.measure( string );
+  measureWidth( string: string, useCache = true ): number {
+    return this.measureText.measure( string, useCache );
   }
 
   /**
