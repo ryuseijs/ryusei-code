@@ -41,7 +41,7 @@ export class Measure extends Component {
   private measureText: MeasureText;
 
   /**
-   * Caches the padding numbers.
+   * An object with padding values as `{ top, right, bottom, left }`;
    */
   padding: { top: number, right: number, bottom: number, left: number };
 
@@ -62,7 +62,7 @@ export class Measure extends Component {
    * @param e        - An EventBusEvent object.
    * @param elements - A collection of essential editor elements.
    */
-  private onMount( e: EventBusEvent, elements: Elements ): void {
+  private onMount( e: EventBusEvent<Editor>, elements: Elements ): void {
     this.elements = elements;
     this.createMeasureText();
     this.updatePadding();
@@ -135,22 +135,24 @@ export class Measure extends Component {
   }
 
   /**
-   * Returns a top position of the line at the provided row.
+   * Returns the top position of the line at the specified row.
+   * This clamps the row index from 0 and the total length of lines.
    *
    * @param row - A row index.
    *
-   * @return A top position in px.
+   * @return A top position in pixel.
    */
   getTop( row: number ): number {
     return clamp( row, 0, this.lines.length - 1 ) * this.lineHeight;
   }
 
   /**
-   * Returns a bottom position of the line at the provided row.
+   * Returns the bottom position of the line at the specified row.
+   * This clamps the row index from 0 and the total length of lines.
    *
    * @param row - A row index.
    *
-   * @return A bottom position in px.
+   * @return A bottom position in pixel.
    */
   getBottom( row: number ): number {
     const { Code } = this;
@@ -159,11 +161,11 @@ export class Measure extends Component {
   }
 
   /**
-   * Finds the closest row index with the provided position.
+   * Computes the closest row index to the offset `top` position.
    *
-   * @param top - A top position to search for.
+   * @param top - A offset position.
    *
-   * @return The closest row index.
+   * @return The closest row index to the offset position.
    */
   closest( top: number ): number {
     const row = round( ( top - this.padding.top ) / this.lineHeight );
@@ -172,9 +174,10 @@ export class Measure extends Component {
 
   /**
    * Measures the provided string and returns the width.
+   * This method caches each width of the character in the string for performance.
    *
    * @param string   - A string to measure.
-   * @param useCache - Optional. Determines whether to use the cached width or not..
+   * @param useCache - Optional. Determines whether to use the cached width or not.
    *
    * @return The width of the string.
    */
@@ -183,7 +186,7 @@ export class Measure extends Component {
   }
 
   /**
-   * Converts the passed position to the BoundaryRect object.
+   * Converts the passed position to the OffsetPosition object as `{ top: number, left: number }`.
    *
    * @param position - A position to convert.
    *
@@ -192,6 +195,8 @@ export class Measure extends Component {
   getOffset( position: Position ): OffsetPosition {
     const { padding } = this;
     const line = position[ 0 ] === this.Selection.focus[ 0 ] ? this.Input.value : this.Code.getLine( position[ 0 ] );
+
+    // console.log( line.slice( 0, position[ 1 ] ) );
 
     return {
       top : this.getTop( position[ 0 ] ) + padding.top,
@@ -227,9 +232,9 @@ export class Measure extends Component {
   }
 
   /**
-   * Returns the line height in px.
+   * Returns the editor line height in pixel.
    *
-   * @return Line height in px.
+   * @return The line height in pixel.
    */
   get lineHeight(): number {
     return ( this.lineHeightCache = this.lineHeightCache

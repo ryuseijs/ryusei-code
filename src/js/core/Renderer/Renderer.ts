@@ -16,6 +16,7 @@ import {
 } from '../../constants/classes';
 import { EventBus } from '../../event/EventBus';
 import { assign, min, repeat, tag } from '../../utils';
+import { Editor } from '../Editor/Editor';
 
 
 /**
@@ -27,7 +28,7 @@ export class Renderer {
   /**
    * Holds the EventBus instance.
    */
-  protected readonly event: EventBus
+  protected readonly event: EventBus<Editor>
 
   /**
    * Holds the Code instance.
@@ -51,7 +52,7 @@ export class Renderer {
    * @param event   - An EventBus instance.
    * @param options - Options.
    */
-  constructor( Code: Code, event: EventBus, options: Options ) {
+  constructor( Code: Code, event: EventBus<Editor>, options: Options ) {
     this.Code    = Code;
     this.lines   = Code.Lines;
     this.event   = event;

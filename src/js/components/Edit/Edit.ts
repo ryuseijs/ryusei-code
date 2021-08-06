@@ -11,6 +11,7 @@ import {
   EVENT_KEYDOWN,
   EVENT_PASTE,
 } from '../../constants/events';
+import { Editor } from '../../core/Editor/Editor';
 import { count, includes, isIE, isUndefined, normalizeKey, prevent, toArray } from '../../utils';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { Clipboard } from './Clipboard';
@@ -34,6 +35,8 @@ export class Edit extends Component {
 
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -78,7 +81,7 @@ export class Edit extends Component {
    * @param e  - An EventBusEvent object.
    * @param ke - A KeyboardEvent object.
    */
-  private onKeydown( e: EventBusEvent, ke: KeyboardEvent ): void {
+  private onKeydown( e: EventBusEvent<Editor>, ke: KeyboardEvent ): void {
     const { Selection } = this;
     const key   = normalizeKey( ke.key );
     const isKey = ( keys: string | string[] ) => includes( toArray( keys ), key );
@@ -112,7 +115,7 @@ export class Edit extends Component {
    * @param menu - A ContextMenu instance.
    * @param id   - The ID of the clicked item.
    */
-  private onMenuClick( e: EventBusEvent, menu: ContextMenu, id: string ): void {
+  private onMenuClick( e: EventBusEvent<Editor>, menu: ContextMenu, id: string ): void {
     const { Selection } = this;
 
     if ( id === 'copy' || id === 'cut' ) {

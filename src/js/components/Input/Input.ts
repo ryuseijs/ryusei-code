@@ -9,7 +9,7 @@ import {
   EVENT_COMPOSITION_UPDATE,
   EVENT_FOCUS_LINE_CHANGED,
   EVENT_INPUT,
-  EVENT_KEYDOWN,
+  EVENT_KEYDOWN, EVENT_MOUNTED,
   EVENT_NEWLINE,
 } from '../../constants/events';
 import { ARROW_KEYS } from '../../constants/keys';
@@ -40,22 +40,30 @@ const COMPOSITION_INPUT_TYPE = 'composition';
  */
 export class Input extends Component {
   /**
-   * Holds the TokenInfo object when any key is pressed.
+   * The `TokenInfo` object saved when any key is pressed.
+   *
+   * @readonly
    */
   info: TokenInfo | null;
 
   /**
    * Indicates whether the input is in composition session or not.
+   *
+   * @readonly
    */
   composing: boolean;
 
   /**
    * Keeps the latest focus line.
+   *
+   * @readonly
    */
   line: Element;
 
   /**
    * Keeps the latest focus row index.
+   *
+   * @readonly
    */
   row: number;
 
@@ -71,6 +79,8 @@ export class Input extends Component {
 
   /**
    * Initialized the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -90,6 +100,11 @@ export class Input extends Component {
     this.bind( editable, 'compositionstart', this.onCompositionStart, this );
     this.bind( editable, 'compositionupdate', this.onCompositionUpdate, this );
     this.bind( editable, 'compositionend', this.onCompositionEnd, this );
+
+    this.on( EVENT_MOUNTED, () => {
+      this.line = this.Chunk.elms[ 0 ];
+      this.row  = 0;
+    } );
 
     this.on( EVENT_FOCUS_LINE_CHANGED, ( e, line, row ) => {
       this.line = line;
@@ -322,6 +337,15 @@ export class Input extends Component {
   /**
    * Sets the input state.
    * If the state with the provided type exists, new props will be assigned to it.
+   * The props object accepts following values:
+   *
+   * - `key?`: The key that makes the input.
+   * - `startRow?`: The start row index to replace lines with the current value from.
+   * - `endRow?`: The end row index to replace lines with the current value to.
+   * - `value?`: The value to replace lines with. If omitted, the current value will be used.
+   * - `insertion?`: Specifies the value to insert at the caret position instead of setting the value.
+   * - `offset?`: The number of offset cols after the state is applied.
+   * - `position?`: Explicitly specifies the position after the state is applied. The `offset` will be ignored.
    *
    * @param type  - The type of the state.
    * @param props - Optional. An object with state values.
@@ -337,14 +361,33 @@ export class Input extends Component {
   }
 
   /**
-   * Returns the current state object.
+   * Returns the current state object if available.
+   *
+   * @return The current state object if available, or `null` if not.
    */
   get(): InputState | null {
     return this.state;
   }
 
   /**
-   * Applies the current input state to the editor.
+   * Applies the state to the editor and clears it.
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * ryuseiCode.on( 'focus', () => {
+   *   const { Input } = ryuseiCode.Editor.Components;
+   *
+   *   setTimeout( () => {
+   *     Input.apply( {
+   *       insertion: 'foo',
+   *       offset: 3,
+   *     } );
+   *   }, 1000 );
+   * } );
+   * ```
    *
    * @param state - Optional. A new state to apply.
    */
@@ -376,17 +419,6 @@ export class Input extends Component {
   }
 
   /**
-   * Inserts a text at the current or specified index.
-   *
-   * @param text  - A text to insert.
-   * @param index - Optional. An index where the text is inserted.
-   */
-  insert( text: string, index = this.col ): void {
-    const { value } = this;
-    this.value = value.slice( 0, index ) + text + value.slice( index );
-  }
-
-  /**
    * Returns a character at the current caret position or specified col index.
    *
    * @param col - Optional. A col index of the desired character.
@@ -398,7 +430,7 @@ export class Input extends Component {
   }
 
   /**
-   * Returns the value of the current line.
+   * Returns the value of the current line without the tailing line break.
    *
    * @return A text of the current line.
    */
@@ -408,6 +440,8 @@ export class Input extends Component {
 
   /**
    * Sets a new value to the current line.
+   * In most cases, it's better to use `apply()` to edit the line instead
+   * because this does not syncs the change to the editor.
    *
    * @param value - A new value to set.
    */
@@ -463,6 +497,8 @@ export class Input extends Component {
   /**
    * Returns `true` if the input is disabled.
    *
+   * @internal
+   *
    * @return `true` if the input is disabled.
    */
   get disabled(): boolean {
@@ -472,6 +508,10 @@ export class Input extends Component {
   /**
    * Makes the input disabled.
    * All keys are ignored while it is disabled.
+   *
+   * @internal
+   *
+   * @param disabled - Determines whether to disable or enable the input.
    */
   set disabled( disabled: boolean ) {
     this._disabled = disabled;

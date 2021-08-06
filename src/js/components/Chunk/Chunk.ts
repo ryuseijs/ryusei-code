@@ -16,6 +16,7 @@ import {
   EVENT_WINDOW_SCROLL,
 } from '../../constants/events';
 import { CHANGED, COLLAPSED } from '../../constants/selection-states';
+import { Editor } from '../../core/Editor/Editor';
 import {
   abs,
   addClass,
@@ -64,21 +65,30 @@ export class Chunk extends Component {
   /**
    * Indicates what row corresponds with the first line element.
    * The number can be negative.
+   *
+   * @readonly
    */
   start = 0;
 
   /**
-   * The number of lines for margin.
+   * The number of margin lines before and after visible lines.
+   * The total number of lines will be `margin * 2 + visibleLines`.
+   *
+   * @readonly
    */
   margin = MARGIN_LINES;
 
   /**
-   * The number of visible lines.
+   * The number of visible lines calculated by the editor height and the line height.
+   *
+   * @readonly
    */
   visibleLines: number;
 
   /**
-   * The current offset amount from the top in pixel.
+   * The current offset amount from the top of the scroller element in pixel.
+   *
+   * @readonly
    */
   offsetY = 0;
 
@@ -129,6 +139,8 @@ export class Chunk extends Component {
 
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -195,7 +207,7 @@ export class Chunk extends Component {
    * @param e         - An EventBusEvent object.
    * @param Selection - A Selection instance.
    */
-  private onSelected( e: EventBusEvent, Selection: Selection ): void {
+  private onSelected( e: EventBusEvent<Editor>, Selection: Selection ): void {
     if ( Selection.is( COLLAPSED, CHANGED ) ) {
       this.activate( true );
       this.activate( false );
@@ -649,7 +661,7 @@ export class Chunk extends Component {
   }
 
   /**
-   * Returns the focus or anchor boundary data which contains the line and the row index.
+   * Returns the focus or anchor boundary data object which contains the line element and the row index.
    *
    * @param focus - Determines whether to return the focus or anchor boundary data.
    *
@@ -693,10 +705,10 @@ export class Chunk extends Component {
   }
 
   /**
-   * Updates HTML of elements with the latest lines.
+   * Updates HTML of elements with the latest HTML of lines.
    * If omitting elements, updates all elements in the chunk.
    *
-   * @param elms  - Optional. Elements to sync.
+   * @param elms  - Optional. Elements to update.
    * @param start - Optional. A start index that corresponds with the first element.
    */
   sync( elms = this.elms, start = this.start ): void {
@@ -716,7 +728,7 @@ export class Chunk extends Component {
 
   /**
    * Syncs difference of the number of lines before syncing each HTML for performance.
-   * If the diff length is greater than the margin, this method does nothing.
+   * If the `diff` length is greater than the `margin`, this method does nothing.
    *
    * @param row  - A row index.
    * @param diff - Difference of the number of lines before and after editing.
@@ -791,7 +803,7 @@ export class Chunk extends Component {
 
   /**
    * Returns the end index of the chunk lines.
-   * This may be greater than the total number of actual lines.
+   * This may be greater than the actual total number of lines.
    *
    * @return An end index of the chunk.
    */

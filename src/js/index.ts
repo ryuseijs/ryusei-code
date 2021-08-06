@@ -1,5 +1,6 @@
 export { RyuseiCode } from './core/RyuseiCode/RyuseiCode';
 export { RyuseiCode as default } from './core/RyuseiCode/RyuseiCode';
+export { Component } from './classes/Component/Component';
 export * from './extensions';
 export * from './languages';
 

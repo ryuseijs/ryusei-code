@@ -117,6 +117,8 @@ export class Style extends Component {
   /**
    * Initializes the component.
    *
+   * @internal
+   *
    * @param elements - A collection of essential editor elements.
    */
   mount( elements: Elements ): void {
@@ -129,11 +131,14 @@ export class Style extends Component {
   }
 
   /**
-   * Adds a style to the specified selector.
+   * Adds styles to the specified selector.
+   * The `Editor#apply()` or `Editor#html()` applies the registered styles once,
+   * and therefore initial styles must be added before them.
+   * Otherwise, you should manually invoke the `apply()` method.
    *
    * @param selector - A selector string.
    * @param prop     - A CSS property or an objet literal with properties and values.
-   * @param value    - A value for the property.
+   * @param value    - Optional. A value for the property.
    */
   add( selector: string, prop: string | Record<string, number | string>, value?: number | string ): void {
     if ( isString( prop ) ) {
@@ -151,7 +156,7 @@ export class Style extends Component {
   }
 
   /**
-   * Applies current styles to the style element.
+   * Applies registered styles to the style element.
    */
   apply(): void {
     text( this.style, this.build() );
@@ -159,6 +164,8 @@ export class Style extends Component {
 
   /**
    * Destroys the component.
+   *
+   * @internal
    */
   destroy(): void {
     super.destroy();

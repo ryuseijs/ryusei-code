@@ -15,12 +15,6 @@ describe( 'Input', () => {
     Selection = Editor.Components.Selection;
   } );
 
-  test( 'can insert a text.', () => {
-    Selection.set( [ 0, 0 ] );
-    Input.insert( 'abc' );
-    expect( Input.value ).toBe( 'abc123' );
-  } );
-
   test( 'can set a new value to the input.', () => {
     Selection.set( [ 0, 0 ] );
     Input.value = 'def';

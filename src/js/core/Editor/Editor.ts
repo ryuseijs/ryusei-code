@@ -76,12 +76,35 @@ const FOCUSOUT_DEBOUNCE_DURATION = 10;
  */
 export class Editor {
   /**
-   * Holds collection of editor elements.
+   * The collection of essential editor elements.
+   *
+   * <div class="caution">
+   *   This collection is empty before components are mounted by the <code>Editor#apply()</code>.
+   * </div>
+   *
+   * @readonly
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { scroller } = ryuseiCode.Editor.elements;
+   * console.log( scroller.id );
+   * ```
    */
   elements: Elements;
 
   /**
-   * Holds Component instances.
+   * The collection of all core components.
+   *
+   * @readonly
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * const { Selection } = ryuseiCode.Editor.Components;
+   * ```
    */
   Components: Partial<Components> = {};
 
@@ -91,27 +114,29 @@ export class Editor {
   private Extensions: Partial<Extensions> = {};
 
   /**
-   * Holds options.
+   * An object with options.
    */
   readonly options: Options;
 
   /**
-   * Holds the EventBus instance.
+   * The EventBus instance.
+   * Although you can attach or detach event handlers by this instance,
+   * `RyuseiCode#on()` or `RyuseiCode#off()` is more useful.
    */
-  readonly event: EventBus;
+  readonly event: EventBus<Editor>;
 
   /**
-   * Holds the source element.
+   * The source element where the editor has been applied to.
    */
   protected source: HTMLElement;
 
   /**
-   * Holds the root element.
+   * The root element of the editor that is same with the `elements.root`.
    */
   protected root: HTMLElement;
 
   /**
-   * Holds the language object.
+   * The Language object.
    */
   readonly language: Language;
 
@@ -130,7 +155,7 @@ export class Editor {
   constructor( language: Language, options: Options, extensions: Partial<Extensions> = {} ) {
     this.language   = language;
     this.options    = options;
-    this.event      = new EventBus();
+    this.event      = new EventBus( this );
     this.options.id = this.options.id || uniqueId( PROJECT_CODE );
 
     forOwn( CoreComponents, ( Component, name ) => {
@@ -284,11 +309,12 @@ export class Editor {
   }
 
   /**
-   * Returns HTML of the editor.
-   * This may not contain all lines because IE can not render tons of HTML tags at the same time.
-   * The number of lines can be specified by options.
+   * Builds the HTML of the editor. This works without `document` and `window` objects,
+   * but has no functionality.
    *
-   * @param code   - A code string.
+   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
+   *
+   * @param code   - The code for the editor.
    * @param source - Optional. Whether to embed the source code into the editor or not.
    *
    * @return The HTML of the editor.
@@ -300,7 +326,12 @@ export class Editor {
   }
 
   /**
-   * Saves the content to the source element.
+   * Saves the content to the source element if available.
+   *
+   * For example, if you apply the editor to the empty `textarea` element,
+   * it remains empty even after you edit the code by the editor.
+   *
+   * This method applies back the change to the `textarea` element.
    */
   save(): void {
     const { source, value } = this;
@@ -313,7 +344,7 @@ export class Editor {
   }
 
   /**
-   * Focuses to the editable area.
+   * Sets focus on the editor.
    *
    * @param reselect - Determines whether to reselect the last position or not.
    */
@@ -337,7 +368,15 @@ export class Editor {
   }
 
   /**
-   * Attempts to invoke the method of the specified extension.
+   * Attempts to invoke the public method of the specified extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
+   *
+   * @example
+   * ```ts
+   * // Attempts to show the "search" toolbar.
+   * Editor.invoke( 'Toolbar', 'show', 'search' );
+   * ```
    *
    * @param name   - A name of the extension.
    * @param method - A method name to invoke.
@@ -358,27 +397,29 @@ export class Editor {
   }
 
   /**
-   * Returns the extension of the specified name.
+   * Returns the extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
    *
    * @param name - A name of an extension.
    *
-   * @return An extension if found, or otherwise `undefined`.
+   * @return The specified extension if found, or otherwise `undefined`.
    */
   require<K extends keyof Extensions>( name: K ): Extensions[ K ] | undefined {
     return this.Extensions[ name ];
   }
 
   /**
-   * Checks if the editor is focused or not.
+   * Checks if the editor has focus or not.
    *
-   * @return `true` if the editor is focused, or otherwise `false`.
+   * @return `true` if the editor has focus, or otherwise `false`.
    */
   isFocused(): boolean {
     return this.root.contains( activeElement() );
   }
 
   /**
-   * Destroys the editor.
+   * Saves the final value to the source element and destroys the editor for releasing the memory.
    */
   destroy(): void {
     const { event } = this;
@@ -400,9 +441,9 @@ export class Editor {
   }
 
   /**
-   * Sets a new value to the editor.
+   * Sets a new value to the editor and resets the editor.
    *
-   * @param value - A value to set.
+   * @param value - A new value.
    */
   set value( value: string ) {
     const { Components, Components: { Code, Selection } } = this;
@@ -430,9 +471,9 @@ export class Editor {
   }
 
   /**
-   * Sets the width of the root element.
+   * Sets width of the root element.
    *
-   * @param width - Width to set as pixel or CSS styles.
+   * @param width - Width to set in pixel or in the CSS format, such as '50%'.
    */
   set width( width: number | string ) {
     styles( this.root, { width: unit( width ) } );
@@ -442,7 +483,7 @@ export class Editor {
   /**
    * Returns the width of the editor in pixel.
    *
-   * @return The width of the editor.
+   * @return The width of the editor in pixel.
    */
   get width(): number {
     return this.root.clientWidth;
@@ -451,7 +492,7 @@ export class Editor {
   /**
    * Sets the height of the root element.
    *
-   * @param height - Height to set as pixel or CSS styles.
+   * @param height - Height to set in pixel or in the CSS format, such as '50%'.
    */
   set height( height: number | string ) {
     styles( this.root, { height: unit( height ) } );
@@ -469,6 +510,7 @@ export class Editor {
 
   /**
    * Makes the editor mutable or immutable.
+   * In the read-only mode, the primary caret gets hidden.
    *
    * @param readOnly - Whether to make the editor immutable or mutable.
    */
@@ -483,9 +525,9 @@ export class Editor {
   }
 
   /**
-   * Indicates whether the editor is disabled or not.
+   * Indicates whether the editor is read-only or not.
    *
-   * @return - `true` if the input is read-only or `false` if not.
+   * @return - `true` if the editor is read-only or `false` if not.
    */
   get readOnly(): boolean {
     return this._readOnly;

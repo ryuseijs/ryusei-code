@@ -2,6 +2,7 @@ import { Elements, EventBusEvent, KeyMatcher } from '@ryusei/code';
 import { Component } from '../../classes/Component/Component';
 import { EVENT_KEYDOWN, EVENT_KEYMAP } from '../../constants/events';
 import { KEYMAP, MODIFIER_KEYS } from '../../constants/keymap';
+import { Editor } from '../../core/Editor/Editor';
 import { assign, forOwn, includes, isArray, isMac, isString, matchesKey, normalizeKey, toArray } from '../../utils';
 
 
@@ -23,6 +24,8 @@ export class Keymap extends Component {
 
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential elements.
    */
@@ -48,7 +51,7 @@ export class Keymap extends Component {
    * @param e  - An EventBusEvent object.
    * @param ke - A KeyboardEvent object.
    */
-  private onKeydown( e: EventBusEvent, ke: KeyboardEvent ): void {
+  private onKeydown( e: EventBusEvent<Editor>, ke: KeyboardEvent ): void {
     if ( ! this.Editor.readOnly ) {
       if ( includes( this.keys, normalizeKey( ke.key ).toUpperCase() ) ) {
         const action = this.find( ke );
@@ -81,7 +84,7 @@ export class Keymap extends Component {
   }
 
   /**
-   * Checks if the keyboard event matches keys of the provided ID or not.
+   * Checks if the keyboard event matches keys of the provided action ID or not.
    *
    * @param e  - A KeyboardEvent object.
    * @param id - An ID.
@@ -94,12 +97,12 @@ export class Keymap extends Component {
   }
 
   /**
-   * Builds a shortcut that describes keys of the provided keymap ID or a KeyMatcher object.
-   * For example, `undo` or `[ 'Z', true ]` will be `Ctrl + Z`.
+   * Builds a shortcut string that describes keys of the provided action ID or a KeyMatcher object.
+   * For example, `undo` or `[ 'Z', true ]` will be `Ctrl+Z`.
    *
-   * @param id - An ID in a keymap or a KeyMatcher object.
+   * @param id - An action ID in the keymap or a KeyMatcher object line.
    *
-   * @return A built shortcut as a string.
+   * @return A built shortcut string. If the ID is not available, it returns an empty string.
    */
   getShortcut( id: string | KeyMatcher ): string {
     const matchers = isString( id ) ? this.keymap[ id ] : id;

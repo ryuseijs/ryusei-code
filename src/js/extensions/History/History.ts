@@ -195,7 +195,7 @@ export class History extends Component {
    * @param e    - A EventBusEvent object.
    * @param type - An input type. This may be empty.
    */
-  private onChange( e: EventBusEvent, type: string ): void {
+  private onChange( e: EventBusEvent<Editor>, type: string ): void {
     if ( type !== RESTORATION_INPUT_TYPE ) {
       const { history } = this;
 
@@ -215,7 +215,7 @@ export class History extends Component {
    * @param e    - A EventBusEvent object.
    * @param type - An input type. This may be empty.
    */
-  private onChanged( e: EventBusEvent, type: string ): void {
+  private onChanged( e: EventBusEvent<Editor>, type: string ): void {
     if ( ! this.Input.composing && type !== RESTORATION_INPUT_TYPE ) {
       if ( type === 'input' ) {
         this.debouncedPush( this.record() );

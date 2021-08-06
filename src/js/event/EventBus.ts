@@ -7,11 +7,25 @@ import { toArray } from '../utils';
  *
  * @since 0.1.0
  */
-export class EventBus {
+export class EventBus<T = undefined> {
   /**
    * Holds all handlers.
    */
   protected handlers: Record<string, EventHandler[]> = {};
+
+  /**
+   * The owner of the instance.
+   */
+  private owner: T | undefined;
+
+  /**
+   * The EventBus constructor.
+   *
+   * @param owner - Optional. The owner of the instance.
+   */
+  constructor( owner?: T ) {
+    this.owner = owner;
+  }
 
   /**
    * Registers an event handler.
@@ -67,7 +81,7 @@ export class EventBus {
    */
   emit( event: string, ...args: any[] ): void {
     const eventHandlers = this.handlers[ event ];
-    const eventObject: EventBusEvent = { type: event };
+    const eventObject: EventBusEvent<T> = { type: event, owner: this.owner };
 
     if ( eventHandlers ) {
       eventHandlers.forEach( handler => { handler.callback( eventObject, ...args ) } );

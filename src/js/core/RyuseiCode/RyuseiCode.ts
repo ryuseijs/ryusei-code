@@ -159,7 +159,7 @@ export class RyuseiCode {
    * If the <code>apply()</code> method is called twice to the same element, it throws an error.
    * </div>
    *
-   * @param target - A selector or an element to apply the editor to.
+   * @param target - A selector to find the target element, or a target element itself.
    * @param code   - Optional. The code to overwrite the content of the target element.
    */
   apply( target: string | Element, code?: string ): void {
@@ -172,9 +172,9 @@ export class RyuseiCode {
    *
    * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
-   * @param code - Initial code.
+   * @param code - The code for the editor.
    *
-   * @return A HTML string for the editor.
+   * @return The HTML string for the editor.
    */
   html( code: string ): string {
     return this.Editor.html( code, true );
@@ -234,7 +234,7 @@ export class RyuseiCode {
   }
 
   /**
-   * Focuses to the editable area.
+   * Sets focus on the editor.
    *
    * @param reselect - Determines whether to reselect the last position or not.
    */
@@ -270,7 +270,7 @@ export class RyuseiCode {
   }
 
   /**
-   * Sets a new value to the editor and refreshes it.
+   * Sets a new value to the editor and resets the editor.
    *
    * @param value - A new value.
    */

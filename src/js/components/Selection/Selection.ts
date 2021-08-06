@@ -19,6 +19,7 @@ import {
   START,
   UPDATE,
 } from '../../constants/selection-states';
+import * as STATES from '../../constants/selection-states';
 import {
   activeElement,
   attr,
@@ -52,17 +53,42 @@ import { State } from './State';
  */
 export class Selection extends Component {
   /**
-   * Holds the State instance.
+   * The collection of selection states.
+   *
+   * | State | Description |
+   * |---|---|
+   * | `IDLE` | The editor is not active. |
+   * | `COLLAPSED` | The selection is collapsed. |
+   * | `START` | The selection will change soon. The native selection has not been updated at this timing. |
+   * | `CHANGED` | Fired every time when the tween is updated. |
+   * | `UPDATE` | The selection has just changed after the `START` state. The native selection has been updated. |
+   * | `SELECTING` | An user starts selecting texts. |
+   * | `EXTEND` | The existing selection is being extended. |
+   * | `END` | User finishes the selection. The native selection has not been updated at this timing (in FF). |
+   * | `SELECTED` | The selection is settled and it is not collapsed. |
+   * | `SELECTED_ALL` | All contents are selected. |
+   * | `CLICKED_RIGHT` | The selection is right-clicked. |
+   */
+  readonly STATES = STATES;
+
+  /**
+   * The State instance that manages the selection states.
+   *
+   * @readonly
    */
   state: State;
 
   /**
-   * Keeps the position where the selection starts.
+   * The position where the selection starts.
+   *
+   * @readonly
    */
   anchor: Position = ORIGIN;
 
   /**
-   * Keeps the position where the selection ends.
+   * The position where the selection ends.
+   *
+   * @readonly
    */
   focus: Position = ORIGIN;
 
@@ -73,6 +99,8 @@ export class Selection extends Component {
 
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential elements.
    */
@@ -225,10 +253,10 @@ export class Selection extends Component {
   }
 
   /**
-   * Sets the custom selection by changing the native selection.
+   * Sets a new selection.
    *
    * @param anchor - An anchor position.
-   * @param focus  - Optional. A focus position.
+   * @param focus  - Optional. A focus position. If omitted, the selection will be collapsed to the anchor.
    */
   set( anchor: Position, focus?: Position ): void {
     this.setNativeSelection( anchor, focus ) || this.update( anchor, focus );
@@ -270,11 +298,10 @@ export class Selection extends Component {
 
   /**
    * Selects the current or specified line.
-   * This method sets the range twice for the backward selection.
    *
    * @param row       - Optional. A row index where to select.
-   * @param refresh   - Optional. Whether to refresh the current selection or not.
-   * @param backwards - Optional. Selects a line backwards.
+   * @param refresh   - Optional. Determines whether to refresh the current selection or not.
+   * @param backwards - Optional. Determines whether to select a line backwards or not.
    */
   selectLine( row = this.focus[ 0 ], refresh = true, backwards?: boolean ): void {
     const { lines } = this;
@@ -319,7 +346,7 @@ export class Selection extends Component {
   }
 
   /**
-   * Disables to hold the state.
+   * Disables to hold the state so that it will change.
    */
   release(): void {
     this.state.release();
@@ -327,7 +354,7 @@ export class Selection extends Component {
 
   /**
    * Converts the selection to a string.
-   * An empty string will be returned when the selection is collapsed.
+   * This returns an empty string when the selection is collapsed.
    *
    * @return A string representing the current selection.
    */
@@ -337,7 +364,7 @@ export class Selection extends Component {
   }
 
   /**
-   * Returns the DOMRect node of the native selection boundary.
+   * Returns the DOMRect object of the native selection boundary.
    * Note that the boundary node is usually a Text node,
    * but sometimes the line or the editable element.
    *
@@ -373,7 +400,7 @@ export class Selection extends Component {
   }
 
   /**
-   * Returns the current location as a string formatted by the i18n definition.
+   * Returns the current location as a string formatted by the i18n definition, such as `'Line: %s, Column: %s'`.
    *
    * @return A string that describes the current location.
    */
@@ -386,6 +413,15 @@ export class Selection extends Component {
    * Checks if the selection state is one of the provided states or not.
    * This is just an alias of the `state.is()` method.
    *
+   * @example
+   * ```ts
+   * // Checks if the state is COLLAPSED or not:
+   * Selection.is( Selection.STATES.COLLAPSED );
+   *
+   * // Checks if the state is START, EXTEND or not:
+   * Selection.is( Selection.STATES.START, Selection.STATES.EXTEND );
+   * ```
+   *
    * @param states - A state or states to check.
    *
    * @return `true` if the current state is one of the provided states, or otherwise `false`.
@@ -395,7 +431,7 @@ export class Selection extends Component {
   }
 
   /**
-   * Collapses the selection to anchor or focus position.
+   * Collapses the selection to the anchor or focus position.
    *
    * @param toFocus - Optional. Collapses the selection to the focus position.
    */
@@ -431,21 +467,12 @@ export class Selection extends Component {
   }
 
   /**
-   * Checks if the editor is focused or not.
+   * Checks if the provided client position is inside the current selection or not.
    *
-   * @return `true` if the editor is focused, or otherwise `false`.
-   */
-  isFocused(): boolean {
-    return this.Editor && this.Editor.isFocused();
-  }
-
-  /**
-   * Checks if the provided client position is inside the current selection range or not.
+   * @param clientX - The X position that is relative to the client.
+   * @param clientY - The Y position that is relative to the client.
    *
-   * @param clientX - X position that is relative to the client.
-   * @param clientY - Y position that is relative to the client.
-   *
-   * @return `true` if the position is inside the range, or otherwise `false`.
+   * @return `true` if the position is inside the selection, or otherwise `false`.
    */
   isInside( clientX: number, clientY: number ): boolean {
     return this.Range.selection.isInside( clientX, clientY );
@@ -453,6 +480,8 @@ export class Selection extends Component {
 
   /**
    * Destroys the instance.
+   *
+   * @internal
    */
   destroy(): void {
     this.state.destroy();
@@ -680,5 +709,14 @@ export class Selection extends Component {
     } else {
       Input.disabled = false;
     }
+  }
+
+  /**
+   * Checks if the editor is focused or not.
+   *
+   * @return `true` if the editor is focused, or otherwise `false`.
+   */
+  private isFocused(): boolean {
+    return this.Editor && this.Editor.isFocused();
   }
 }

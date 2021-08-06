@@ -120,11 +120,16 @@ declare module '@ryusei/code' {
    *
    * @since 0.1.0
    */
-  interface EventBusEvent {
+  interface EventBusEvent<T = undefined> {
     /**
      * An event name.
      */
     type: string;
+
+    /**
+     * The owner of the EventBus instance.
+     */
+    owner?: T;
   }
 
   /**

@@ -1,1 +1,0 @@
-{"version":3,"file":"IndentMarker.d.ts","sourceRoot":"","sources":["IndentMarker.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,QAAQ,EAAE,MAAM,cAAc,CAAC;AACxD,OAAO,EAAE,MAAM,EAAE,MAAM,+BAA+B,CAAC;AAIvD;;;;GAIG;AACH,qBAAa,YAAa,SAAQ,MAAM;IACtC;;;;;;;OAOG;IACH,SAAS,CAAC,cAAc,CAAE,MAAM,EAAE,QAAQ,GAAI;QAAE,KAAK,EAAE,cAAc,CAAC;QAAC,GAAG,EAAE,cAAc,CAAA;KAAE;CAY7F"}

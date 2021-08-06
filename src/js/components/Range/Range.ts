@@ -29,6 +29,8 @@ export const MAX_RANGES = 10000;
 export class Range extends Component {
   /**
    * Holds the SelectionMarker instance.
+   *
+   * @readonly
    */
   selection: SelectionMarker;
 
@@ -44,6 +46,8 @@ export class Range extends Component {
 
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of editor elements.
    */
@@ -110,8 +114,27 @@ export class Range extends Component {
   }
 
   /**
-   * Registers ranges to the group and draw them as markers if they are inside viewport.
+   * Registers ranges to the group and draw them as markers.
+   * They will remain until they are explicitly cleared by the `clear()` method.
    * If `concat` is `true`, sequential ranges will be concatenated as a single range.
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { Range } = ryuseiCode.Editor.Components;
+   *
+   * Range.register( 'my-ranges', [
+   *   { start: [ 0, 0 ], end: [ 0, 5 ] },
+   *   { start: [ 1, 0 ], end: [ 1, 3 ] },
+   * ] );
+   *
+   * // Clear ranges after 2 seconds.
+   * setTimeout( () => {
+   *   Range.clear( 'my-ranges' );
+   * }, 2000 );
+   * ```
    *
    * @param group       - A group name.
    * @param ranges      - A range or ranges to draw.
@@ -145,8 +168,8 @@ export class Range extends Component {
   }
 
   /**
-   * Clears ranges and rendered markers in the specified group.
-   * If the group name is omitted, all ranges will be cleared.
+   * Clears ranges and rendered markers that belong to the specified group.
+   * If the group name is omitted, this method clears all ranges.
    *
    * @param group - Optional. A group name to clear.
    */
@@ -164,8 +187,7 @@ export class Range extends Component {
   }
 
   /**
-   * Clears ranges in the specified group.
-   * Rendered markers are not cleared.
+   * Clears ranges in the specified group, but rendered markers will remain.
    *
    * @param group - A group name to clear.
    */

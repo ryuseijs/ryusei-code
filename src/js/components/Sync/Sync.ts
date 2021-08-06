@@ -34,14 +34,37 @@ export class Sync extends Component {
   private syncing: boolean;
 
   /**
-   * Syncs the changes between the start and end rows to the Lines and View components.
-   * Since the `startRow` can be very far from the `row` when pasting huge code,
-   * syncs lines inaccurately by setting the `strict` to `false` at first,
-   * and then starts strict synchronization.
+   * Syncs changes between the start and end rows to other components.
    *
-   * @param startRow  - A start row index.
-   * @param endRow    - An end row index.
-   * @param jumpTo    - Optional. Jumps to the specified row before starting synchronization.
+   * @example
+   * Consider the following HTML as an example:
+   *
+   * ```html
+   * <pre>
+   * function message() {
+   *   console.log( 'hi' );
+   * }
+   * </pre>
+   * ```
+   *
+   * Let's attempt to modify the line 2 (the row index is `1`):
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code, Sync } = ryuseiCode.Editor.Components;
+   *
+   * // Only the Code component knows the change
+   * Code.replaceLines( 1, 1, `  console.warn( 'error' );\n` );
+   *
+   * // Syncs the change to other components
+   * Sync.sync( 1, 1 );
+   * ```
+   *
+   * @param startRow - A start row index.
+   * @param endRow   - An end row index.
+   * @param jumpTo   - Optional. Jumps to the specified row before starting synchronization.
    */
   sync( startRow: number, endRow: number, jumpTo?: number ): void {
     const { Chunk, View } = this;

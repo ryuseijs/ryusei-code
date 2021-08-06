@@ -11,6 +11,7 @@ import {
   EVENT_SELECTING,
 } from '../../constants/events';
 import { CHANGED, EXTEND, SELECTED, SELECTING, START } from '../../constants/selection-states';
+import { Editor } from '../../core/Editor/Editor';
 import { div, isIE, isMobile, max, min, rafThrottle, rect, styles, text, unit } from '../../utils';
 import { Throttle } from '../../utils/function/throttle/throttle';
 import { Selection } from '../Selection/Selection';
@@ -26,7 +27,9 @@ import { Scrollbar } from './Scrollbar';
  */
 export class View extends Component {
   /**
-   * Emits the resize event with reducing frequency by `throttle`.
+   * Emits the resize event with reducing frequency by the animation frame.
+   *
+   * @readonly
    */
   emitResize: Throttle<() => void>;
 
@@ -47,6 +50,8 @@ export class View extends Component {
 
   /**
    * Initializes the instance.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -79,7 +84,7 @@ export class View extends Component {
    * @param e         - An EventBusEvent object.
    * @param Selection - A Selection instance.
    */
-  private onSelected( e: EventBusEvent, Selection: Selection ): void {
+  private onSelected( e: EventBusEvent<Editor>, Selection: Selection ): void {
     if ( Selection.is( START, EXTEND ) && Selection.state.device === 'keyboard' ) {
       this.jump( Selection.focus[ 0 ] );
     }
@@ -171,12 +176,12 @@ export class View extends Component {
   }
 
   /**
-   * Jumps to the specified row if it's not visible in the viewport.
-   * If the `middle` is true, always jumps to the middle of the viewport.
+   * Jumps to the specified row if it's not visible in the scroller.
+   * If the `middle` is `true`, this method try to vertically center the target line.
    *
    * @param row        - A row index to jump to.
-   * @param middle     - Optional. Determines whether to jump to the middle of the viewport.
-   * @param lineOffset - Optional. A number of lines to offset top and bottom borders.
+   * @param middle     - Optional. Determines whether to jump to the middle of the viewport or not.
+   * @param lineOffset - Optional. A number of lines to offset.
    */
   jump( row: number, middle?: boolean, lineOffset = JUMP_OFFSET ): void {
     const { Measure, Chunk, Measure: { scrollerRect } } = this;
@@ -203,7 +208,7 @@ export class View extends Component {
   }
 
   /**
-   * Adjusts the width of the lines element.
+   * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
    */
   autoWidth(): void {
     const { Measure } = this;
@@ -218,7 +223,7 @@ export class View extends Component {
   }
 
   /**
-   * Adjusts the height of the container element so that it contains all lines.
+   * Adjusts the height of the container element so that it can contain all lines.
    * It won't be smaller than the scroller element when the editor has explicit height.
    *
    * @param skipLengthCheck - Optional. Whether to skip checking the number of lines or not.
@@ -243,7 +248,7 @@ export class View extends Component {
   }
 
   /**
-   * Checks if the provided row is visible on the scroller or not.
+   * Checks if the specified row is visible in the scroller or not.
    *
    * @param row        - A row index to check.
    * @param lineOffset - Optional. A number of lines to offset top and bottom borders.
@@ -269,6 +274,8 @@ export class View extends Component {
 
   /**
    * Destroys the component.
+   *
+   * @internal
    */
   destroy(): void {
     this.scrollbars.forEach( bar => { bar.destroy() } );

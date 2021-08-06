@@ -3,6 +3,7 @@ import { Component } from '../../classes/Component/Component';
 import { CLASS_CARETS } from '../../constants/classes';
 import { EVENT_READONLY, EVENT_SELECTED, EVENT_SELECTING } from '../../constants/events';
 import { CHANGED, COLLAPSED, SELECTED } from '../../constants/selection-states';
+import { Editor } from '../../core/Editor/Editor';
 import { assert, div, isIE, isMobile, rafThrottle } from '../../utils';
 import { Selection } from '../Selection/Selection';
 import { CustomCaret } from './CustomCaret';
@@ -39,6 +40,8 @@ export class Caret extends Component {
   /**
    * Mounts the component.
    * Uses the native caret on IE and mobile devices.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -104,7 +107,7 @@ export class Caret extends Component {
    * @param e         - An EventBusEvent object.
    * @param Selection - A Selection instance.
    */
-  private onSelected( e: EventBusEvent, Selection: Selection ): void {
+  private onSelected( e: EventBusEvent<Editor>, Selection: Selection ): void {
     if ( ! this.Editor.readOnly ) {
       if ( Selection.is( CHANGED, COLLAPSED, SELECTED ) ) {
         this.update();

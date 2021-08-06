@@ -151,7 +151,7 @@ export class Indentation extends Component {
    * @param e     - An EventBusEvent object.
    * @param ke    - A KeyboardEvent object.
    */
-  private onKeydown( e: EventBusEvent, ke: KeyboardEvent ): void {
+  private onKeydown( e: EventBusEvent<Editor>, ke: KeyboardEvent ): void {
     if ( this.opts.help && ! Indentation.noticed && ke.key === 'Tab' ) {
       this.Dialog.show( DIALOG_ID );
       Indentation.noticed = true;

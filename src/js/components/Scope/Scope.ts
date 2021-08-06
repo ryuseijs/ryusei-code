@@ -11,10 +11,24 @@ import { startsWith, toArray } from '../../utils';
  */
 export class Scope extends Component {
   /**
-   * Checks if the current start position is in the specified state or category.
-   * With a `!` prefix, this returns `true` if the position is NOT inside the scope.
+   * Checks if the current or specified position is in the specified state or category.
+   * With the `!` negating notation, this returns `true` if the position is NOT inside the scope.
    *
-   * @param names    - A name or names of scope.
+   * Note that the Lexer (RyuseiLight) determines states and categories.
+   *
+   * @example
+   * ```ts
+   * // Returns `true` if the caret is inside a comment.
+   * Scope.isIn( [ 'comment' ] );
+   *
+   * // Returns `true` if the caret is inside a "attr" state.
+   * Scope.isIn( [ '#attr' ] );
+   *
+   * // Returns `true` if the caret is not inside a comment and a string.
+   * Scope.isIn( [ '!comment', '!string' ] );
+   * ```
+   *
+   * @param names    - A name or an array with names of states and/or categories.
    * @param position - Optional. Specifies the position to check.
    *
    * @return `true` if the start position is inside the scope.
@@ -29,10 +43,10 @@ export class Scope extends Component {
   }
 
   /**
-   * Checks if the current start position is in the specified state or not.
-   * `!` is acceptable.
+   * Checks if the current or specified position is in the specified state or not.
+   * The `!` negating notation is acceptable.
    *
-   * @param states   - A state or state names.
+   * @param states   - A name or an array with names of states.
    * @param position - Optional. Specifies the position to check.
    */
   inState( states: string | string[], position?: Position ): boolean {
@@ -40,10 +54,10 @@ export class Scope extends Component {
   }
 
   /**
-   * Checks if the current start position is in the specified category or not.
-   * `!` is acceptable.
+   * Checks if the current or specified position is in the specified category or not.
+   * The `!` negating notation is acceptable.
    *
-   * @param categories - A state or state names.
+   * @param categories - A name or an array with names of categories.
    * @param position   - Optional. Specifies the position to check.
    */
   inCategory( categories: string | string[], position?: Position ): boolean {

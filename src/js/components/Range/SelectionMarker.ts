@@ -54,7 +54,7 @@ export class SelectionMarker extends StandaloneMarker {
    * @param state     - A new state.
    * @param prev      - A previous state.
    */
-  private onStateChanged( e: EventBusEvent, Selection: Selection, state: number, prev: number ): void {
+  private onStateChanged( e: EventBusEvent<Editor>, Selection: Selection, state: number, prev: number ): void {
     if ( Selection.is( COLLAPSED, CHANGED ) ) {
       this.clear();
     }

@@ -40,7 +40,7 @@ export class Component {
   /**
    * Holds the EventBus instance.
    */
-  protected readonly event: EventBus;
+  protected readonly event: EventBus<Editor>;
 
   /**
    * Holds options.
@@ -324,6 +324,7 @@ export class Component {
 
   /**
    * Returns the latest Lines instance.
+   * This is an alias of `Code#Lines`.
    *
    * @return The Lines instance.
    */
@@ -333,6 +334,7 @@ export class Component {
 
   /**
    * Returns the i18n collection.
+   * This is an alias of `this.options.i18n`.
    *
    * @return The object with i18n strings.
    */

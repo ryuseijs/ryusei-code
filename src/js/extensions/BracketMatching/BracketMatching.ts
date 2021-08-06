@@ -4,6 +4,7 @@ import { Component } from '../../classes/Component/Component';
 import { Selection } from '../../components';
 import { EVENT_BLUR, EVENT_READONLY, EVENT_SELECTED } from '../../constants/events';
 import { CHANGED, EXTEND, SELECTING, START } from '../../constants/selection-states';
+import { Editor } from '../../core/Editor/Editor';
 import { debounce, escapeRegExp, rafThrottle } from '../../utils';
 import { Throttle } from '../../utils/function/throttle/throttle';
 import { DEFAULT_OPTIONS } from './defaults';
@@ -76,7 +77,7 @@ export class BracketMatching extends Component {
    * @param e         - An EventBusEvent object.
    * @param Selection - A Selection instance.
    */
-  private onSelected( e: EventBusEvent, Selection: Selection ): void {
+  private onSelected( e: EventBusEvent<Editor>, Selection: Selection ): void {
     if ( Selection.is( START, SELECTING, EXTEND ) ) {
       this.clear();
     } else if ( Selection.is( CHANGED ) ) {

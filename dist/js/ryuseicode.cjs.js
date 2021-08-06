@@ -1579,6 +1579,7 @@ var Component = /*#__PURE__*/function () {
   }
   /**
    * Returns the latest Lines instance.
+   * This is an alias of `Code#Lines`.
    *
    * @return The Lines instance.
    */
@@ -1591,6 +1592,7 @@ var Component = /*#__PURE__*/function () {
     }
     /**
      * Returns the i18n collection.
+     * This is an alias of `this.options.i18n`.
      *
      * @return The object with i18n strings.
      */
@@ -1720,7 +1722,7 @@ var SELECTING = 5;
 
 var EXTEND = 6;
 /**
- * User finishes the selection. The native selection has not been updated at this timing (in FF).
+ * User finishes the selection. The native selection has not been updated at this timing (in Gecko).
  */
 
 var END = 7;
@@ -1730,10 +1732,29 @@ var END = 7;
 
 var SELECTED = 8;
 /**
+ * All contents are selected.
+ */
+
+var SELECTED_ALL = 9;
+/**
  * The selection is right-clicked.
  */
 
 var CLICKED_RIGHT = 10;
+var STATES = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  IDLE: IDLE,
+  COLLAPSED: COLLAPSED,
+  START: START,
+  CHANGED: CHANGED,
+  UPDATE: UPDATE,
+  SELECTING: SELECTING,
+  EXTEND: EXTEND,
+  END: END,
+  SELECTED: SELECTED,
+  SELECTED_ALL: SELECTED_ALL,
+  CLICKED_RIGHT: CLICKED_RIGHT
+});
 /**
  * The offset amount for the horizontal position of the caret.
  *
@@ -1854,6 +1875,8 @@ var Caret = /*#__PURE__*/function (_Component2) {
   /**
    * Mounts the component.
    * Uses the native caret on IE and mobile devices.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -2021,16 +2044,23 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     /**
      * Indicates what row corresponds with the first line element.
      * The number can be negative.
+     *
+     * @readonly
      */
 
     _this6.start = 0;
     /**
-     * The number of lines for margin.
+     * The number of margin lines before and after visible lines.
+     * The total number of lines will be `margin * 2 + visibleLines`.
+     *
+     * @readonly
      */
 
     _this6.margin = MARGIN_LINES;
     /**
-     * The current offset amount from the top in pixel.
+     * The current offset amount from the top of the scroller element in pixel.
+     *
+     * @readonly
      */
 
     _this6.offsetY = 0;
@@ -2053,6 +2083,8 @@ var Chunk = /*#__PURE__*/function (_Component3) {
   }
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential editor elements.
    */
@@ -2624,7 +2656,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     this.emit(EVENT_CHUNK_MOVED, this);
   }
   /**
-   * Returns the focus or anchor boundary data which contains the line and the row index.
+   * Returns the focus or anchor boundary data object which contains the line element and the row index.
    *
    * @param focus - Determines whether to return the focus or anchor boundary data.
    *
@@ -2673,10 +2705,10 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     return line;
   }
   /**
-   * Updates HTML of elements with the latest lines.
+   * Updates HTML of elements with the latest HTML of lines.
    * If omitting elements, updates all elements in the chunk.
    *
-   * @param elms  - Optional. Elements to sync.
+   * @param elms  - Optional. Elements to update.
    * @param start - Optional. A start index that corresponds with the first element.
    */
   ;
@@ -2705,7 +2737,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
   }
   /**
    * Syncs difference of the number of lines before syncing each HTML for performance.
-   * If the diff length is greater than the margin, this method does nothing.
+   * If the `diff` length is greater than the `margin`, this method does nothing.
    *
    * @param row  - A row index.
    * @param diff - Difference of the number of lines before and after editing.
@@ -2787,7 +2819,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
   }
   /**
    * Returns the end index of the chunk lines.
-   * This may be greater than the total number of actual lines.
+   * This may be greater than the actual total number of lines.
    *
    * @return An end index of the chunk.
    */
@@ -3892,8 +3924,7 @@ var Lines = /*#__PURE__*/function (_AbstractArrayLike) {
     return _this8;
   }
   /**
-   * Inserts a new line at the specified row index.
-   * Be aware that inserting a lot of lines causes the fatal performance issue.
+   * Inserts a new empty Line instance or instances at the specified row.
    *
    * @param row   - A row index.
    * @param count - A number of lines to insert.
@@ -3910,7 +3941,7 @@ var Lines = /*#__PURE__*/function (_AbstractArrayLike) {
     }
   }
   /**
-   * Deletes a line or lines from the specified row.
+   * Deletes a Line instance or instances from the specified row.
    *
    * @param row   - A row index.
    * @param count - A number of lines to delete.
@@ -3921,7 +3952,7 @@ var Lines = /*#__PURE__*/function (_AbstractArrayLike) {
     this.splice(row, count);
   }
   /**
-   * Syncs lines with the provided code.
+   * Syncs Line instances with the provided code.
    *
    * @param row    - A row index where sync starts.
    * @param code   - Code to sync.
@@ -4217,6 +4248,8 @@ var Lines = /*#__PURE__*/function (_AbstractArrayLike) {
   }
   /**
    * Destroys the instance.
+   *
+   * @internal
    */
   ;
 
@@ -5450,6 +5483,8 @@ var Edit = /*#__PURE__*/function (_Component6) {
   /**
    * Initializes the component.
    *
+   * @internal
+   *
    * @param elements - A collection of essential editor elements.
    */
 
@@ -5749,6 +5784,8 @@ var Input = /*#__PURE__*/function (_Component7) {
   /**
    * Initialized the component.
    *
+   * @internal
+   *
    * @param elements - A collection of essential editor elements.
    */
   _proto14.mount = function mount(elements) {
@@ -5770,6 +5807,10 @@ var Input = /*#__PURE__*/function (_Component7) {
     this.bind(editable, 'compositionstart', this.onCompositionStart, this);
     this.bind(editable, 'compositionupdate', this.onCompositionUpdate, this);
     this.bind(editable, 'compositionend', this.onCompositionEnd, this);
+    this.on(EVENT_MOUNTED, function () {
+      _this22.line = _this22.Chunk.elms[0];
+      _this22.row = 0;
+    });
     this.on(EVENT_FOCUS_LINE_CHANGED, function (e, line, row) {
       _this22.line = line;
       _this22.row = row;
@@ -6025,6 +6066,15 @@ var Input = /*#__PURE__*/function (_Component7) {
   /**
    * Sets the input state.
    * If the state with the provided type exists, new props will be assigned to it.
+   * The props object accepts following values:
+   *
+   * - `key?`: The key that makes the input.
+   * - `startRow?`: The start row index to replace lines with the current value from.
+   * - `endRow?`: The end row index to replace lines with the current value to.
+   * - `value?`: The value to replace lines with. If omitted, the current value will be used.
+   * - `insertion?`: Specifies the value to insert at the caret position instead of setting the value.
+   * - `offset?`: The number of offset cols after the state is applied.
+   * - `position?`: Explicitly specifies the position after the state is applied. The `offset` will be ignored.
    *
    * @param type  - The type of the state.
    * @param props - Optional. An object with state values.
@@ -6047,7 +6097,9 @@ var Input = /*#__PURE__*/function (_Component7) {
     }
   }
   /**
-   * Returns the current state object.
+   * Returns the current state object if available.
+   *
+   * @return The current state object if available, or `null` if not.
    */
   ;
 
@@ -6055,7 +6107,24 @@ var Input = /*#__PURE__*/function (_Component7) {
     return this.state;
   }
   /**
-   * Applies the current input state to the editor.
+   * Applies the state to the editor and clears it.
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * ryuseiCode.on( 'focus', () => {
+   *   const { Input } = ryuseiCode.Editor.Components;
+   *
+   *   setTimeout( () => {
+   *     Input.apply( {
+   *       insertion: 'foo',
+   *       offset: 3,
+   *     } );
+   *   }, 1000 );
+   * } );
+   * ```
    *
    * @param state - Optional. A new state to apply.
    */
@@ -6091,22 +6160,6 @@ var Input = /*#__PURE__*/function (_Component7) {
     this.info = null;
   }
   /**
-   * Inserts a text at the current or specified index.
-   *
-   * @param text  - A text to insert.
-   * @param index - Optional. An index where the text is inserted.
-   */
-  ;
-
-  _proto14.insert = function insert(text, index) {
-    if (index === void 0) {
-      index = this.col;
-    }
-
-    var value = this.value;
-    this.value = value.slice(0, index) + text + value.slice(index);
-  }
-  /**
    * Returns a character at the current caret position or specified col index.
    *
    * @param col - Optional. A col index of the desired character.
@@ -6123,7 +6176,7 @@ var Input = /*#__PURE__*/function (_Component7) {
     return this.value.charAt(col);
   }
   /**
-   * Returns the value of the current line.
+   * Returns the value of the current line without the tailing line break.
    *
    * @return A text of the current line.
    */
@@ -6136,6 +6189,8 @@ var Input = /*#__PURE__*/function (_Component7) {
     }
     /**
      * Sets a new value to the current line.
+     * In most cases, it's better to use `apply()` to edit the line instead
+     * because this does not syncs the change to the editor.
      *
      * @param value - A new value to set.
      */
@@ -6199,6 +6254,8 @@ var Input = /*#__PURE__*/function (_Component7) {
     /**
      * Returns `true` if the input is disabled.
      *
+     * @internal
+     *
      * @return `true` if the input is disabled.
      */
 
@@ -6210,6 +6267,10 @@ var Input = /*#__PURE__*/function (_Component7) {
     /**
      * Makes the input disabled.
      * All keys are ignored while it is disabled.
+     *
+     * @internal
+     *
+     * @param disabled - Determines whether to disable or enable the input.
      */
     ,
     set: function set(disabled) {
@@ -6242,6 +6303,8 @@ var Keymap = /*#__PURE__*/function (_Component8) {
   }
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential elements.
    */
@@ -6307,7 +6370,7 @@ var Keymap = /*#__PURE__*/function (_Component8) {
     return action;
   }
   /**
-   * Checks if the keyboard event matches keys of the provided ID or not.
+   * Checks if the keyboard event matches keys of the provided action ID or not.
    *
    * @param e  - A KeyboardEvent object.
    * @param id - An ID.
@@ -6321,12 +6384,12 @@ var Keymap = /*#__PURE__*/function (_Component8) {
     return matchers && matchesKey(e, matchers);
   }
   /**
-   * Builds a shortcut that describes keys of the provided keymap ID or a KeyMatcher object.
-   * For example, `undo` or `[ 'Z', true ]` will be `Ctrl + Z`.
+   * Builds a shortcut string that describes keys of the provided action ID or a KeyMatcher object.
+   * For example, `undo` or `[ 'Z', true ]` will be `Ctrl+Z`.
    *
-   * @param id - An ID in a keymap or a KeyMatcher object.
+   * @param id - An action ID in the keymap or a KeyMatcher object line.
    *
-   * @return A built shortcut as a string.
+   * @return A built shortcut string. If the ID is not available, it returns an empty string.
    */
   ;
 
@@ -6544,11 +6607,12 @@ var Measure = /*#__PURE__*/function (_Component9) {
     this.rectCaches = {};
   }
   /**
-   * Returns a top position of the line at the provided row.
+   * Returns the top position of the line at the specified row.
+   * This clamps the row index from 0 and the total length of lines.
    *
    * @param row - A row index.
    *
-   * @return A top position in px.
+   * @return A top position in pixel.
    */
   ;
 
@@ -6556,11 +6620,12 @@ var Measure = /*#__PURE__*/function (_Component9) {
     return clamp(row, 0, this.lines.length - 1) * this.lineHeight;
   }
   /**
-   * Returns a bottom position of the line at the provided row.
+   * Returns the bottom position of the line at the specified row.
+   * This clamps the row index from 0 and the total length of lines.
    *
    * @param row - A row index.
    *
-   * @return A bottom position in px.
+   * @return A bottom position in pixel.
    */
   ;
 
@@ -6570,11 +6635,11 @@ var Measure = /*#__PURE__*/function (_Component9) {
     return this.getTop(row + 1) + (isLast ? this.lineHeight : 0);
   }
   /**
-   * Finds the closest row index with the provided position.
+   * Computes the closest row index to the offset `top` position.
    *
-   * @param top - A top position to search for.
+   * @param top - A offset position.
    *
-   * @return The closest row index.
+   * @return The closest row index to the offset position.
    */
   ;
 
@@ -6584,9 +6649,10 @@ var Measure = /*#__PURE__*/function (_Component9) {
   }
   /**
    * Measures the provided string and returns the width.
+   * This method caches each width of the character in the string for performance.
    *
    * @param string   - A string to measure.
-   * @param useCache - Optional. Determines whether to use the cached width or not..
+   * @param useCache - Optional. Determines whether to use the cached width or not.
    *
    * @return The width of the string.
    */
@@ -6600,7 +6666,7 @@ var Measure = /*#__PURE__*/function (_Component9) {
     return this.measureText.measure(string, useCache);
   }
   /**
-   * Converts the passed position to the BoundaryRect object.
+   * Converts the passed position to the OffsetPosition object as `{ top: number, left: number }`.
    *
    * @param position - A position to convert.
    *
@@ -6610,7 +6676,8 @@ var Measure = /*#__PURE__*/function (_Component9) {
 
   _proto17.getOffset = function getOffset(position) {
     var padding = this.padding;
-    var line = position[0] === this.Selection.focus[0] ? this.Input.value : this.Code.getLine(position[0]);
+    var line = position[0] === this.Selection.focus[0] ? this.Input.value : this.Code.getLine(position[0]); // console.log( line.slice( 0, position[ 1 ] ) );
+
     return {
       top: this.getTop(position[0]) + padding.top,
       left: this.measureWidth(line.slice(0, position[1])) + padding.left
@@ -6651,9 +6718,9 @@ var Measure = /*#__PURE__*/function (_Component9) {
       return this.rectCaches.container = this.rectCaches.container || rect(this.elements.container);
     }
     /**
-     * Returns the line height in px.
+     * Returns the editor line height in pixel.
      *
-     * @return Line height in px.
+     * @return The line height in pixel.
      */
 
   }, {
@@ -6985,6 +7052,8 @@ var Range = /*#__PURE__*/function (_Component10) {
   /**
    * Initializes the component.
    *
+   * @internal
+   *
    * @param elements - A collection of editor elements.
    */
 
@@ -7059,8 +7128,27 @@ var Range = /*#__PURE__*/function (_Component10) {
     return Chunk.includes(startRow) || Chunk.includes(endRow) || between(Chunk.start, startRow, endRow);
   }
   /**
-   * Registers ranges to the group and draw them as markers if they are inside viewport.
+   * Registers ranges to the group and draw them as markers.
+   * They will remain until they are explicitly cleared by the `clear()` method.
    * If `concat` is `true`, sequential ranges will be concatenated as a single range.
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { Range } = ryuseiCode.Editor.Components;
+   *
+   * Range.register( 'my-ranges', [
+   *   { start: [ 0, 0 ], end: [ 0, 5 ] },
+   *   { start: [ 1, 0 ], end: [ 1, 3 ] },
+   * ] );
+   *
+   * // Clear ranges after 2 seconds.
+   * setTimeout( () => {
+   *   Range.clear( 'my-ranges' );
+   * }, 2000 );
+   * ```
    *
    * @param group       - A group name.
    * @param ranges      - A range or ranges to draw.
@@ -7108,8 +7196,8 @@ var Range = /*#__PURE__*/function (_Component10) {
     this.observe();
   }
   /**
-   * Clears ranges and rendered markers in the specified group.
-   * If the group name is omitted, all ranges will be cleared.
+   * Clears ranges and rendered markers that belong to the specified group.
+   * If the group name is omitted, this method clears all ranges.
    *
    * @param group - Optional. A group name to clear.
    */
@@ -7132,8 +7220,7 @@ var Range = /*#__PURE__*/function (_Component10) {
     }
   }
   /**
-   * Clears ranges in the specified group.
-   * Rendered markers are not cleared.
+   * Clears ranges in the specified group, but rendered markers will remain.
    *
    * @param group - A group name to clear.
    */
@@ -7163,10 +7250,24 @@ var Scope = /*#__PURE__*/function (_Component11) {
   var _proto22 = Scope.prototype;
 
   /**
-   * Checks if the current start position is in the specified state or category.
-   * With a `!` prefix, this returns `true` if the position is NOT inside the scope.
+   * Checks if the current or specified position is in the specified state or category.
+   * With the `!` negating notation, this returns `true` if the position is NOT inside the scope.
    *
-   * @param names    - A name or names of scope.
+   * Note that the Lexer (RyuseiLight) determines states and categories.
+   *
+   * @example
+   * ```ts
+   * // Returns `true` if the caret is inside a comment.
+   * Scope.isIn( [ 'comment' ] );
+   *
+   * // Returns `true` if the caret is inside a "attr" state.
+   * Scope.isIn( [ '#attr' ] );
+   *
+   * // Returns `true` if the caret is not inside a comment and a string.
+   * Scope.isIn( [ '!comment', '!string' ] );
+   * ```
+   *
+   * @param names    - A name or an array with names of states and/or categories.
    * @param position - Optional. Specifies the position to check.
    *
    * @return `true` if the start position is inside the scope.
@@ -7182,10 +7283,10 @@ var Scope = /*#__PURE__*/function (_Component11) {
     return this.inState(states, position) && this.inCategory(categories, position);
   }
   /**
-   * Checks if the current start position is in the specified state or not.
-   * `!` is acceptable.
+   * Checks if the current or specified position is in the specified state or not.
+   * The `!` negating notation is acceptable.
    *
-   * @param states   - A state or state names.
+   * @param states   - A name or an array with names of states.
    * @param position - Optional. Specifies the position to check.
    */
   ;
@@ -7194,10 +7295,10 @@ var Scope = /*#__PURE__*/function (_Component11) {
     return this.inScope(states, false, position);
   }
   /**
-   * Checks if the current start position is in the specified category or not.
-   * `!` is acceptable.
+   * Checks if the current or specified position is in the specified category or not.
+   * The `!` negating notation is acceptable.
    *
-   * @param categories - A state or state names.
+   * @param categories - A name or an array with names of categories.
    * @param position   - Optional. Specifies the position to check.
    */
   ;
@@ -7274,11 +7375,17 @@ var DELAY_FOR_RESELECTION = 5;
  */
 
 var EventBus = /*#__PURE__*/function () {
-  function EventBus() {
+  /**
+   * The EventBus constructor.
+   *
+   * @param owner - Optional. The owner of the instance.
+   */
+  function EventBus(owner) {
     /**
      * Holds all handlers.
      */
     this.handlers = {};
+    this.owner = owner;
   }
   /**
    * Registers an event handler.
@@ -7365,7 +7472,8 @@ var EventBus = /*#__PURE__*/function () {
 
     var eventHandlers = this.handlers[event];
     var eventObject = {
-      type: event
+      type: event,
+      owner: this.owner
     };
 
     if (eventHandlers) {
@@ -7727,12 +7835,35 @@ var Selection = /*#__PURE__*/function (_Component12) {
 
     _this40 = _Component12.apply(this, arguments) || this;
     /**
-     * Keeps the position where the selection starts.
+     * The collection of selection states.
+     *
+     * | State | Description |
+     * |---|---|
+     * | `IDLE` | The editor is not active. |
+     * | `COLLAPSED` | The selection is collapsed. |
+     * | `START` | The selection will change soon. The native selection has not been updated at this timing. |
+     * | `CHANGED` | Fired every time when the tween is updated. |
+     * | `UPDATE` | The selection has just changed after the `START` state. The native selection has been updated. |
+     * | `SELECTING` | An user starts selecting texts. |
+     * | `EXTEND` | The existing selection is being extended. |
+     * | `END` | User finishes the selection. The native selection has not been updated at this timing (in FF). |
+     * | `SELECTED` | The selection is settled and it is not collapsed. |
+     * | `SELECTED_ALL` | All contents are selected. |
+     * | `CLICKED_RIGHT` | The selection is right-clicked. |
+     */
+
+    _this40.STATES = STATES;
+    /**
+     * The position where the selection starts.
+     *
+     * @readonly
      */
 
     _this40.anchor = ORIGIN;
     /**
-     * Keeps the position where the selection ends.
+     * The position where the selection ends.
+     *
+     * @readonly
      */
 
     _this40.focus = ORIGIN;
@@ -7740,6 +7871,8 @@ var Selection = /*#__PURE__*/function (_Component12) {
   }
   /**
    * Initializes the component.
+   *
+   * @internal
    *
    * @param elements - A collection of essential elements.
    */
@@ -7901,10 +8034,10 @@ var Selection = /*#__PURE__*/function (_Component12) {
     }
   }
   /**
-   * Sets the custom selection by changing the native selection.
+   * Sets a new selection.
    *
    * @param anchor - An anchor position.
-   * @param focus  - Optional. A focus position.
+   * @param focus  - Optional. A focus position. If omitted, the selection will be collapsed to the anchor.
    */
   ;
 
@@ -7953,11 +8086,10 @@ var Selection = /*#__PURE__*/function (_Component12) {
   }
   /**
    * Selects the current or specified line.
-   * This method sets the range twice for the backward selection.
    *
    * @param row       - Optional. A row index where to select.
-   * @param refresh   - Optional. Whether to refresh the current selection or not.
-   * @param backwards - Optional. Selects a line backwards.
+   * @param refresh   - Optional. Determines whether to refresh the current selection or not.
+   * @param backwards - Optional. Determines whether to select a line backwards or not.
    */
   ;
 
@@ -8014,7 +8146,7 @@ var Selection = /*#__PURE__*/function (_Component12) {
     this.state.hold();
   }
   /**
-   * Disables to hold the state.
+   * Disables to hold the state so that it will change.
    */
   ;
 
@@ -8023,7 +8155,7 @@ var Selection = /*#__PURE__*/function (_Component12) {
   }
   /**
    * Converts the selection to a string.
-   * An empty string will be returned when the selection is collapsed.
+   * This returns an empty string when the selection is collapsed.
    *
    * @return A string representing the current selection.
    */
@@ -8034,7 +8166,7 @@ var Selection = /*#__PURE__*/function (_Component12) {
     return this.Code.sliceRange(range.start, range.end);
   }
   /**
-   * Returns the DOMRect node of the native selection boundary.
+   * Returns the DOMRect object of the native selection boundary.
    * Note that the boundary node is usually a Text node,
    * but sometimes the line or the editable element.
    *
@@ -8071,7 +8203,7 @@ var Selection = /*#__PURE__*/function (_Component12) {
     return null;
   }
   /**
-   * Returns the current location as a string formatted by the i18n definition.
+   * Returns the current location as a string formatted by the i18n definition, such as `'Line: %s, Column: %s'`.
    *
    * @return A string that describes the current location.
    */
@@ -8085,6 +8217,15 @@ var Selection = /*#__PURE__*/function (_Component12) {
    * Checks if the selection state is one of the provided states or not.
    * This is just an alias of the `state.is()` method.
    *
+   * @example
+   * ```ts
+   * // Checks if the state is COLLAPSED or not:
+   * Selection.is( Selection.STATES.COLLAPSED );
+   *
+   * // Checks if the state is START, EXTEND or not:
+   * Selection.is( Selection.STATES.START, Selection.STATES.EXTEND );
+   * ```
+   *
    * @param states - A state or states to check.
    *
    * @return `true` if the current state is one of the provided states, or otherwise `false`.
@@ -8097,7 +8238,7 @@ var Selection = /*#__PURE__*/function (_Component12) {
     return (_this$state2 = this.state).is.apply(_this$state2, arguments);
   }
   /**
-   * Collapses the selection to anchor or focus position.
+   * Collapses the selection to the anchor or focus position.
    *
    * @param toFocus - Optional. Collapses the selection to the focus position.
    */
@@ -8137,22 +8278,12 @@ var Selection = /*#__PURE__*/function (_Component12) {
     return this.anchor[0] !== this.focus[0];
   }
   /**
-   * Checks if the editor is focused or not.
+   * Checks if the provided client position is inside the current selection or not.
    *
-   * @return `true` if the editor is focused, or otherwise `false`.
-   */
-  ;
-
-  _proto26.isFocused = function isFocused() {
-    return this.Editor && this.Editor.isFocused();
-  }
-  /**
-   * Checks if the provided client position is inside the current selection range or not.
+   * @param clientX - The X position that is relative to the client.
+   * @param clientY - The Y position that is relative to the client.
    *
-   * @param clientX - X position that is relative to the client.
-   * @param clientY - Y position that is relative to the client.
-   *
-   * @return `true` if the position is inside the range, or otherwise `false`.
+   * @return `true` if the position is inside the selection, or otherwise `false`.
    */
   ;
 
@@ -8161,6 +8292,8 @@ var Selection = /*#__PURE__*/function (_Component12) {
   }
   /**
    * Destroys the instance.
+   *
+   * @internal
    */
   ;
 
@@ -8408,6 +8541,16 @@ var Selection = /*#__PURE__*/function (_Component12) {
     } else {
       Input.disabled = false;
     }
+  }
+  /**
+   * Checks if the editor is focused or not.
+   *
+   * @return `true` if the editor is focused, or otherwise `false`.
+   */
+  ;
+
+  _proto26.isFocused = function isFocused() {
+    return this.Editor && this.Editor.isFocused();
   };
 
   return Selection;
@@ -8563,6 +8706,8 @@ var Style = /*#__PURE__*/function (_Component13) {
   /**
    * Initializes the component.
    *
+   * @internal
+   *
    * @param elements - A collection of essential editor elements.
    */
   ;
@@ -8577,11 +8722,14 @@ var Style = /*#__PURE__*/function (_Component13) {
     }
   }
   /**
-   * Adds a style to the specified selector.
+   * Adds styles to the specified selector.
+   * The `Editor#apply()` or `Editor#html()` applies the registered styles once,
+   * and therefore initial styles must be added before them.
+   * Otherwise, you should manually invoke the `apply()` method.
    *
    * @param selector - A selector string.
    * @param prop     - A CSS property or an objet literal with properties and values.
-   * @param value    - A value for the property.
+   * @param value    - Optional. A value for the property.
    */
   ;
 
@@ -8602,7 +8750,7 @@ var Style = /*#__PURE__*/function (_Component13) {
     }
   }
   /**
-   * Applies current styles to the style element.
+   * Applies registered styles to the style element.
    */
   ;
 
@@ -8611,6 +8759,8 @@ var Style = /*#__PURE__*/function (_Component13) {
   }
   /**
    * Destroys the component.
+   *
+   * @internal
    */
   ;
 
@@ -8670,14 +8820,37 @@ var Sync = /*#__PURE__*/function (_Component14) {
     return _this45;
   }
   /**
-   * Syncs the changes between the start and end rows to the Lines and View components.
-   * Since the `startRow` can be very far from the `row` when pasting huge code,
-   * syncs lines inaccurately by setting the `strict` to `false` at first,
-   * and then starts strict synchronization.
+   * Syncs changes between the start and end rows to other components.
    *
-   * @param startRow  - A start row index.
-   * @param endRow    - An end row index.
-   * @param jumpTo    - Optional. Jumps to the specified row before starting synchronization.
+   * @example
+   * Consider the following HTML as an example:
+   *
+   * ```html
+   * <pre>
+   * function message() {
+   *   console.log( 'hi' );
+   * }
+   * </pre>
+   * ```
+   *
+   * Let's attempt to modify the line 2 (the row index is `1`):
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code, Sync } = ryuseiCode.Editor.Components;
+   *
+   * // Only the Code component knows the change
+   * Code.replaceLines( 1, 1, `  console.warn( 'error' );\n` );
+   *
+   * // Syncs the change to other components
+   * Sync.sync( 1, 1 );
+   * ```
+   *
+   * @param startRow - A start row index.
+   * @param endRow   - An end row index.
+   * @param jumpTo   - Optional. Jumps to the specified row before starting synchronization.
    */
 
 
@@ -9321,6 +9494,8 @@ var View = /*#__PURE__*/function (_Component15) {
   /**
    * Initializes the instance.
    *
+   * @internal
+   *
    * @param elements - A collection of essential editor elements.
    */
 
@@ -9457,12 +9632,12 @@ var View = /*#__PURE__*/function (_Component15) {
     return Measure.editorRect.left - Measure.containerRect.left;
   }
   /**
-   * Jumps to the specified row if it's not visible in the viewport.
-   * If the `middle` is true, always jumps to the middle of the viewport.
+   * Jumps to the specified row if it's not visible in the scroller.
+   * If the `middle` is `true`, this method try to vertically center the target line.
    *
    * @param row        - A row index to jump to.
-   * @param middle     - Optional. Determines whether to jump to the middle of the viewport.
-   * @param lineOffset - Optional. A number of lines to offset top and bottom borders.
+   * @param middle     - Optional. Determines whether to jump to the middle of the viewport or not.
+   * @param lineOffset - Optional. A number of lines to offset.
    */
   ;
 
@@ -9495,7 +9670,7 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the width of the lines element.
+   * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
    */
   ;
 
@@ -9512,7 +9687,7 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the height of the container element so that it contains all lines.
+   * Adjusts the height of the container element so that it can contain all lines.
    * It won't be smaller than the scroller element when the editor has explicit height.
    *
    * @param skipLengthCheck - Optional. Whether to skip checking the number of lines or not.
@@ -9541,7 +9716,7 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Checks if the provided row is visible on the scroller or not.
+   * Checks if the specified row is visible in the scroller or not.
    *
    * @param row        - A row index to check.
    * @param lineOffset - Optional. A number of lines to offset top and bottom borders.
@@ -9573,6 +9748,8 @@ var View = /*#__PURE__*/function (_Component15) {
   }
   /**
    * Destroys the component.
+   *
+   * @internal
    */
   ;
 
@@ -9735,7 +9912,15 @@ var Editor = /*#__PURE__*/function () {
     }
 
     /**
-     * Holds Component instances.
+     * The collection of all core components.
+     *
+     * @readonly
+     *
+     * @example
+     * ```ts
+     * const ryuseiCode = new RyuseiCode();
+     * const { Selection } = ryuseiCode.Editor.Components;
+     * ```
      */
     this.Components = {};
     /**
@@ -9745,7 +9930,7 @@ var Editor = /*#__PURE__*/function () {
     this.Extensions = {};
     this.language = language;
     this.options = options;
-    this.event = new EventBus();
+    this.event = new EventBus(this);
     this.options.id = this.options.id || uniqueId(PROJECT_CODE);
     forOwn$1(CoreComponents, function (Component, name) {
       _this53.Components[name] = new Component(_this53);
@@ -9902,11 +10087,12 @@ var Editor = /*#__PURE__*/function () {
     }
   }
   /**
-   * Returns HTML of the editor.
-   * This may not contain all lines because IE can not render tons of HTML tags at the same time.
-   * The number of lines can be specified by options.
+   * Builds the HTML of the editor. This works without `document` and `window` objects,
+   * but has no functionality.
    *
-   * @param code   - A code string.
+   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
+   *
+   * @param code   - The code for the editor.
    * @param source - Optional. Whether to embed the source code into the editor or not.
    *
    * @return The HTML of the editor.
@@ -9919,7 +10105,12 @@ var Editor = /*#__PURE__*/function () {
     return new Renderer(Code, this.event, this.options).html(source);
   }
   /**
-   * Saves the content to the source element.
+   * Saves the content to the source element if available.
+   *
+   * For example, if you apply the editor to the empty `textarea` element,
+   * it remains empty even after you edit the code by the editor.
+   *
+   * This method applies back the change to the `textarea` element.
    */
   ;
 
@@ -9934,7 +10125,7 @@ var Editor = /*#__PURE__*/function () {
     }
   }
   /**
-   * Focuses to the editable area.
+   * Sets focus on the editor.
    *
    * @param reselect - Determines whether to reselect the last position or not.
    */
@@ -9960,7 +10151,15 @@ var Editor = /*#__PURE__*/function () {
     }
   }
   /**
-   * Attempts to invoke the method of the specified extension.
+   * Attempts to invoke the public method of the specified extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
+   *
+   * @example
+   * ```ts
+   * // Attempts to show the "search" toolbar.
+   * Editor.invoke( 'Toolbar', 'show', 'search' );
+   * ```
    *
    * @param name   - A name of the extension.
    * @param method - A method name to invoke.
@@ -9982,11 +10181,13 @@ var Editor = /*#__PURE__*/function () {
     }
   }
   /**
-   * Returns the extension of the specified name.
+   * Returns the extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
    *
    * @param name - A name of an extension.
    *
-   * @return An extension if found, or otherwise `undefined`.
+   * @return The specified extension if found, or otherwise `undefined`.
    */
   ;
 
@@ -9994,9 +10195,9 @@ var Editor = /*#__PURE__*/function () {
     return this.Extensions[name];
   }
   /**
-   * Checks if the editor is focused or not.
+   * Checks if the editor has focus or not.
    *
-   * @return `true` if the editor is focused, or otherwise `false`.
+   * @return `true` if the editor has focus, or otherwise `false`.
    */
   ;
 
@@ -10004,7 +10205,7 @@ var Editor = /*#__PURE__*/function () {
     return this.root.contains(activeElement());
   }
   /**
-   * Destroys the editor.
+   * Saves the final value to the source element and destroys the editor for releasing the memory.
    */
   ;
 
@@ -10026,9 +10227,9 @@ var Editor = /*#__PURE__*/function () {
     event.destroy();
   }
   /**
-   * Sets a new value to the editor.
+   * Sets a new value to the editor and resets the editor.
    *
-   * @param value - A value to set.
+   * @param value - A new value.
    */
   ;
 
@@ -10044,9 +10245,9 @@ var Editor = /*#__PURE__*/function () {
       return this.Components.Code.value;
     }
     /**
-     * Sets the width of the root element.
+     * Sets width of the root element.
      *
-     * @param width - Width to set as pixel or CSS styles.
+     * @param width - Width to set in pixel or in the CSS format, such as '50%'.
      */
     ,
     set: function set(value) {
@@ -10072,7 +10273,7 @@ var Editor = /*#__PURE__*/function () {
     /**
      * Returns the width of the editor in pixel.
      *
-     * @return The width of the editor.
+     * @return The width of the editor in pixel.
      */
     function get() {
       return this.root.clientWidth;
@@ -10080,7 +10281,7 @@ var Editor = /*#__PURE__*/function () {
     /**
      * Sets the height of the root element.
      *
-     * @param height - Height to set as pixel or CSS styles.
+     * @param height - Height to set in pixel or in the CSS format, such as '50%'.
      */
     ,
     set: function set(width) {
@@ -10102,6 +10303,7 @@ var Editor = /*#__PURE__*/function () {
     }
     /**
      * Makes the editor mutable or immutable.
+     * In the read-only mode, the primary caret gets hidden.
      *
      * @param readOnly - Whether to make the editor immutable or mutable.
      */
@@ -10116,9 +10318,9 @@ var Editor = /*#__PURE__*/function () {
     key: "readOnly",
     get:
     /**
-     * Indicates whether the editor is disabled or not.
+     * Indicates whether the editor is read-only or not.
      *
-     * @return - `true` if the input is read-only or `false` if not.
+     * @return - `true` if the editor is read-only or `false` if not.
      */
     function get() {
       return this._readOnly;
@@ -10275,7 +10477,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    * If the <code>apply()</code> method is called twice to the same element, it throws an error.
    * </div>
    *
-   * @param target - A selector or an element to apply the editor to.
+   * @param target - A selector to find the target element, or a target element itself.
    * @param code   - Optional. The code to overwrite the content of the target element.
    */
   ;
@@ -10289,9 +10491,9 @@ var RyuseiCode = /*#__PURE__*/function () {
    *
    * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
-   * @param code - Initial code.
+   * @param code - The code for the editor.
    *
-   * @return A HTML string for the editor.
+   * @return The HTML string for the editor.
    */
   ;
 
@@ -10355,7 +10557,7 @@ var RyuseiCode = /*#__PURE__*/function () {
     this.Editor.save();
   }
   /**
-   * Focuses to the editable area.
+   * Sets focus on the editor.
    *
    * @param reselect - Determines whether to reselect the last position or not.
    */
@@ -10395,7 +10597,7 @@ var RyuseiCode = /*#__PURE__*/function () {
     delete this.Editor;
   }
   /**
-   * Sets a new value to the editor and refreshes it.
+   * Sets a new value to the editor and resets the editor.
    *
    * @param value - A new value.
    */
@@ -14659,6 +14861,7 @@ exports.ActiveLine = ActiveLine;
 exports.AutoClose = AutoClose;
 exports.BracketMatching = BracketMatching;
 exports.Comment = Comment;
+exports.Component = Component;
 exports.Dialog = Dialog;
 exports.Extensions = index$1;
 exports.Guide = Guide;

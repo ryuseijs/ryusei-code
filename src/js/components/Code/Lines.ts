@@ -1,6 +1,7 @@
 import { Language, Options, Position, ScanResult, Token, TokenInfo, TokenMatcher } from '@ryusei/code';
 import { AbstractArrayLike } from '../../classes/AbstractArrayLike/AbstractArrayLike';
 import { LINE_BREAK } from '../../constants/characters';
+import { Editor } from '../../core/Editor/Editor';
 import { EventBus } from '../../event/EventBus';
 import { forOwn, isUndefined, max, min } from '../../utils';
 import { matchesToken } from '../../utils/token';
@@ -46,7 +47,7 @@ export class Lines extends AbstractArrayLike<Line> {
   /**
    * Holds the EventBus object.
    */
-  private readonly event: EventBus;
+  private readonly event: EventBus<Editor>;
 
   /**
    * The Lines constructor.
@@ -55,7 +56,7 @@ export class Lines extends AbstractArrayLike<Line> {
    * @param language - A Language object.
    * @param options  - Options.
    */
-  constructor( event: EventBus, language: Language, options: Options ) {
+  constructor( event: EventBus<Editor>, language: Language, options: Options ) {
     super();
 
     this.language = language;
@@ -64,8 +65,7 @@ export class Lines extends AbstractArrayLike<Line> {
   }
 
   /**
-   * Inserts a new line at the specified row index.
-   * Be aware that inserting a lot of lines causes the fatal performance issue.
+   * Inserts a new empty Line instance or instances at the specified row.
    *
    * @param row   - A row index.
    * @param count - A number of lines to insert.
@@ -79,7 +79,7 @@ export class Lines extends AbstractArrayLike<Line> {
   }
 
   /**
-   * Deletes a line or lines from the specified row.
+   * Deletes a Line instance or instances from the specified row.
    *
    * @param row   - A row index.
    * @param count - A number of lines to delete.
@@ -89,7 +89,7 @@ export class Lines extends AbstractArrayLike<Line> {
   }
 
   /**
-   * Syncs lines with the provided code.
+   * Syncs Line instances with the provided code.
    *
    * @param row    - A row index where sync starts.
    * @param code   - Code to sync.
@@ -370,6 +370,8 @@ export class Lines extends AbstractArrayLike<Line> {
 
   /**
    * Destroys the instance.
+   *
+   * @internal
    */
   destroy(): void {
     forOwn( this.timers, clearTimeout );

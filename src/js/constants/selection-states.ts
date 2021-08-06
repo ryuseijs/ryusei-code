@@ -34,7 +34,7 @@ export const SELECTING = 5;
 export const EXTEND = 6;
 
 /**
- * User finishes the selection. The native selection has not been updated at this timing (in FF).
+ * User finishes the selection. The native selection has not been updated at this timing (in Gecko).
  */
 export const END = 7;
 
