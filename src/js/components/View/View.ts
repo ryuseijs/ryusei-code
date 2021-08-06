@@ -203,7 +203,7 @@ export class View extends Component {
   }
 
   /**
-   * Adjusts the width of the viewport.
+   * Adjusts the width of the lines element.
    */
   autoWidth(): void {
     const { Measure } = this;
@@ -218,18 +218,24 @@ export class View extends Component {
   }
 
   /**
-   * Adjusts the height of the viewport.
+   * Adjusts the height of the container element so that it contains all lines.
+   * It won't be smaller than the scroller element when the editor has explicit height.
    *
    * @param skipLengthCheck - Optional. Whether to skip checking the number of lines or not.
    */
   autoHeight( skipLengthCheck?: boolean ): void {
+    const { elements } = this;
     const { length } = this.lines;
 
     if ( skipLengthCheck || length !== this.lastLength ) {
       const { Measure, Measure: { padding } } = this;
-      const height = Measure.lineHeight * ( length || 1 ) + padding.top + padding.bottom;
+      let height = Measure.lineHeight * ( length || 1 ) + padding.top + padding.bottom;
 
-      styles( this.elements.container, { height: unit( max( height, Measure.scrollerRect.height ) ) } );
+      if ( elements.root.style.height || this.options.height ) {
+        height = max( height, Measure.scrollerRect.height );
+      }
+
+      styles( this.elements.container, { height: unit( height ) } );
       this.lastLength = length;
 
       this.emit( EVENT_SCROLL_HEIGHT_CHANGED );

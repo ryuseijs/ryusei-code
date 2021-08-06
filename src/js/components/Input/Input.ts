@@ -240,18 +240,20 @@ export class Input extends Component {
    * Handles the backspace key.
    */
   private handleBackspace( e: KeyboardEvent ): void {
-    const { row } = this;
+    const { row, col } = this;
 
-    if ( this.col === 0 && row > 0 ) {
-      const prev = this.lines[ row - 1 ].text;
+    if ( col === 0 ) {
+      if ( row > 0 ) {
+        const prev = this.lines[ row - 1 ].text;
 
-      this.apply( {
-        type    : 'removePrev',
-        key     : 'Backspace',
-        value   : prev + this.value,
-        startRow: row - 1,
-        position: [ row - 1, prev.length ],
-      } );
+        this.apply( {
+          type    : 'removePrev',
+          key     : 'Backspace',
+          value   : prev + this.value,
+          startRow: row - 1,
+          position: [ row - 1, prev.length ],
+        } );
+      }
 
       prevent( e );
     }
@@ -319,7 +321,7 @@ export class Input extends Component {
 
   /**
    * Sets the input state.
-   * If the state with the provided type exists, new props will be assigne to it.
+   * If the state with the provided type exists, new props will be assigned to it.
    *
    * @param type  - The type of the state.
    * @param props - Optional. An object with state values.

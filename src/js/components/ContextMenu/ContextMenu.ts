@@ -281,8 +281,65 @@ export class ContextMenu extends UIComponent<ContextMenuGroupData> {
   /**
    * Registers a menu item or items.
    *
-   * @param group - A group ID. If it does not exist, a new group will be generated.
-   * @param list  - A list ID.
+   * @example
+   *
+   * Registers a new item to the "edit" list in the "main" context menu:
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { ContextMenu } = ryuseiCode.Editor.Components;
+   *
+   * ContextMenu.register( 'main', 'edit', {
+   *   id  : 'myButton',
+   *   html: 'Click Me',
+   *   click() {
+   *     console.log( 'Clicked! );
+   *   },
+   * } );
+   * ```
+   *
+   * Registers a new list and items to the the "main" context menu:
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { ContextMenu } = ryuseiCode.Editor.Components;
+   *
+   * ContextMenu.register( 'main', 'my-list', [
+   *   {
+   *     id  : 'button1',
+   *     html: 'Button 1',
+   *     click() {
+   *       console.log( 'You clicked the Button 1' );
+   *     },
+   *   },
+   *   {
+   *     id  : 'button2',
+   *     html: 'Button 2',
+   *     click() {
+   *       console.log( 'You clicked the Button 2' );
+   *     },
+   *   },
+   * ] );
+   * ```
+   *
+   * Registers a new group:
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { ContextMenu } = ryuseiCode.Editor.Components;
+   *
+   * ContextMenu.register( 'my-context-menu', 'my-list', [
+   *   ...
+   * ] );
+   *
+   * ContextMenu.show( 'my-context-menu' );
+   * ```
+   *
+   * @param group    - A group ID. If it does not exist, a new group will be generated.
+   * @param list     - A list ID.
    * @param settings - An menu item or items.
    */
   register( group: string, list: string, settings: ContextMenuButtonSettings[] ): void {
@@ -308,7 +365,7 @@ export class ContextMenu extends UIComponent<ContextMenuGroupData> {
   }
 
   /**
-   * Displays the context menu.
+   * Displays the specified context menu.
    *
    * @param group - A group ID.
    */

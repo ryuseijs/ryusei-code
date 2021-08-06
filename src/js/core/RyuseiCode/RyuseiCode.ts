@@ -21,9 +21,27 @@ export class RyuseiCode {
   private static Extensions: Partial<Extensions> = {};
 
   /**
-   * Registers languages.
+   * Registers a language or languages.
    *
-   * @param languages - A language object or objects.
+   * @example
+   * ```js
+   * import { RyuseiCode, javascript, html } from '@ryusei/code';
+   *
+   * RyuseiLight.register( javascript() );
+   *
+   * // Or pass an array:
+   * RyuseiLight.register( [ javascript(), html() ] );
+   * ```
+   *
+   * If you want to register all languages the `languages` object is helpful:
+   *
+   * ```js
+   * import { RyuseiCode, languages } from '@ryusei/code';
+   *
+   * RyuseiLight.register( Object.values( languages ).map( lang => lang() ) );
+   * ```
+   *
+   * @param languages - A Language object or an array with objects.
    */
   static register( languages: Language | Language[] ): void {
     toArray( languages ).forEach( language => {
@@ -39,6 +57,21 @@ export class RyuseiCode {
 
   /**
    * Registers extensions.
+   *
+   * @example
+   * ```js
+   * import { RyuseiCode, ActiveLine, History } from '@ryusei/code';
+   *
+   * RyuseiLight.register( { ActiveLine, History } );
+   * ```
+   *
+   * If you want to compose all extensions, the `Extensions` object is helpful:
+   *
+   * ```js
+   * import { RyuseiCode, Extensions } from '@ryusei/code';
+   *
+   * RyuseiLight.register( Extensions );
+   * ```
    *
    * @param extensions - An object literal with extensions.
    */
@@ -62,17 +95,17 @@ export class RyuseiCode {
   }
 
   /**
-   * Holds options.
+   * An object with all options.
    */
   options: Options;
 
   /**
-   * Holds the Editor instance.
+   * The Editor instance.
    */
   Editor: Editor;
 
   /**
-   * Holds the language object.
+   * The Language object.
    */
   language: Language;
 
@@ -109,7 +142,22 @@ export class RyuseiCode {
   }
 
   /**
-   * Applies the editor to the target element.
+   * Applies the editor to the specified target element.
+   *
+   * @example
+   * ```js
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * // or
+   * const textarea = document.querySelector( 'textarea' );
+   * ryuseiCode.apply( textarea )
+   * ```
+   *
+   * <div class="caution">
+   * The instance can not have multiple targets.
+   * If the <code>apply()</code> method is called twice to the same element, it throws an error.
+   * </div>
    *
    * @param target - A selector or an element to apply the editor to.
    * @param code   - Optional. The code to overwrite the content of the target element.
@@ -119,7 +167,10 @@ export class RyuseiCode {
   }
 
   /**
-   * Returns a HTML string for the editor.
+   * Builds the HTML of the editor. This works without `document` and `window` objects,
+   * but has no functionality.
+   *
+   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
    * @param code - Initial code.
    *
@@ -132,24 +183,51 @@ export class RyuseiCode {
   /**
    * Attaches an event handler to the editor event or events.
    *
-   * @param events   - An event name or names separated by spaces. Use a dot(.) to add a namespace.
+   * ```js
+   * // ke is the native KeyboardEvent object
+   * ryuseiCode.on( 'keydown', ( e, ke ) => {
+   *   console.log( ke.key );
+   * } );
+   *
+   * // With a namespace:
+   * ryuseiCode.on( 'keydown.myNamespace', ( e, ke ) => {
+   *   console.log( ke.key );
+   * } );
+   * ```
+   *
+   * @param events   - An event name or names separated by spaces, or an array with event names.
+   *                   Use a dot(.) to add a namespace.
    * @param callback - A callback function.
    */
-  on( events: string, callback: EventBusCallback ): void {
+  on( events: string | string[], callback: EventBusCallback ): void {
     this.Editor.event.on( events, callback );
   }
 
   /**
    * Detaches an event handler registered by `on()`.
    *
-   * @param events - An event name or names separated by spaces. Use a dot(.) to add a namespace.
+   * ```js
+   * // Detach all handlers:
+   * ryuseiCode.off( 'keydown' );
+   *
+   * // Detach handlers only in the namespace:
+   * ryuseiCode.off( 'keydown.myNamespace' );
+   * ```
+   *
+   * @param events - An event name or names separated by spaces, or or an array with event names.
+   *                 Use a dot(.) to add a namespace.
    */
-  off( events: string ): void {
+  off( events: string | string[] ): void {
     this.Editor.event.off( events );
   }
 
   /**
-   * Saves the content to the source element.
+   * Saves the content to the source element if available.
+   *
+   * For example, if you apply the editor to the empty `textarea` element,
+   * it remains empty even after you edit the code by the editor.
+   *
+   * This method applies back the change to the `textarea` element.
    */
   save(): void {
     this.Editor.save();
@@ -167,7 +245,7 @@ export class RyuseiCode {
   /**
    * Sets the caret position or selection range.
    *
-   * @param start - A start position as [ row, col ];
+   * @param start - A start position as `[ row, col ]`.
    * @param end   - Optional. An end position. If omitted, the selection will be collapsed to the start.
    */
   setRange( start: Position, end?: Position ): void {
@@ -184,8 +262,7 @@ export class RyuseiCode {
   }
 
   /**
-   * Destroys the code editor and releases the memory.
-   * The final value is applied to the source element.
+   * Saves the final value to the source element and destroys the editor for releasing the memory.
    */
   destroy(): void {
     this.Editor.destroy();
@@ -193,18 +270,18 @@ export class RyuseiCode {
   }
 
   /**
-   * Sets the new value to the editor.
+   * Sets a new value to the editor and refreshes it.
    *
-   * @return The current code.
+   * @param value - A new value.
    */
-  set value( code: string ) {
-    this.Editor.value = code;
+  set value( value: string ) {
+    this.Editor.value = value;
   }
 
   /**
-   * Returns the current code as a string.
+   * Returns the current value as a string.
    *
-   * @return The current code.
+   * @return The current value.
    */
   get value(): string {
     return this.Editor.value;

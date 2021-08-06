@@ -81,7 +81,7 @@ export class Caret extends Component {
       primary.hide();
     } );
 
-    this.update = rafThrottle( this.update.bind( this ) );
+    this.update = rafThrottle( this.update.bind( this ), true );
 
     this.on( EVENT_READONLY, ( e, readOnly ) => {
       if ( readOnly ) {
@@ -122,9 +122,9 @@ export class Caret extends Component {
   /**
    * Registers a new caret.
    *
-   * @param id - An ID for the caret to register.
+   * @param id - The ID for the caret to register.
    *
-   * @return A registered Caret instance.
+   * @return The registered CustomCaret instance.
    */
   register( id: string ): CustomCaret {
     const { carets } = this;
@@ -137,18 +137,18 @@ export class Caret extends Component {
   }
 
   /**
-   * Returns the primary or the particular caret.
+   * Returns the primary or the specific CustomCaret instance.
    *
    * @param id - Optional. A caret ID.
    *
-   * @return A Caret instance if available, or otherwise `undefined`.
+   * @return A CustomCaret instance if available, or otherwise `undefined`.
    */
   get( id = PRIMARY_CARET_ID ): CustomCaret | undefined {
     return this.carets[ id ];
   }
 
   /**
-   * Returns the DOMRect object of the native caret.
+   * Returns the DOMRect object of the primary caret.
    *
    * @return A DOMRect object.
    */

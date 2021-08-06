@@ -32,12 +32,14 @@ export class Code extends Component {
   protected sizeCache: number;
 
   /**
-   * Holds the Lines instance.
+   * The Lines instance.
    */
   Lines: Lines;
 
   /**
    * Sets a new value.
+   *
+   * @internal
    *
    * @param value - A new value.
    */
@@ -87,21 +89,21 @@ export class Code extends Component {
   }
 
   /**
-   * Returns a text at the row index.
+   * Returns the code at the row index.
    *
-   * @param row - A row to search for.
+   * @param row - A row index.
    *
-   * @return A line text.
+   * @return The text of the line at the specified row.
    */
   getLine( row: number ): string {
     return row < this.size ? this.sliceLines( row, row ) : '';
   }
 
   /**
-   * Slices a text by the specified row range.
+   * Slices the code by the specified row range.
    *
    * @param startRow - A start row index to start slicing a text.
-   * @param endRow   - An end row index to start slicing a text.
+   * @param endRow   - An end row index to end slicing a text.
    *
    * @return A sliced text.
    */
@@ -112,10 +114,10 @@ export class Code extends Component {
   }
 
   /**
-   * Slices a text by the specified position range.
+   * Slices the code by the specified position range.
    *
    * @param start - A start position to start slicing a text.
-   * @param end   - Optional. An end position to start slicing a text.
+   * @param end   - Optional. An end position to end slicing a text.
    *
    * @return A sliced text.
    */
@@ -139,7 +141,7 @@ export class Code extends Component {
   }
 
   /**
-   * Replaces a text in a specified range by the replacement text.
+   * Replaces the code in a specified range by the replacement text.
    *
    * @param start       - A start position.
    * @param end         - An end position.
@@ -226,6 +228,8 @@ export class Code extends Component {
 
   /**
    * Destroys the component.
+   *
+   * @internal
    */
   destroy(): void {
     if ( this.Lines ) {

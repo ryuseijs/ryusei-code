@@ -60,7 +60,7 @@ export class CustomCaret {
   }
 
   /**
-   * Sets the position of the caret.
+   * Moves the caret to the specified position.
    *
    * @param position - A position to set as [ row, col ].
    */

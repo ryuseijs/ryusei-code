@@ -78,7 +78,7 @@ export class Chunk extends Component {
   visibleLines: number;
 
   /**
-   * The current offset amount in pixel.
+   * The current offset amount from the top in pixel.
    */
   offsetY = 0;
 
@@ -624,7 +624,32 @@ export class Chunk extends Component {
   }
 
   /**
-   * Returns the focus or anchor boundary data.
+   * Jumps to the specified row index.
+   * Use `View#jump()` instead if you want to scroll to the specific line.
+   *
+   * @param row - A row to jump to.
+   */
+  private jump( row: number ): void {
+    const { Measure, length } = this;
+    const { padding: { top: paddingTop }, lineHeight } = Measure;
+    const offsetRows = ceil( paddingTop / lineHeight );
+
+    this.start   = clamp( row - offsetRows, 0, max( this.lines.length - length + this.margin, 0 ) );
+    this.offsetY = Measure.getTop( this.start );
+
+    const elms = this.detach( 0 );
+
+    elms[ 0 ].insertAdjacentHTML( 'afterend', this.html( this.start, length ) );
+    remove( elms );
+
+    this.offset();
+    this.attach();
+
+    this.emit( EVENT_CHUNK_MOVED, this );
+  }
+
+  /**
+   * Returns the focus or anchor boundary data which contains the line and the row index.
    *
    * @param focus - Determines whether to return the focus or anchor boundary data.
    *
@@ -638,6 +663,8 @@ export class Chunk extends Component {
    * Manually adds preserved line.
    * This method should be only used by the Selection component.
    * Note that the `changed` event will be emitted by the `activate` method.
+   *
+   * @internal
    *
    * @param focus - Determines whether to add a focus or anchor line.
    * @param row   - A row index.
@@ -666,10 +693,11 @@ export class Chunk extends Component {
   }
 
   /**
-   * Updates HTML of elements by current lines.
+   * Updates HTML of elements with the latest lines.
+   * If omitting elements, updates all elements in the chunk.
    *
-   * @param elms  - Elements to sync.
-   * @param start - A start index.
+   * @param elms  - Optional. Elements to sync.
+   * @param start - Optional. A start index that corresponds with the first element.
    */
   sync( elms = this.elms, start = this.start ): void {
     for ( let i = 0; i < elms.length; i++ ) {
@@ -707,7 +735,7 @@ export class Chunk extends Component {
   }
 
   /**
-   * Updates the position and contents of line elements.
+   * Refreshes the chunk.
    */
   refresh(): void {
     this.moveDown();
@@ -715,32 +743,10 @@ export class Chunk extends Component {
   }
 
   /**
-   * Makes the chunk jump to the specified row index.
-   *
-   * @param row - A row to jump to.
-   */
-  jump( row: number ): void {
-    const { Measure, length } = this;
-    const { padding: { top: paddingTop }, lineHeight } = Measure;
-    const offsetRows = ceil( paddingTop / lineHeight );
-
-    this.start   = clamp( row - offsetRows, 0, max( this.lines.length - length + this.margin, 0 ) );
-    this.offsetY = Measure.getTop( this.start );
-
-    const elms = this.detach( 0 );
-
-    elms[ 0 ].insertAdjacentHTML( 'afterend', this.html( this.start, length ) );
-    remove( elms );
-
-    this.offset();
-    this.attach();
-
-    this.emit( EVENT_CHUNK_MOVED, this );
-  }
-
-  /**
    * Scrolls to the specified top position
    * and manually calls the `onScroll` handler for succeeding synchronous processes.
+   *
+   * @internal
    *
    * @param scrollTop - A scroll position.
    */
@@ -754,7 +760,7 @@ export class Chunk extends Component {
    *
    * @param elm - A line element.
    *
-   * @return The row index if available, or otherwise -1.
+   * @return The row index of the line element if available, or otherwise `-1`.
    */
   getRow( elm: HTMLElement ): number {
     const row = this.elms.indexOf( elm );
@@ -794,18 +800,18 @@ export class Chunk extends Component {
   }
 
   /**
-   * Returns the number of chunk lines without preserved lines.
+   * Returns the number of chunk lines without preserved ones.
    *
-   * @return A number of elements.
+   * @return A number of line elements in the chunk.
    */
   get length(): number {
     return this.visibleLines + this.margin * 2;
   }
 
   /**
-   * Returns chunk lines without preserved lines.
+   * Returns chunk lines without preserved ones.
    *
-   * @return An array containing chunk line elements.
+   * @return An array containing line elements in the chunk.
    */
   get elms(): Element[] {
     return slice( queryAll( this.parent, `.${ CLASS_LINE }:not(.${ CLASS_PRESERVED })` ) );
@@ -816,7 +822,7 @@ export class Chunk extends Component {
    *
    * @return A tuple containing top and bottom borders.
    */
-  get border(): [ number, number ] {
+  protected get border(): [ number, number ] {
     if ( ! this.borderCache ) {
       const domRect = rect( this.scroller );
       const top     = max( domRect.top, 0 );

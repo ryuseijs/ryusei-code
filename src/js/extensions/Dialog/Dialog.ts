@@ -76,6 +76,8 @@ export class Dialog extends UIComponent<DialogGroupData> {
 
   /**
    * Called when the general confirm button is clicked.
+   *
+   * @internal
    */
   confirm(): void {
     this.emit( `dialog:${ this.group }:confirmed`, this );
@@ -83,12 +85,43 @@ export class Dialog extends UIComponent<DialogGroupData> {
   }
 
   /**
-   * Registers a group to the UI.
+   * Registers a new dialog.
+   * Use `message()` instead just for showing a message.
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * const Dialog     = ryuseiCode.Editor.require( 'Dialog' );
+   *
+   * // The Dialog extension may not exist.
+   * if ( Dialog ) {
+   *   const body = document.createElement( 'p' );
+   *   body.textContent = 'Hello!';
+   *   Dialog.register( 'sample', body, 'Sample Dialog', [ 'confirm' ] );
+   *   Dialog.show( 'sample' );
+   * }
+   * ```
+   *
+   * If you want to add custom buttons, pass an array with button settings to the `buttons`.
+   *
+   * ```ts
+   * const settings = [
+   *   {
+   *     id: 'myButton',
+   *     html: 'Click Me',
+   *     click() {
+   *       console.log( 'Clicked!' );
+   *     },
+   *   }
+   * ];
+   *
+   * Dialog.register( 'sample', body, 'Sample Dialog', settings );
+   * ```
    *
    * @param group   - A group ID.
-   * @param elm     - An element to register.
-   * @param title   - The title of the dialog.
-   * @param buttons - The title of the dialog.
+   * @param elm     - An element to display as a dialog body.
+   * @param title   - A title of a dialog.
+   * @param buttons - Optional. General button names, `'confirm'`, `'cancel'`, or objects with button settings.
    */
   register(
     group: string,
@@ -123,9 +156,9 @@ export class Dialog extends UIComponent<DialogGroupData> {
   }
 
   /**
-   * Opens the dialog.
+   * Opens the specified dialog. The dialog must be registered by `register()` before opening it.
    *
-   * @param group - A dialog ID.
+   * @param group - A dialog ID to open.
    */
   show( group: string ): void {
     this.hide();
@@ -139,7 +172,7 @@ export class Dialog extends UIComponent<DialogGroupData> {
   }
 
   /**
-   * Closes the dialog.
+   * Closes the dialog which is visible now. Nothing will happen when there is no shown dialog.
    */
   hide(): void {
     if ( this.isActive() ) {
@@ -154,10 +187,10 @@ export class Dialog extends UIComponent<DialogGroupData> {
   }
 
   /**
-   * Displays a message with the common dialog.
+   * Displays a message with a common dialog. No registration required.
    *
-   * @param message - A message.
-   * @param title   - Optional. A title.
+   * @param message - A message to display.
+   * @param title   - Optional. A title of a dialog. If omitted, uses the `notice` in the `i18n` collection.
    */
   message( message: string, title?: string ): void {
     const data = this.groups[ COMMON_DIALOG_GROUP ];

@@ -13,7 +13,7 @@ describe( 'View#jump()', () => {
   }
 
   beforeEach( () => {
-    Chunk.jump( 0 );
+    View.jump( 0 );
     scroller.scrollTop = 0;
   } );
 
@@ -22,15 +22,6 @@ describe( 'View#jump()', () => {
 
     View.jump( 99, false, 0 );
     expect( scroller.scrollTop ).toBe( LINE_HEIGHT * ( 100 - linesPerView ) );
-  } );
-
-  test( 'can scroll the scroller so that the specified row is contained in the top of the view', () => {
-    mockIsVisible( false );
-    // Force to move the chunk to update the start property.
-    Chunk.jump( 999 );
-
-    View.jump( 99, false, 0 );
-    expect( scroller.scrollTop ).toBe( LINE_HEIGHT * ( 100 - 1 ) ); // 1 means the line itself
   } );
 
   test( 'can jump to the specified row with vertically centering the line.', () => {

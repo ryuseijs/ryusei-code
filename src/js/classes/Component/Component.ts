@@ -158,6 +158,15 @@ export class Component {
   }
 
   /**
+   * Called when the editor is destroyed.
+   *
+   * @internal
+   */
+  destroy(): void {
+    off( null, '', this );
+  }
+
+  /**
    * Attaches an event handler with passing this instance as a key.
    * All handlers can only be detached by the `off()` method below.
    *
@@ -166,7 +175,7 @@ export class Component {
    * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
    * @param priority - Optional. A priority number for the order in which the callbacks are invoked.
    */
-  on<F extends EventBusCallback>(
+  protected on<F extends EventBusCallback>(
     events: string | string[],
     callback: EventBusCallback,
     thisArg?: ThisParameterType<F>,
@@ -180,7 +189,7 @@ export class Component {
    *
    * @param events - An event name or names.
    */
-  off( events: string | string[] ): void {
+  protected off( events: string | string[] ): void {
     this.event.off( events, this );
   }
 
@@ -190,7 +199,7 @@ export class Component {
    * @param event - An event name.
    * @param args  - Optional. Any number of arguments to pass to callback functions.
    */
-  emit( event: string, ...args: any[] ): void {
+  protected emit( event: string, ...args: any[] ): void {
     this.event.emit( event, ...args );
   }
 
@@ -203,7 +212,7 @@ export class Component {
    * @param callback - A callback function.
    * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
    */
-  bind<F extends ( e: Event ) => void>(
+  protected bind<F extends ( e: Event ) => void>(
     elm: Document | Window | Element,
     events: string,
     callback: F,
@@ -219,7 +228,7 @@ export class Component {
    *
    * @return A main Language object or sub language config object.
    */
-  getLanguage( position?: Position ): Language | LanguageConfig {
+  protected getLanguage( position?: Position ): Language | LanguageConfig {
     position = position || this.Selection.get().start;
 
     const { language } = this;
@@ -230,13 +239,6 @@ export class Component {
     }
 
     return language;
-  }
-
-  /**
-   * Called when the editor is destroyed.
-   */
-  destroy(): void {
-    off( null, '', this );
   }
 
   /**
@@ -330,9 +332,9 @@ export class Component {
   }
 
   /**
-   * Returns the current i18n collection.
+   * Returns the i18n collection.
    *
-   * @return An object with i18n strings.
+   * @return The object with i18n strings.
    */
   get i18n(): Record<string, string> {
     return this.options.i18n;
