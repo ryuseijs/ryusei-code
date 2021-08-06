@@ -24,11 +24,13 @@ describe( 'View#autoHeight()', () => {
   } );
 
 
-  test( 'should not make the editor height smaller than the scroller element.', () => {
-    refresh( Editor, generate( 1 ) );
+  test( 'should not make the editor height smaller than the scroller when the root has explicit height.', () => {
+    const Editor = init( generate( 1 ), { height: 100 } );
+    const { View } = Editor.Components;
+
     View.autoHeight();
 
-    expect( container.style.height ).toBe( `${ EDITOR_HEIGHT }px` );
+    expect( Editor.elements.container.style.height ).toBe( `${ EDITOR_HEIGHT }px` );
   } );
 
   test( 'should emit the event when the height is changed.', done => {

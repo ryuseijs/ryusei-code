@@ -38,7 +38,7 @@ export class Toolbar extends UIComponent<ToolbarGroupData> {
     this.body = div( CLASS_TOOLBAR_BODY, wrapper );
 
     append( div( CLASS_TOOLBAR_UI, wrapper ), close );
-    prepend( elements.root, wrapper );
+    prepend( elements.view, wrapper );
 
     this.wrapper = wrapper;
   }

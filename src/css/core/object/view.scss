@@ -1,0 +1,17 @@
+@use '../foundation/colors';
+
+$background: colors.$dark01 !default;
+
+.ryuseicode {
+  &__view {
+    background: $background;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: inherit;
+    min-height: inherit;
+    overflow: hidden;
+    position: relative;
+    z-index: 0;
+  }
+}

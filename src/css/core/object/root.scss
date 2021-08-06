@@ -5,10 +5,7 @@ $color: colors.$light02 !default;
 $background: colors.$dark01 !default;
 
 .ryuseicode {
-  background: $background;
   color: colors.$text01;
-  display: flex;
-  flex-direction: column;
   font-family: typography.$font-family;
   font-size: typography.$font-size;
   letter-spacing: 0;

@@ -12,6 +12,7 @@ import {
   CLASS_ROOT,
   CLASS_SCROLLER,
   CLASS_SOURCE,
+  CLASS_VIEW,
 } from '../../constants/classes';
 import { EventBus } from '../../event/EventBus';
 import { assign, min, repeat, tag } from '../../utils';
@@ -88,6 +89,7 @@ export class Renderer {
 
     const divs: [ string, string[], Attributes? ][] = [
       [ 'root', classes, { id, role: 'code' } ],
+      [ 'view', [ CLASS_VIEW ].concat( options.viewClasses ) ],
       [ 'body', [ CLASS_BODY ] ],
       [ 'scroller', [ CLASS_SCROLLER ] ],
       [ 'container', [ CLASS_CONTAINER ] ],

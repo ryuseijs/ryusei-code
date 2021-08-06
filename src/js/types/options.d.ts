@@ -19,7 +19,12 @@ declare module '@ryusei/code' {
     /**
      * Classes for the root element.
      */
-    rootClasses?: string | string[]
+    rootClasses?: string | string[];
+
+    /**
+     * Classes for the view element.
+     */
+    viewClasses?: string | string[]
 
     /**
      * A placeholder to display when the editor is empty.

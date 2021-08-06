@@ -3,7 +3,7 @@ import { EDITOR_HEIGHT, generate, init, LINE_HEIGHT } from '../../../test';
 
 describe( 'View#jump()', () => {
   const Editor = init( generate( 1000 ) );
-  const { View, Chunk } = Editor.Components;
+  const { View } = Editor.Components;
   const { scroller } = Editor.elements;
   const linesPerView = EDITOR_HEIGHT / LINE_HEIGHT;
 

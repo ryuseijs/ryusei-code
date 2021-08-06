@@ -15,6 +15,7 @@ import {
   CLASS_READONLY,
   CLASS_RENDERED,
   CLASS_SCROLLER,
+  CLASS_VIEW,
 } from '../../constants/classes';
 import {
   EVENT_BLUR,
@@ -187,6 +188,7 @@ export class Editor {
       editor,
       lines,
       editable  : lines,
+      view      : query<HTMLDivElement>( root, `.${ CLASS_VIEW }` ),
       body      : query<HTMLDivElement>( root, `.${ CLASS_BODY }` ),
       scroller  : query<HTMLDivElement>( root, `.${ CLASS_SCROLLER }` ),
       container : query<HTMLDivElement>( root, `.${ CLASS_CONTAINER }` ),

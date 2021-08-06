@@ -3,11 +3,10 @@
 
   &__scroller {
     box-sizing: border-box;
+    height: 100%;
     max-height: inherit;
     min-height: inherit;
     overflow: hidden;
-
-    // For IE
     -ms-overflow-style: none;
     position: relative;
     width: 100%;

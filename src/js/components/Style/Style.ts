@@ -52,7 +52,7 @@ export class Style extends Component {
 
     this.init();
 
-    this.on( 'body:open', ( e, append ) => {
+    this.on( 'view:open', ( e, append ) => {
       this.emit( EVENT_INIT_STYLE, this.add.bind( this ) );
       append( `<style id="${ this.options.id }-style">${ this.build() }</style>` );
     } );

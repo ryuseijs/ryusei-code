@@ -2,6 +2,7 @@ import { PROJECT_CODE } from './project';
 
 
 export const CLASS_ROOT                  = PROJECT_CODE;
+export const CLASS_VIEW                  = `${ PROJECT_CODE }__view`;
 export const CLASS_BODY                  = `${ PROJECT_CODE }__body`;
 export const CLASS_SCROLLER              = `${ PROJECT_CODE }__scroller`;
 export const CLASS_CONTAINER             = `${ PROJECT_CODE }__container`;

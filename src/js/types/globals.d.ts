@@ -30,7 +30,12 @@ declare module '@ryusei/code' {
     root: HTMLElement;
 
     /**
-     * A body element that contains elements without the toolbar.
+     * A view element for clipping the overflowed contents.
+     */
+    view: HTMLDivElement;
+
+    /**
+     * A body element that contains scroller and scrollbars.
      */
     body: HTMLDivElement;
 

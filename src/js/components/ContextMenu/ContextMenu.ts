@@ -34,6 +34,7 @@ import {
   normalizeKey,
   prevent,
   queryAll,
+  rect,
   styles,
   text,
   unit,
@@ -192,8 +193,9 @@ export class ContextMenu extends UIComponent<ContextMenuGroupData> {
    * @param clientY - A client y coordinate.
    */
   private move( clientX: number, clientY: number ): void {
-    const { wrapper, wrapper: { clientWidth }, Measure: { scrollerRect } } = this;
+    const { wrapper, wrapper: { clientWidth } } = this;
     const { documentElement } = document;
+    const rootRect = rect( this.elements.root );
 
     if ( clientX + clientWidth > documentElement.clientWidth - MARGIN_RIGHT ) {
       clientX -= clientWidth;
@@ -202,8 +204,8 @@ export class ContextMenu extends UIComponent<ContextMenuGroupData> {
     clientY = min( clientY, height( documentElement ) - height( wrapper ) - MARGIN_BOTTOM );
 
     styles( wrapper, {
-      top : unit( clientY - scrollerRect.top ),
-      left: unit( clientX - scrollerRect.left ),
+      top : unit( clientY - rootRect.top ),
+      left: unit( clientX - rootRect.left ),
     } );
   }
 
