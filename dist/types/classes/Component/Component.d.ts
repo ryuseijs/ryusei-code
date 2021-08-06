@@ -99,6 +99,12 @@ export declare class Component {
      */
     mount(elements: Elements): void;
     /**
+     * Called when the editor is destroyed.
+     *
+     * @internal
+     */
+    destroy(): void;
+    /**
      * Attaches an event handler with passing this instance as a key.
      * All handlers can only be detached by the `off()` method below.
      *
@@ -107,20 +113,20 @@ export declare class Component {
      * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
      * @param priority - Optional. A priority number for the order in which the callbacks are invoked.
      */
-    on<F extends EventBusCallback>(events: string | string[], callback: EventBusCallback, thisArg?: ThisParameterType<F>, priority?: number): void;
+    protected on<F extends EventBusCallback>(events: string | string[], callback: EventBusCallback, thisArg?: ThisParameterType<F>, priority?: number): void;
     /**
      * Detaches event handlers registered by `on()` without removing other handlers.
      *
      * @param events - An event name or names.
      */
-    off(events: string | string[]): void;
+    protected off(events: string | string[]): void;
     /**
      * Triggers callback functions.
      *
      * @param event - An event name.
      * @param args  - Optional. Any number of arguments to pass to callback functions.
      */
-    emit(event: string, ...args: any[]): void;
+    protected emit(event: string, ...args: any[]): void;
     /**
      * Listens to native events.
      * All handlers will be stored for destruction.
@@ -130,7 +136,7 @@ export declare class Component {
      * @param callback - A callback function.
      * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
      */
-    bind<F extends (e: Event) => void>(elm: Document | Window | Element, events: string, callback: F, thisArg?: ThisParameterType<F>): void;
+    protected bind<F extends (e: Event) => void>(elm: Document | Window | Element, events: string, callback: F, thisArg?: ThisParameterType<F>): void;
     /**
      * Returns a Language or LanguageConfig object at the specified position.
      *
@@ -138,11 +144,7 @@ export declare class Component {
      *
      * @return A main Language object or sub language config object.
      */
-    getLanguage(position?: Position): Language | LanguageConfig;
-    /**
-     * Called when the editor is destroyed.
-     */
-    destroy(): void;
+    protected getLanguage(position?: Position): Language | LanguageConfig;
     /**
      * Attempts to invoke the method of the specified extension.
      *
@@ -196,9 +198,9 @@ export declare class Component {
      */
     get lines(): Lines;
     /**
-     * Returns the current i18n collection.
+     * Returns the i18n collection.
      *
-     * @return An object with i18n strings.
+     * @return The object with i18n strings.
      */
     get i18n(): Record<string, string>;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@ryusei/code",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Naotoshi Fujita",
   "license": "MIT",
   "main": "dist/js/ryuseicode.cjs.js",

@@ -27,7 +27,7 @@ export declare class CustomCaret {
      */
     constructor(Editor: Editor, id: string, parent: HTMLElement);
     /**
-     * Sets the position of the caret.
+     * Moves the caret to the specified position.
      *
      * @param position - A position to set as [ row, col ].
      */

@@ -240,7 +240,7 @@ export class Gutter extends Component {
 
     this.deactivate();
 
-    if ( elm ) {
+    if ( elm && this.Editor.isFocused() ) {
       addClass( elm, CLASS_ACTIVE );
       this.activeElm = elm;
       this.emit( 'gutter:activated', elm );

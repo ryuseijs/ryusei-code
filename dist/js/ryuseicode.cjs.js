@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.3
+ * Version  : 0.1.4
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -1404,6 +1404,16 @@ var Component = /*#__PURE__*/function () {
     });
   }
   /**
+   * Called when the editor is destroyed.
+   *
+   * @internal
+   */
+  ;
+
+  _proto2.destroy = function destroy() {
+    off(null, '', this);
+  }
+  /**
    * Attaches an event handler with passing this instance as a key.
    * All handlers can only be detached by the `off()` method below.
    *
@@ -1477,14 +1487,6 @@ var Component = /*#__PURE__*/function () {
     }
 
     return language;
-  }
-  /**
-   * Called when the editor is destroyed.
-   */
-  ;
-
-  _proto2.destroy = function destroy() {
-    off(null, '', this);
   }
   /**
    * Attempts to invoke the method of the specified extension.
@@ -1588,9 +1590,9 @@ var Component = /*#__PURE__*/function () {
       return this.Code.Lines;
     }
     /**
-     * Returns the current i18n collection.
+     * Returns the i18n collection.
      *
-     * @return An object with i18n strings.
+     * @return The object with i18n strings.
      */
 
   }, {
@@ -1604,6 +1606,7 @@ var Component = /*#__PURE__*/function () {
 }();
 
 var CLASS_ROOT = PROJECT_CODE;
+var CLASS_VIEW = PROJECT_CODE + "__view";
 var CLASS_BODY = PROJECT_CODE + "__body";
 var CLASS_SCROLLER = PROJECT_CODE + "__scroller";
 var CLASS_CONTAINER = PROJECT_CODE + "__container";
@@ -1772,7 +1775,7 @@ var CustomCaret = /*#__PURE__*/function () {
     });
   }
   /**
-   * Sets the position of the caret.
+   * Moves the caret to the specified position.
    *
    * @param position - A position to set as [ row, col ].
    */
@@ -1900,7 +1903,7 @@ var Caret = /*#__PURE__*/function (_Component2) {
     this.bind(editable, 'blur', function () {
       primary.hide();
     });
-    this.update = rafThrottle(this.update.bind(this));
+    this.update = rafThrottle(this.update.bind(this), true);
     this.on(EVENT_READONLY, function (e, readOnly) {
       if (readOnly) {
         primary.hide();
@@ -1941,9 +1944,9 @@ var Caret = /*#__PURE__*/function (_Component2) {
   /**
    * Registers a new caret.
    *
-   * @param id - An ID for the caret to register.
+   * @param id - The ID for the caret to register.
    *
-   * @return A registered Caret instance.
+   * @return The registered CustomCaret instance.
    */
   ;
 
@@ -1955,11 +1958,11 @@ var Caret = /*#__PURE__*/function (_Component2) {
     return caret;
   }
   /**
-   * Returns the primary or the particular caret.
+   * Returns the primary or the specific CustomCaret instance.
    *
    * @param id - Optional. A caret ID.
    *
-   * @return A Caret instance if available, or otherwise `undefined`.
+   * @return A CustomCaret instance if available, or otherwise `undefined`.
    */
   ;
 
@@ -1971,7 +1974,7 @@ var Caret = /*#__PURE__*/function (_Component2) {
     return this.carets[id];
   }
   /**
-   * Returns the DOMRect object of the native caret.
+   * Returns the DOMRect object of the primary caret.
    *
    * @return A DOMRect object.
    */
@@ -2027,7 +2030,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
 
     _this6.margin = MARGIN_LINES;
     /**
-     * The current offset amount in pixel.
+     * The current offset amount from the top in pixel.
      */
 
     _this6.offsetY = 0;
@@ -2196,7 +2199,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     }
 
     if (line) {
-      if (!hasClass(line, className)) {
+      if (boundary.row !== row) {
         this.deactivate(focus);
         addClass(line, className);
         assign$1(boundary, {
@@ -2596,7 +2599,32 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     return between(top, 0, innerHeight) || between(bottom, 0, innerHeight) || top < 0 && bottom > innerHeight;
   }
   /**
-   * Returns the focus or anchor boundary data.
+   * Jumps to the specified row index.
+   * Use `View#jump()` instead if you want to scroll to the specific line.
+   *
+   * @param row - A row to jump to.
+   */
+  ;
+
+  _proto5.jump = function jump(row) {
+    var Measure = this.Measure,
+        length = this.length;
+    var paddingTop = Measure.padding.top,
+        lineHeight = Measure.lineHeight;
+    var offsetRows = ceil(paddingTop / lineHeight);
+    this.start = clamp(row - offsetRows, 0, max(this.lines.length - length + this.margin, 0));
+    this.offsetY = Measure.getTop(this.start);
+    var elms = this.detach(0);
+    elms[0].insertAdjacentHTML('afterend', this.html(this.start, length));
+
+    _remove(elms);
+
+    this.offset();
+    this.attach();
+    this.emit(EVENT_CHUNK_MOVED, this);
+  }
+  /**
+   * Returns the focus or anchor boundary data which contains the line and the row index.
    *
    * @param focus - Determines whether to return the focus or anchor boundary data.
    *
@@ -2611,6 +2639,8 @@ var Chunk = /*#__PURE__*/function (_Component3) {
    * Manually adds preserved line.
    * This method should be only used by the Selection component.
    * Note that the `changed` event will be emitted by the `activate` method.
+   *
+   * @internal
    *
    * @param focus - Determines whether to add a focus or anchor line.
    * @param row   - A row index.
@@ -2643,10 +2673,11 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     return line;
   }
   /**
-   * Updates HTML of elements by current lines.
+   * Updates HTML of elements with the latest lines.
+   * If omitting elements, updates all elements in the chunk.
    *
-   * @param elms  - Elements to sync.
-   * @param start - A start index.
+   * @param elms  - Optional. Elements to sync.
+   * @param start - Optional. A start index that corresponds with the first element.
    */
   ;
 
@@ -2695,7 +2726,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     }
   }
   /**
-   * Updates the position and contents of line elements.
+   * Refreshes the chunk.
    */
   ;
 
@@ -2704,32 +2735,10 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     this.moveUp();
   }
   /**
-   * Makes the chunk jump to the specified row index.
-   *
-   * @param row - A row to jump to.
-   */
-  ;
-
-  _proto5.jump = function jump(row) {
-    var Measure = this.Measure,
-        length = this.length;
-    var paddingTop = Measure.padding.top,
-        lineHeight = Measure.lineHeight;
-    var offsetRows = ceil(paddingTop / lineHeight);
-    this.start = clamp(row - offsetRows, 0, max(this.lines.length - length + this.margin, 0));
-    this.offsetY = Measure.getTop(this.start);
-    var elms = this.detach(0);
-    elms[0].insertAdjacentHTML('afterend', this.html(this.start, length));
-
-    _remove(elms);
-
-    this.offset();
-    this.attach();
-    this.emit(EVENT_CHUNK_MOVED, this);
-  }
-  /**
    * Scrolls to the specified top position
    * and manually calls the `onScroll` handler for succeeding synchronous processes.
+   *
+   * @internal
    *
    * @param scrollTop - A scroll position.
    */
@@ -2744,7 +2753,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
    *
    * @param elm - A line element.
    *
-   * @return The row index if available, or otherwise -1.
+   * @return The row index of the line element if available, or otherwise `-1`.
    */
   ;
 
@@ -2790,9 +2799,9 @@ var Chunk = /*#__PURE__*/function (_Component3) {
       return this.start + this.length - 1;
     }
     /**
-     * Returns the number of chunk lines without preserved lines.
+     * Returns the number of chunk lines without preserved ones.
      *
-     * @return A number of elements.
+     * @return A number of line elements in the chunk.
      */
 
   }, {
@@ -2801,9 +2810,9 @@ var Chunk = /*#__PURE__*/function (_Component3) {
       return this.visibleLines + this.margin * 2;
     }
     /**
-     * Returns chunk lines without preserved lines.
+     * Returns chunk lines without preserved ones.
      *
-     * @return An array containing chunk line elements.
+     * @return An array containing line elements in the chunk.
      */
 
   }, {
@@ -4281,6 +4290,8 @@ var Code = /*#__PURE__*/function (_Component4) {
   /**
    * Sets a new value.
    *
+   * @internal
+   *
    * @param value - A new value.
    */
 
@@ -4334,11 +4345,11 @@ var Code = /*#__PURE__*/function (_Component4) {
     return text.slice(row < this.size ? nthIndexOf(text, LINE_BREAK$1, row) + 1 : text.length);
   }
   /**
-   * Returns a text at the row index.
+   * Returns the code at the row index.
    *
-   * @param row - A row to search for.
+   * @param row - A row index.
    *
-   * @return A line text.
+   * @return The text of the line at the specified row.
    */
   ;
 
@@ -4346,10 +4357,10 @@ var Code = /*#__PURE__*/function (_Component4) {
     return row < this.size ? this.sliceLines(row, row) : '';
   }
   /**
-   * Slices a text by the specified row range.
+   * Slices the code by the specified row range.
    *
    * @param startRow - A start row index to start slicing a text.
-   * @param endRow   - An end row index to start slicing a text.
+   * @param endRow   - An end row index to end slicing a text.
    *
    * @return A sliced text.
    */
@@ -4361,10 +4372,10 @@ var Code = /*#__PURE__*/function (_Component4) {
     return text.slice(nthIndexOf(text, LINE_BREAK$1, startRow) + 1, endIndex);
   }
   /**
-   * Slices a text by the specified position range.
+   * Slices the code by the specified position range.
    *
    * @param start - A start position to start slicing a text.
-   * @param end   - Optional. An end position to start slicing a text.
+   * @param end   - Optional. An end position to end slicing a text.
    *
    * @return A sliced text.
    */
@@ -4390,7 +4401,7 @@ var Code = /*#__PURE__*/function (_Component4) {
     this.sizeCache = 0;
   }
   /**
-   * Replaces a text in a specified range by the replacement text.
+   * Replaces the code in a specified range by the replacement text.
    *
    * @param start       - A start position.
    * @param end         - An end position.
@@ -4472,6 +4483,8 @@ var Code = /*#__PURE__*/function (_Component4) {
   }
   /**
    * Destroys the component.
+   *
+   * @internal
    */
   ;
 
@@ -5079,10 +5092,10 @@ var ContextMenu = /*#__PURE__*/function (_UIComponent) {
 
   _proto11.move = function move(clientX, clientY) {
     var wrapper = this.wrapper,
-        clientWidth = this.wrapper.clientWidth,
-        scrollerRect = this.Measure.scrollerRect;
+        clientWidth = this.wrapper.clientWidth;
     var _document = document,
         documentElement = _document.documentElement;
+    var rootRect = rect(this.elements.root);
 
     if (clientX + clientWidth > documentElement.clientWidth - MARGIN_RIGHT) {
       clientX -= clientWidth;
@@ -5090,8 +5103,8 @@ var ContextMenu = /*#__PURE__*/function (_UIComponent) {
 
     clientY = min(clientY, height(documentElement) - height(wrapper) - MARGIN_BOTTOM);
     styles(wrapper, {
-      top: unit(clientY - scrollerRect.top),
-      left: unit(clientX - scrollerRect.left)
+      top: unit(clientY - rootRect.top),
+      left: unit(clientX - rootRect.left)
     });
   }
   /**
@@ -5179,8 +5192,65 @@ var ContextMenu = /*#__PURE__*/function (_UIComponent) {
   /**
    * Registers a menu item or items.
    *
-   * @param group - A group ID. If it does not exist, a new group will be generated.
-   * @param list  - A list ID.
+   * @example
+   *
+   * Registers a new item to the "edit" list in the "main" context menu:
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { ContextMenu } = ryuseiCode.Editor.Components;
+   *
+   * ContextMenu.register( 'main', 'edit', {
+   *   id  : 'myButton',
+   *   html: 'Click Me',
+   *   click() {
+   *     console.log( 'Clicked! );
+   *   },
+   * } );
+   * ```
+   *
+   * Registers a new list and items to the the "main" context menu:
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { ContextMenu } = ryuseiCode.Editor.Components;
+   *
+   * ContextMenu.register( 'main', 'my-list', [
+   *   {
+   *     id  : 'button1',
+   *     html: 'Button 1',
+   *     click() {
+   *       console.log( 'You clicked the Button 1' );
+   *     },
+   *   },
+   *   {
+   *     id  : 'button2',
+   *     html: 'Button 2',
+   *     click() {
+   *       console.log( 'You clicked the Button 2' );
+   *     },
+   *   },
+   * ] );
+   * ```
+   *
+   * Registers a new group:
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * const { ContextMenu } = ryuseiCode.Editor.Components;
+   *
+   * ContextMenu.register( 'my-context-menu', 'my-list', [
+   *   ...
+   * ] );
+   *
+   * ContextMenu.show( 'my-context-menu' );
+   * ```
+   *
+   * @param group    - A group ID. If it does not exist, a new group will be generated.
+   * @param list     - A list ID.
    * @param settings - An menu item or items.
    */
   ;
@@ -5206,7 +5276,7 @@ var ContextMenu = /*#__PURE__*/function (_UIComponent) {
     lists[list] = (lists[list] || []).concat(settings);
   }
   /**
-   * Displays the context menu.
+   * Displays the specified context menu.
    *
    * @param group - A group ID.
    */
@@ -5528,8 +5598,7 @@ var Edit = /*#__PURE__*/function (_Component6) {
     return !this.Editor.readOnly;
   }
   /**
-   * Deletes the selected text.
-   * Do not set the focus back to the editable area to receive the input.
+   * Deletes the selected text. Nothing will happen when the selection is collapsed.
    */
   ;
 
@@ -5580,10 +5649,10 @@ var Edit = /*#__PURE__*/function (_Component6) {
   }
   /**
    * Copies the provided text to the clipboard.
-   * If the string is not provided, this tries to copy the current selection.
+   * If the text is not provided, this method tries to copy the current selection.
    *
    * @param string        - Optional. A string to copy.
-   * @param skipSelection - Optional. Whether to restore the current range after copy or not.
+   * @param skipSelection - Optional. Whether to restore the selection range after copy or not.
    */
   ;
 
@@ -5612,7 +5681,7 @@ var Edit = /*#__PURE__*/function (_Component6) {
     }
   }
   /**
-   * Cuts the selected code.
+   * Cuts the selected code. Nothing will happen if the selection is collapsed.
    */
   ;
 
@@ -5625,8 +5694,6 @@ var Edit = /*#__PURE__*/function (_Component6) {
   }
   /**
    * Cuts the current line.
-   * To collapse the selection to the start after copy,
-   * this method does not utilize the paste function.
    */
   ;
 
@@ -5869,17 +5936,21 @@ var Input = /*#__PURE__*/function (_Component7) {
   ;
 
   _proto14.handleBackspace = function handleBackspace(e) {
-    var row = this.row;
+    var row = this.row,
+        col = this.col;
 
-    if (this.col === 0 && row > 0) {
-      var prev = this.lines[row - 1].text;
-      this.apply({
-        type: 'removePrev',
-        key: 'Backspace',
-        value: prev + this.value,
-        startRow: row - 1,
-        position: [row - 1, prev.length]
-      });
+    if (col === 0) {
+      if (row > 0) {
+        var prev = this.lines[row - 1].text;
+        this.apply({
+          type: 'removePrev',
+          key: 'Backspace',
+          value: prev + this.value,
+          startRow: row - 1,
+          position: [row - 1, prev.length]
+        });
+      }
+
       prevent(e);
     }
   }
@@ -5953,7 +6024,7 @@ var Input = /*#__PURE__*/function (_Component7) {
   }
   /**
    * Sets the input state.
-   * If the state with the provided type exists, new props will be assigne to it.
+   * If the state with the provided type exists, new props will be assigned to it.
    *
    * @param type  - The type of the state.
    * @param props - Optional. An object with state values.
@@ -8426,7 +8497,7 @@ var Style = /*#__PURE__*/function (_Component13) {
 
     _this42.init();
 
-    _this42.on('body:open', function (e, append) {
+    _this42.on('view:open', function (e, append) {
       _this42.emit(EVENT_INIT_STYLE, _this42.add.bind(_assertThisInitialized(_this42)));
 
       append("<style id=\"" + _this42.options.id + "-style\">" + _this42.build() + "</style>");
@@ -9424,7 +9495,7 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the width of the viewport.
+   * Adjusts the width of the lines element.
    */
   ;
 
@@ -9441,13 +9512,15 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the height of the viewport.
+   * Adjusts the height of the container element so that it contains all lines.
+   * It won't be smaller than the scroller element when the editor has explicit height.
    *
    * @param skipLengthCheck - Optional. Whether to skip checking the number of lines or not.
    */
   ;
 
   _proto33.autoHeight = function autoHeight(skipLengthCheck) {
+    var elements = this.elements;
     var length = this.lines.length;
 
     if (skipLengthCheck || length !== this.lastLength) {
@@ -9456,8 +9529,12 @@ var View = /*#__PURE__*/function (_Component15) {
 
       var _height = _Measure.lineHeight * (length || 1) + padding.top + padding.bottom;
 
+      if (elements.root.style.height || this.options.height) {
+        _height = max(_height, _Measure.scrollerRect.height);
+      }
+
       styles(this.elements.container, {
-        height: unit(max(_height, _Measure.scrollerRect.height))
+        height: unit(_height)
       });
       this.lastLength = length;
       this.emit(EVENT_SCROLL_HEIGHT_CHANGED);
@@ -9606,7 +9683,7 @@ var Renderer = /*#__PURE__*/function () {
     var divs = [['root', classes, {
       id: id,
       role: 'code'
-    }], ['body', [CLASS_BODY]], ['scroller', [CLASS_SCROLLER]], ['container', [CLASS_CONTAINER]], ['editor', [CLASS_EDITOR]]];
+    }], ['view', [CLASS_VIEW].concat(options.viewClasses)], ['body', [CLASS_BODY]], ['scroller', [CLASS_SCROLLER]], ['container', [CLASS_CONTAINER]], ['editor', [CLASS_EDITOR]]];
     divs.forEach(function (settings) {
       _this52.event.emit(settings[0] + ":open", append, settings[1], _this52.lines);
 
@@ -9725,6 +9802,7 @@ var Editor = /*#__PURE__*/function () {
       editor: editor,
       lines: lines,
       editable: lines,
+      view: query(root, "." + CLASS_VIEW),
       body: query(root, "." + CLASS_BODY),
       scroller: query(root, "." + CLASS_SCROLLER),
       container: query(root, "." + CLASS_CONTAINER),
@@ -10077,9 +10155,27 @@ var RyuseiCode = /*#__PURE__*/function () {
     this.Editor = new Editor(this.language, this.options, RyuseiCode.Extensions);
   }
   /**
-   * Registers languages.
+   * Registers a language or languages.
    *
-   * @param languages - A language object or objects.
+   * @example
+   * ```js
+   * import { RyuseiCode, javascript, html } from '@ryusei/code';
+   *
+   * RyuseiLight.register( javascript() );
+   *
+   * // Or pass an array:
+   * RyuseiLight.register( [ javascript(), html() ] );
+   * ```
+   *
+   * If you want to register all languages the `languages` object is helpful:
+   *
+   * ```js
+   * import { RyuseiCode, languages } from '@ryusei/code';
+   *
+   * RyuseiLight.register( Object.values( languages ).map( lang => lang() ) );
+   * ```
+   *
+   * @param languages - A Language object or an array with objects.
    */
 
 
@@ -10097,6 +10193,21 @@ var RyuseiCode = /*#__PURE__*/function () {
   }
   /**
    * Registers extensions.
+   *
+   * @example
+   * ```js
+   * import { RyuseiCode, ActiveLine, History } from '@ryusei/code';
+   *
+   * RyuseiLight.register( { ActiveLine, History } );
+   * ```
+   *
+   * If you want to compose all extensions, the `Extensions` object is helpful:
+   *
+   * ```js
+   * import { RyuseiCode, Extensions } from '@ryusei/code';
+   *
+   * RyuseiLight.register( Extensions );
+   * ```
    *
    * @param extensions - An object literal with extensions.
    */
@@ -10147,7 +10258,22 @@ var RyuseiCode = /*#__PURE__*/function () {
     });
   }
   /**
-   * Applies the editor to the target element.
+   * Applies the editor to the specified target element.
+   *
+   * @example
+   * ```js
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'textarea' );
+   *
+   * // or
+   * const textarea = document.querySelector( 'textarea' );
+   * ryuseiCode.apply( textarea )
+   * ```
+   *
+   * <div class="caution">
+   * The instance can not have multiple targets.
+   * If the <code>apply()</code> method is called twice to the same element, it throws an error.
+   * </div>
    *
    * @param target - A selector or an element to apply the editor to.
    * @param code   - Optional. The code to overwrite the content of the target element.
@@ -10158,7 +10284,10 @@ var RyuseiCode = /*#__PURE__*/function () {
     this.Editor.apply(target, code);
   }
   /**
-   * Returns a HTML string for the editor.
+   * Builds the HTML of the editor. This works without `document` and `window` objects,
+   * but has no functionality.
+   *
+   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
    * @param code - Initial code.
    *
@@ -10172,7 +10301,20 @@ var RyuseiCode = /*#__PURE__*/function () {
   /**
    * Attaches an event handler to the editor event or events.
    *
-   * @param events   - An event name or names separated by spaces. Use a dot(.) to add a namespace.
+   * ```js
+   * // ke is the native KeyboardEvent object
+   * ryuseiCode.on( 'keydown', ( e, ke ) => {
+   *   console.log( ke.key );
+   * } );
+   *
+   * // With a namespace:
+   * ryuseiCode.on( 'keydown.myNamespace', ( e, ke ) => {
+   *   console.log( ke.key );
+   * } );
+   * ```
+   *
+   * @param events   - An event name or names separated by spaces, or an array with event names.
+   *                   Use a dot(.) to add a namespace.
    * @param callback - A callback function.
    */
   ;
@@ -10183,7 +10325,16 @@ var RyuseiCode = /*#__PURE__*/function () {
   /**
    * Detaches an event handler registered by `on()`.
    *
-   * @param events - An event name or names separated by spaces. Use a dot(.) to add a namespace.
+   * ```js
+   * // Detach all handlers:
+   * ryuseiCode.off( 'keydown' );
+   *
+   * // Detach handlers only in the namespace:
+   * ryuseiCode.off( 'keydown.myNamespace' );
+   * ```
+   *
+   * @param events - An event name or names separated by spaces, or or an array with event names.
+   *                 Use a dot(.) to add a namespace.
    */
   ;
 
@@ -10191,7 +10342,12 @@ var RyuseiCode = /*#__PURE__*/function () {
     this.Editor.event.off(events);
   }
   /**
-   * Saves the content to the source element.
+   * Saves the content to the source element if available.
+   *
+   * For example, if you apply the editor to the empty `textarea` element,
+   * it remains empty even after you edit the code by the editor.
+   *
+   * This method applies back the change to the `textarea` element.
    */
   ;
 
@@ -10211,7 +10367,7 @@ var RyuseiCode = /*#__PURE__*/function () {
   /**
    * Sets the caret position or selection range.
    *
-   * @param start - A start position as [ row, col ];
+   * @param start - A start position as `[ row, col ]`.
    * @param end   - Optional. An end position. If omitted, the selection will be collapsed to the start.
    */
   ;
@@ -10230,8 +10386,7 @@ var RyuseiCode = /*#__PURE__*/function () {
     return this.value;
   }
   /**
-   * Destroys the code editor and releases the memory.
-   * The final value is applied to the source element.
+   * Saves the final value to the source element and destroys the editor for releasing the memory.
    */
   ;
 
@@ -10240,9 +10395,9 @@ var RyuseiCode = /*#__PURE__*/function () {
     delete this.Editor;
   }
   /**
-   * Sets the new value to the editor.
+   * Sets a new value to the editor and refreshes it.
    *
-   * @return The current code.
+   * @param value - A new value.
    */
   ;
 
@@ -10250,15 +10405,15 @@ var RyuseiCode = /*#__PURE__*/function () {
     key: "value",
     get:
     /**
-     * Returns the current code as a string.
+     * Returns the current value as a string.
      *
-     * @return The current code.
+     * @return The current value.
      */
     function get() {
       return this.Editor.value;
     },
-    set: function set(code) {
-      this.Editor.value = code;
+    set: function set(value) {
+      this.Editor.value = value;
     }
   }]);
 
@@ -10686,6 +10841,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
     }, CLEAR_DEBOUNCE_DURATION);
     this.update = rafThrottle(this.update.bind(this));
     this.on(EVENT_SELECTED, this.onSelected, this);
+    this.on(EVENT_BLUR, this.clear);
     this.on(EVENT_READONLY, function (e, readOnly) {
       if (readOnly) {
         _this59.clear();
@@ -11171,6 +11327,8 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
   }
   /**
    * Called when the general confirm button is clicked.
+   *
+   * @internal
    */
   ;
 
@@ -11179,12 +11337,43 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
     this.hide();
   }
   /**
-   * Registers a group to the UI.
+   * Registers a new dialog.
+   * Use `message()` instead just for showing a message.
+   *
+   * @example
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * const Dialog     = ryuseiCode.Editor.require( 'Dialog' );
+   *
+   * // The Dialog extension may not exist.
+   * if ( Dialog ) {
+   *   const body = document.createElement( 'p' );
+   *   body.textContent = 'Hello!';
+   *   Dialog.register( 'sample', body, 'Sample Dialog', [ 'confirm' ] );
+   *   Dialog.show( 'sample' );
+   * }
+   * ```
+   *
+   * If you want to add custom buttons, pass an array with button settings to the `buttons`.
+   *
+   * ```ts
+   * const settings = [
+   *   {
+   *     id: 'myButton',
+   *     html: 'Click Me',
+   *     click() {
+   *       console.log( 'Clicked!' );
+   *     },
+   *   }
+   * ];
+   *
+   * Dialog.register( 'sample', body, 'Sample Dialog', settings );
+   * ```
    *
    * @param group   - A group ID.
-   * @param elm     - An element to register.
-   * @param title   - The title of the dialog.
-   * @param buttons - The title of the dialog.
+   * @param elm     - An element to display as a dialog body.
+   * @param title   - A title of a dialog.
+   * @param buttons - Optional. General button names, `'confirm'`, `'cancel'`, or objects with button settings.
    */
   ;
 
@@ -11225,9 +11414,9 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
     };
   }
   /**
-   * Opens the dialog.
+   * Opens the specified dialog. The dialog must be registered by `register()` before opening it.
    *
-   * @param group - A dialog ID.
+   * @param group - A dialog ID to open.
    */
   ;
 
@@ -11242,7 +11431,7 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
     this.emit('dialog:opened', this, group);
   }
   /**
-   * Closes the dialog.
+   * Closes the dialog which is visible now. Nothing will happen when there is no shown dialog.
    */
   ;
 
@@ -11258,10 +11447,10 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
     }
   }
   /**
-   * Displays a message with the common dialog.
+   * Displays a message with a common dialog. No registration required.
    *
-   * @param message - A message.
-   * @param title   - Optional. A title.
+   * @param message - A message to display.
+   * @param title   - Optional. A title of a dialog. If omitted, uses the `notice` in the `i18n` collection.
    */
   ;
 
@@ -11676,7 +11865,7 @@ var Gutter = /*#__PURE__*/function (_Component21) {
     var elm = this.getElm(row);
     this.deactivate();
 
-    if (elm) {
+    if (elm && this.Editor.isFocused()) {
       addClass(elm, CLASS_ACTIVE);
       this.activeElm = elm;
       this.emit('gutter:activated', elm);
@@ -13630,7 +13819,7 @@ var Toolbar = /*#__PURE__*/function (_UIComponent3) {
 
     _append(div(CLASS_TOOLBAR_UI, wrapper), close);
 
-    prepend(elements.root, wrapper);
+    prepend(elements.view, wrapper);
     this.wrapper = wrapper;
   }
   /**

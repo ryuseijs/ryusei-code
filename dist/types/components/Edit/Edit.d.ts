@@ -63,8 +63,7 @@ export declare class Edit extends Component {
      */
     private isEditable;
     /**
-     * Deletes the selected text.
-     * Do not set the focus back to the editable area to receive the input.
+     * Deletes the selected text. Nothing will happen when the selection is collapsed.
      */
     delete(): void;
     /**
@@ -76,20 +75,18 @@ export declare class Edit extends Component {
     paste(string: string, type?: string): void;
     /**
      * Copies the provided text to the clipboard.
-     * If the string is not provided, this tries to copy the current selection.
+     * If the text is not provided, this method tries to copy the current selection.
      *
      * @param string        - Optional. A string to copy.
-     * @param skipSelection - Optional. Whether to restore the current range after copy or not.
+     * @param skipSelection - Optional. Whether to restore the selection range after copy or not.
      */
     copy(string?: string, skipSelection?: boolean): void;
     /**
-     * Cuts the selected code.
+     * Cuts the selected code. Nothing will happen if the selection is collapsed.
      */
     cut(): void;
     /**
      * Cuts the current line.
-     * To collapse the selection to the start after copy,
-     * this method does not utilize the paste function.
      */
     cutLine(): void;
 }

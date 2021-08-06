@@ -117,7 +117,7 @@ export declare class Input extends Component {
     private getCaretPosition;
     /**
      * Sets the input state.
-     * If the state with the provided type exists, new props will be assigne to it.
+     * If the state with the provided type exists, new props will be assigned to it.
      *
      * @param type  - The type of the state.
      * @param props - Optional. An object with state values.

@@ -54,21 +54,21 @@ export declare class Caret extends Component {
     /**
      * Registers a new caret.
      *
-     * @param id - An ID for the caret to register.
+     * @param id - The ID for the caret to register.
      *
-     * @return A registered Caret instance.
+     * @return The registered CustomCaret instance.
      */
     register(id: string): CustomCaret;
     /**
-     * Returns the primary or the particular caret.
+     * Returns the primary or the specific CustomCaret instance.
      *
      * @param id - Optional. A caret ID.
      *
-     * @return A Caret instance if available, or otherwise `undefined`.
+     * @return A CustomCaret instance if available, or otherwise `undefined`.
      */
     get(id?: string): CustomCaret | undefined;
     /**
-     * Returns the DOMRect object of the native caret.
+     * Returns the DOMRect object of the primary caret.
      *
      * @return A DOMRect object.
      */

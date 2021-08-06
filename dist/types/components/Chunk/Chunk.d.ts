@@ -29,7 +29,7 @@ export declare class Chunk extends Component {
      */
     visibleLines: number;
     /**
-     * The current offset amount in pixel.
+     * The current offset amount from the top in pixel.
      */
     offsetY: number;
     /**
@@ -202,7 +202,14 @@ export declare class Chunk extends Component {
      */
     private isVisible;
     /**
-     * Returns the focus or anchor boundary data.
+     * Jumps to the specified row index.
+     * Use `View#jump()` instead if you want to scroll to the specific line.
+     *
+     * @param row - A row to jump to.
+     */
+    private jump;
+    /**
+     * Returns the focus or anchor boundary data which contains the line and the row index.
      *
      * @param focus - Determines whether to return the focus or anchor boundary data.
      *
@@ -214,6 +221,8 @@ export declare class Chunk extends Component {
      * This method should be only used by the Selection component.
      * Note that the `changed` event will be emitted by the `activate` method.
      *
+     * @internal
+     *
      * @param focus - Determines whether to add a focus or anchor line.
      * @param row   - A row index.
      *
@@ -221,10 +230,11 @@ export declare class Chunk extends Component {
      */
     addPreservedLine(focus: boolean, row: number): Element;
     /**
-     * Updates HTML of elements by current lines.
+     * Updates HTML of elements with the latest lines.
+     * If omitting elements, updates all elements in the chunk.
      *
-     * @param elms  - Elements to sync.
-     * @param start - A start index.
+     * @param elms  - Optional. Elements to sync.
+     * @param start - Optional. A start index that corresponds with the first element.
      */
     sync(elms?: Element[], start?: number): void;
     /**
@@ -236,18 +246,14 @@ export declare class Chunk extends Component {
      */
     syncDiff(row: number, diff: number): void;
     /**
-     * Updates the position and contents of line elements.
+     * Refreshes the chunk.
      */
     refresh(): void;
     /**
-     * Makes the chunk jump to the specified row index.
-     *
-     * @param row - A row to jump to.
-     */
-    jump(row: number): void;
-    /**
      * Scrolls to the specified top position
      * and manually calls the `onScroll` handler for succeeding synchronous processes.
+     *
+     * @internal
      *
      * @param scrollTop - A scroll position.
      */
@@ -257,7 +263,7 @@ export declare class Chunk extends Component {
      *
      * @param elm - A line element.
      *
-     * @return The row index if available, or otherwise -1.
+     * @return The row index of the line element if available, or otherwise `-1`.
      */
     getRow(elm: HTMLElement): number;
     /**
@@ -284,15 +290,15 @@ export declare class Chunk extends Component {
      */
     get end(): number;
     /**
-     * Returns the number of chunk lines without preserved lines.
+     * Returns the number of chunk lines without preserved ones.
      *
-     * @return A number of elements.
+     * @return A number of line elements in the chunk.
      */
     get length(): number;
     /**
-     * Returns chunk lines without preserved lines.
+     * Returns chunk lines without preserved ones.
      *
-     * @return An array containing chunk line elements.
+     * @return An array containing line elements in the chunk.
      */
     get elms(): Element[];
     /**
@@ -300,7 +306,7 @@ export declare class Chunk extends Component {
      *
      * @return A tuple containing top and bottom borders.
      */
-    get border(): [number, number];
+    protected get border(): [number, number];
 }
 export {};
 //# sourceMappingURL=../../../../src/js/components/Chunk/Chunk.d.ts.map

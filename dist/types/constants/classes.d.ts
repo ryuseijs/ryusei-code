@@ -1,4 +1,5 @@
 export declare const CLASS_ROOT = "ryuseicode";
+export declare const CLASS_VIEW: string;
 export declare const CLASS_BODY: string;
 export declare const CLASS_SCROLLER: string;
 export declare const CLASS_CONTAINER: string;

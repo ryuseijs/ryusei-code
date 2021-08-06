@@ -2,7 +2,7 @@ import { BracketMatchingOptions, Elements, EventBusEvent, Position, Range, ScanR
 import { CATEGORY_BRACKET } from '@ryusei/light';
 import { Component } from '../../classes/Component/Component';
 import { Selection } from '../../components';
-import { EVENT_READONLY, EVENT_SELECTED } from '../../constants/events';
+import { EVENT_BLUR, EVENT_READONLY, EVENT_SELECTED } from '../../constants/events';
 import { CHANGED, EXTEND, SELECTING, START } from '../../constants/selection-states';
 import { debounce, escapeRegExp, rafThrottle } from '../../utils';
 import { Throttle } from '../../utils/function/throttle/throttle';
@@ -61,6 +61,8 @@ export class BracketMatching extends Component {
     this.update = rafThrottle( this.update.bind( this ) );
 
     this.on( EVENT_SELECTED, this.onSelected, this );
+    this.on( EVENT_BLUR, this.clear );
+
     this.on( EVENT_READONLY, ( e, readOnly ) => {
       if ( readOnly ) {
         this.clear();

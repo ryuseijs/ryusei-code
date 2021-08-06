@@ -65,11 +65,12 @@ export declare class View extends Component {
      */
     jump(row: number, middle?: boolean, lineOffset?: number): void;
     /**
-     * Adjusts the width of the viewport.
+     * Adjusts the width of the lines element.
      */
     autoWidth(): void;
     /**
-     * Adjusts the height of the viewport.
+     * Adjusts the height of the container element so that it contains all lines.
+     * It won't be smaller than the scroller element when the editor has explicit height.
      *
      * @param skipLengthCheck - Optional. Whether to skip checking the number of lines or not.
      */
