@@ -269,7 +269,7 @@ export class Chunk extends Component {
     }
 
     if ( line ) {
-      if ( ! hasClass( line, className ) ) {
+      if ( boundary.row !== row ) {
         this.deactivate( focus );
 
         addClass( line, className );
