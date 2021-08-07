@@ -114,7 +114,7 @@ export class Editor {
   private Extensions: Partial<Extensions> = {};
 
   /**
-   * An object with options.
+   * The collection of all options.
    */
   readonly options: Options;
 
@@ -397,7 +397,7 @@ export class Editor {
   }
 
   /**
-   * Returns the extension.
+   * Returns the specified extension.
    * In terms of the "loose coupling", you'd better try not to use this method.
    * Using events is enough in most cases.
    *

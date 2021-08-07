@@ -42,7 +42,7 @@ export class Sync extends Component {
    * ```html
    * <pre>
    * function message() {
-   *   console.log( 'hi' );
+   *   console.log( 'Hi!' );
    * }
    * </pre>
    * ```

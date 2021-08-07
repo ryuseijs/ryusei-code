@@ -38,97 +38,98 @@ import { assert, assign, forOwn, isObject, isUndefined, off, on } from '../../ut
  */
 export class Component {
   /**
-   * Holds the EventBus instance.
+   * The EventBus instance.
+   * Use `on()`, `off()` and `emit()` methods instead of this.
    */
   protected readonly event: EventBus<Editor>;
 
   /**
-   * Holds options.
+   * The collection of all options.
    */
   protected readonly options: Options;
 
   /**
-   * Holds the Editor instance.
+   * The Editor instance.
    */
   protected Editor: Editor;
 
   /**
-   * Holds the Caret instance.
+   * The Caret instance.
    */
   protected Caret: Caret;
 
   /**
-   * Holds the Chunk instance.
+   * The Chunk instance.
    */
   protected Chunk: Chunk;
 
   /**
-   * Holds the Code instance.
+   * The Code instance.
    */
   protected Code: Code;
 
   /**
-   * Holds the ContextMenu instance.
+   * The ContextMenu instance.
    */
   protected ContextMenu: ContextMenu;
 
   /**
-   * Holds the Edit instance.
+   * The Edit instance.
    */
   protected Edit: Edit;
 
   /**
-   * Holds the Input instance.
+   * The Input instance.
    */
   protected Input: Input;
 
   /**
-   * Holds the Input instance.
+   * The Input instance.
    */
   protected Keymap: Keymap;
 
   /**
-   * Holds the Measure instance.
+   * The Measure instance.
    */
   protected Measure: Measure;
 
   /**
-   * Holds the Range instance.
+   * The Range instance.
    */
   protected Range: Range;
 
   /**
-   * Holds the Scope instance.
+   * The Scope instance.
    */
   protected Scope: Scope;
 
   /**
-   * Holds the Selection instance.
+   * The Selection instance.
    */
   protected Selection: Selection;
 
   /**
-   * Holds the Style instance.
+   * The Style instance.
    */
   protected Style: Style;
 
   /**
-   * Holds the Sync instance.
+   * The Sync instance.
    */
   protected Sync: Sync;
 
   /**
-   * Holds the View instance.
+   * The View instance.
    */
   protected View: View;
 
   /**
-   * Holds the collection of the editor elements.
+   * The collection of essential editor elements.
    */
   protected elements: Elements;
 
   /**
-   * Holds the Language object.
+   * The Language object.
    */
   protected language: Language;
 
@@ -167,10 +168,10 @@ export class Component {
   }
 
   /**
-   * Attaches an event handler with passing this instance as a key.
-   * All handlers can only be detached by the `off()` method below.
+   * Attaches an event handler to an event or events with passing this instance as a key.
+   * They can only be detached by the `off()` member method.
    *
-   * @param events   - An event name or names.
+   * @param events   - An event name, names split by spaces, or an array with names.
    * @param callback - A callback function.
    * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
    * @param priority - Optional. A priority number for the order in which the callbacks are invoked.
@@ -185,16 +186,16 @@ export class Component {
   }
 
   /**
-   * Detaches event handlers registered by `on()` without removing other handlers.
+   * Detaches handlers registered by `on()` without removing handlers attached by other components.
    *
-   * @param events - An event name or names.
+   * @param events - An event name, names split by spaces, or an array with names.
    */
   protected off( events: string | string[] ): void {
     this.event.off( events, this );
   }
 
   /**
-   * Triggers callback functions.
+   * Triggers handlers attached to the event.
    *
    * @param event - An event name.
    * @param args  - Optional. Any number of arguments to pass to callback functions.
@@ -205,10 +206,10 @@ export class Component {
 
   /**
    * Listens to native events.
-   * All handlers will be stored for destruction.
+   * This method stores all listeners and automatically removes them on destruction.
    *
    * @param elm      - A document, a window or an element.
-   * @param events   - An event name or names.
+   * @param events   - An event name or names split by spaces.
    * @param callback - A callback function.
    * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
    */
@@ -222,14 +223,16 @@ export class Component {
   }
 
   /**
-   * Returns a Language or LanguageConfig object at the specified position.
+   * Returns a Language or LanguageConfig object at the focus or specified position.
+   * This method can return different objects depending on the position
+   * if the language allows to embed other languages, such as HTML and PHP.
    *
-   * @param position - Optional. A position.
+   * @param position - Optional. Specifies the position to get the language at.
    *
    * @return A main Language object or sub language config object.
    */
   protected getLanguage( position?: Position ): Language | LanguageConfig {
-    position = position || this.Selection.get().start;
+    position = position || this.Selection.focus;
 
     const { language } = this;
     const info = this.lines.getInfoAt( position );
@@ -242,7 +245,15 @@ export class Component {
   }
 
   /**
-   * Attempts to invoke the method of the specified extension.
+   * Attempts to invoke the public method of the specified extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
+   *
+   * @example
+   * ```ts
+   * // Attempts to show the "search" toolbar.
+   * Editor.invoke( 'Toolbar', 'show', 'search' );
+   * ```
    *
    * @param name   - A name of the extension.
    * @param method - A method name to invoke.
@@ -259,7 +270,9 @@ export class Component {
   }
 
   /**
-   * Returns the extension of the specified name.
+   * Returns the specified extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
    *
    * @param name - A name of an extension.
    *
@@ -271,8 +284,19 @@ export class Component {
 
   /**
    * Adds default icon strings. They can be still overridden by options.
+   * The IconSettings is a tuple as `[ string, number?, string? ]` corresponding with `[ path, stroke?, linecap? ]`.
    *
-   * @param icons - Additional icon strings.
+   * @example
+   * ```ts
+   * this.addIcons( {
+   *   myIcon: [
+   *     'm19 18-14-13m0 13 14-13',
+   *     3,
+   *   ],
+   * } );
+   * ```
+   *
+   * @param icons - Icon settings to add.
    */
   protected addIcons( icons: Record<string, IconSettings> ): void {
     const { options } = this;
@@ -281,6 +305,13 @@ export class Component {
 
   /**
    * Adds default i18n strings. They can be still overridden by options.
+   *
+   * @example
+   * ```ts
+   * this.addI18n( {
+   *   myMessage: 'Hello!',
+   * } );
+   * ```
    *
    * @param i18n - Additional i18n strings.
    */
@@ -291,6 +322,20 @@ export class Component {
 
   /**
    * Adds default shortcuts to the keymap object. They can be still overridden by options.
+   * Call this method before RyuseiCode mounts components so that the Keymap component recognizes shortcuts.
+   *
+   * @example
+   * ```js
+   * class MyExtension extends Component {
+   *   constructor( Editor ) {
+   *     super( Editor );
+   *
+   *     this.addKeyBindings( {
+   *       myShortcut: [ 'P', true, true ],
+   *     } );
+   *   }
+   * }
+   * ```
    *
    * @param shortcuts - Additional shortcuts.
    */
@@ -300,8 +345,18 @@ export class Component {
   }
 
   /**
-   * Returns options for each component with merging default values.
-   * If the returned value is `null`, that means the component should not be active.
+   * Returns options for each extension, merging provided default values.
+   *
+   * @example
+   * ```js
+   * class MyExtension extends Component {
+   *   constructor( Editor ) {
+   *     super( Editor );
+   *
+   *     const extensionOptions = this.getOptions( 'myExtension', { option1: true } );
+   *   }
+   * }
+   * ```
    *
    * @param name     - An option name.
    * @param defaults - Default values.

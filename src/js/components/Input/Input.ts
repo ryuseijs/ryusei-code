@@ -339,13 +339,15 @@ export class Input extends Component {
    * If the state with the provided type exists, new props will be assigned to it.
    * The props object accepts following values:
    *
-   * - `key?`: The key that makes the input.
-   * - `startRow?`: The start row index to replace lines with the current value from.
-   * - `endRow?`: The end row index to replace lines with the current value to.
-   * - `value?`: The value to replace lines with. If omitted, the current value will be used.
-   * - `insertion?`: Specifies the value to insert at the caret position instead of setting the value.
-   * - `offset?`: The number of offset cols after the state is applied.
-   * - `position?`: Explicitly specifies the position after the state is applied. The `offset` will be ignored.
+   * | State | Description |
+   * |---|---|
+   * | `key?` | The key that makes the input. |
+   * | `startRow?` | The start row index to replace lines with the current value from. |
+   * | `endRow?` | The end row index to replace lines with the current value to. |
+   * | `value?` | The value to replace lines with. If omitted, the current value will be used. |
+   * | `insertion?` | Specifies the value to insert at the caret position instead of setting the value. |
+   * | `offset?` | The number of offset cols after the state is applied. |
+   * | `position?` | Explicitly specifies the position after the state is applied. The `offset` will be ignored. |
    *
    * @param type  - The type of the state.
    * @param props - Optional. An object with state values.

@@ -86,7 +86,7 @@ export class CustomCaret {
   }
 
   /**
-   * Hides teh caret.
+   * Hides the caret.
    */
   hide(): void {
     removeClass( this.caret, CLASS_ACTIVE );

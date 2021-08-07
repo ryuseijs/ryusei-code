@@ -90,6 +90,9 @@ export class Code extends Component {
 
   /**
    * Returns the code at the row index.
+   * Although the `Lines[ row ]` also returns the code at the row,
+   * which is much faster than this method,
+   * it may not be the latest before the `Sync` finishes syncing process.
    *
    * @param row - A row index.
    *
@@ -101,6 +104,12 @@ export class Code extends Component {
 
   /**
    * Slices the code by the specified row range.
+   *
+   * @example
+   * ```ts
+   * // Gets lines from 1 to 9:
+   * const code = Code.sliceLines( 2, 10 );
+   * ```
    *
    * @param startRow - A start row index to start slicing a text.
    * @param endRow   - An end row index to end slicing a text.
@@ -116,6 +125,11 @@ export class Code extends Component {
   /**
    * Slices the code by the specified position range.
    *
+   * @example
+   * ```ts
+   * const code = Code.sliceLines( [ 0, 1 ], [ 2, 9 ] );
+   * ```
+   *
    * @param start - A start position to start slicing a text.
    * @param end   - Optional. An end position to end slicing a text.
    *
@@ -129,6 +143,30 @@ export class Code extends Component {
 
   /**
    * Replaces lines by the replacement text.
+   *
+   * @example
+   * Consider the following HTML as an example:
+   * ```html
+   * <pre>
+   * function message() {
+   *   console.log( 'Hi!' );
+   * }
+   * </pre>
+   * ```
+   *
+   * Let's modify the line 2 (row index is `1`):
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code, Sync } = ryuseiCode.Editor.Components;
+   *
+   * setTimeout( () => {
+   *   Code.replaceLines( 1, 1, `  console.log( 'Bye!' );\n` );
+   *   Sync.sync( 1, 1 );
+   * }, 2000 );
+   * ```
    *
    * @param startRow    - A start row index.
    * @param endRow      - An end row index.
@@ -162,6 +200,38 @@ export class Code extends Component {
    * Replaces lines by the iteratee function invoked for each line.
    * The returning string of the function will be used as a new line.
    *
+   * @example
+   * Consider the following HTML as an example:
+   *
+   * ```html
+   * <pre>
+   * 1
+   * 2
+   * 3
+   * </pre>
+   * ```
+   *
+   * Let's modify lines by an iteratee function:
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code, Sync } = ryuseiCode.Editor.Components;
+   *
+   * setTimeout( () => {
+   *   Code.replaceLinesBy( 0, 2, line => `Line: ${ line }` );
+   *   Sync.sync( 0, 2 );
+   * }, 2000 );
+   * ```
+   *
+   * The result will be:
+   * ```none
+   * Line: 1
+   * Line: 2
+   * Line: 3
+   * ```
+   *
    * @param startRow - A start row index.
    * @param endRow   - An end row index.
    * @param iteratee - An iteratee function invoked for each line.
@@ -184,14 +254,35 @@ export class Code extends Component {
   }
 
   /**
-   * Searches the provided word or regexp.
+   * Searches the provided word or regexp and returns matched ranges.
+   *
+   * @example
+   * ```html
+   * <pre>
+   * foo
+   * bar
+   * foo
+   * </pre>
+   * ```
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code } = ryuseiCode.Editor.Components;
+   * const ranges = Code.search( 'foo' );
+   *
+   * // The ranges will contain 2 results:
+   * // { start: [ 0, 0 ], end: [ 0, 3 ] }
+   * // { start: [ 2, 0 ], end: [ 2, 3 ] }
+   * ```
    *
    * @param search     - A string or a regexp object.
    * @param ignoreCase - Optional. Whether to perform case-insensitive search or not.
    * @param wholeWord  - Optional. Whether to only match a whole word or not.
    * @param limit      - Optional. Limits the number of matched results.
    *
-   * @return An array with tuples that contains `[ index, length ]`.
+   * @return An array with Range objects.
    */
   search( search: string | RegExp, ignoreCase?: boolean, wholeWord?: boolean, limit?: number ): Range[] {
     const source = isString( search ) ? escapeRegExp( search ) : search.source;

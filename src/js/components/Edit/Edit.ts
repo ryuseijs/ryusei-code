@@ -64,7 +64,7 @@ export class Edit extends Component {
       prevent( e, true );
     } );
 
-    this.on( EVENT_CONTEXT_MENU_CLICKED, this.onMenuClick, this );
+    this.on( EVENT_CONTEXT_MENU_CLICKED, this.onMenuClicked, this );
 
     if ( isIE() ) {
       this.bind( editable, 'compositionstart', e => {
@@ -111,23 +111,26 @@ export class Edit extends Component {
   /**
    * Called when the context menu item is clicked.
    *
-   * @param e    - An EventBusEvent object.
-   * @param menu - A ContextMenu instance.
-   * @param id   - The ID of the clicked item.
+   * @param e           - An EventBusEvent object.
+   * @param ContextMenu - A ContextMenu instance.
+   * @param group       - A group ID.
+   * @param id          - The ID of the clicked item.
    */
-  private onMenuClick( e: EventBusEvent<Editor>, menu: ContextMenu, id: string ): void {
-    const { Selection } = this;
+  private onMenuClicked( e: EventBusEvent<Editor>, ContextMenu: ContextMenu, group: string, id: string ): void {
+    if ( group === MAIN_CONTEXT_MENU_ID ) {
+      const { Selection } = this;
 
-    if ( id === 'copy' || id === 'cut' ) {
-      if ( ! this.isSelected() ) {
-        Selection.selectLine( undefined, id === 'copy', true );
+      if ( id === 'copy' || id === 'cut' ) {
+        if ( ! this.isSelected() ) {
+          Selection.selectLine( undefined, id === 'copy', true );
+        }
+
+        this[ id ]();
+      } else if ( id === 'paste' ) {
+        this.clipboard.paste( this.paste.bind( this ) );
+      } else if ( id === 'selectAll' ) {
+        Selection.selectAll();
       }
-
-      this[ id ]();
-    } else if ( id === 'paste' ) {
-      this.clipboard.paste( this.paste.bind( this ) );
-    } else if ( id === 'selectAll' ) {
-      Selection.selectAll();
     }
   }
 

@@ -59,7 +59,8 @@ describe( 'ContextMenu', () => {
   test( 'should emit the event when the menu item is clicked.', done => {
     show();
 
-    Editor.event.on( EVENT_CONTEXT_MENU_CLICKED, ( e, Editor, id ) => {
+    Editor.event.on( EVENT_CONTEXT_MENU_CLICKED, ( e, Editor, group, id ) => {
+      expect( group ).toBe( MAIN_CONTEXT_MENU_ID );
       expect( id ).toBe( CONTEXT_MENU_EDIT[ 0 ].id );
       done();
     } );

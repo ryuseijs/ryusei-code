@@ -246,7 +246,7 @@ export class ContextMenu extends UIComponent<ContextMenuGroupData> {
         attr( button, { role: 'menuitem' } );
 
         this.bind( button, 'click', () => {
-          this.emit( EVENT_CONTEXT_MENU_CLICKED, this, id, button );
+          this.emit( EVENT_CONTEXT_MENU_CLICKED, this, group, id, button );
           this.hide();
         } );
 
