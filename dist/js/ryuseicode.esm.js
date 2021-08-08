@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /*!
  * RyuseiCode.js
- * Version  : 0.1.7
+ * Version  : 0.1.8
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -5492,21 +5492,11 @@ var ContextMenu = /*#__PURE__*/function (_UIComponent) {
   return ContextMenu;
 }(UIComponent);
 /**
- * Holds the clipboard object. IE does not support this object.
- *
- * @link https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard
- *
- * @since 0.1.0
- */
-
-
-var _navigator2 = navigator,
-    clipboard = _navigator2.clipboard;
-/**
  * The class for normalizing different copy/paste behaviours in browsers.
  *
  * @since 0.1.0
  */
+
 
 var Clipboard = /*#__PURE__*/function () {
   function Clipboard() {}
@@ -5581,6 +5571,9 @@ var Clipboard = /*#__PURE__*/function () {
   ;
 
   _proto12.paste = function paste(onPaste) {
+    var _navigator2 = navigator,
+        clipboard = _navigator2.clipboard;
+
     if (clipboard) {
       clipboard.readText().then(onPaste);
     } else {
@@ -5597,6 +5590,9 @@ var Clipboard = /*#__PURE__*/function () {
 
   _proto12.copy = function copy(text, onFailed) {
     var _this18 = this;
+
+    var _navigator3 = navigator,
+        clipboard = _navigator3.clipboard;
 
     if (clipboard) {
       clipboard.writeText(text)["catch"](function () {

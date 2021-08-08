@@ -2,15 +2,6 @@ import { create, focus, remove, styles } from '../../utils';
 
 
 /**
- * Holds the clipboard object. IE does not support this object.
- *
- * @link https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard
- *
- * @since 0.1.0
- */
-const { clipboard } = navigator;
-
-/**
  * The class for normalizing different copy/paste behaviours in browsers.
  *
  * @since 0.1.0
@@ -23,7 +14,7 @@ export class Clipboard {
    *
    * @return A created element.
    */
-  protected create( text: string ): HTMLTextAreaElement {
+  private create( text: string ): HTMLTextAreaElement {
     const textarea = create( 'textarea', {}, document.body );
     const offset   = '-999999px';
     styles( textarea, { position: 'absolute', top: offset, left: offset } );
@@ -40,7 +31,7 @@ export class Clipboard {
    *
    * @return A pasted text.
    */
-  protected execPaste(): string {
+  private execPaste(): string {
     const textarea = this.create( '' );
     document.execCommand( 'paste' );
 
@@ -56,7 +47,7 @@ export class Clipboard {
    * @param text     - A text to copy.
    * @param onFailed - Optional. A callback fired when copy failed.
    */
-  protected execCopy( text: string, onFailed?: () => void ): void {
+  private execCopy( text: string, onFailed?: () => void ): void {
     const textarea = this.create( text );
 
     try {
@@ -76,6 +67,8 @@ export class Clipboard {
    * @param onPaste - A callback fired after pasting a text, taking a pasted value as the first argument.
    */
   paste( onPaste: ( text: string ) => void ): void {
+    const { clipboard } = navigator;
+
     if ( clipboard ) {
       clipboard.readText().then( onPaste );
     } else {
@@ -90,6 +83,8 @@ export class Clipboard {
    * @param onFailed - Optional. A callback fired when copy failed.
    */
   copy( text: string, onFailed?: () => void ): void {
+    const { clipboard } = navigator;
+
     if ( clipboard ) {
       clipboard.writeText( text ).catch( () => {
         this.execCopy( text, onFailed );
