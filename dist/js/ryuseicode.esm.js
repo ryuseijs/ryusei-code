@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /*!
  * RyuseiCode.js
- * Version  : 0.1.9
+ * Version  : 0.1.10
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -32,7 +32,7 @@ var I18N$4 = {
   cancel: 'Cancel',
   failedToCopy: 'Can not copy on your environment.',
   scrollbar: 'Drag to Scroll',
-  inputLabel: 'Edit the code.',
+  inputLabel: 'Edit contents',
   location: 'Line: %s, Column: %s'
 };
 /**
@@ -9937,7 +9937,7 @@ var CoreComponents = /*#__PURE__*/Object.freeze({
   View: View
 });
 /**
- * Common attributes for editable areas.
+ * Attributes for the editable area.
  *
  * @link https://www.w3.org/TR/wai-aria-1.2/#aria-roledescription
  * @link https://www.w3.org/TR/wai-aria-1.2/#aria-multiline
@@ -10024,7 +10024,9 @@ var Renderer = /*#__PURE__*/function () {
       }, settings[2]);
       html += tag(settings[1], attrs);
     });
-    html += tag([CLASS_LINES], ATTRIBUTES_EDITABLE_AREA);
+    html += tag([CLASS_LINES], assign$1({
+      'aria-label': options.i18n.inputLabel
+    }, ATTRIBUTES_EDITABLE_AREA));
     this.renderLines(append);
     html += '</div>';
 

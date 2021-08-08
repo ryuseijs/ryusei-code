@@ -15,6 +15,6 @@ export const I18N = {
   cancel      : 'Cancel',
   failedToCopy: 'Can not copy on your environment.',
   scrollbar   : 'Drag to Scroll',
-  inputLabel  : 'Edit the code.',
+  inputLabel  : 'Edit contents',
   location    : 'Line: %s, Column: %s',
 };

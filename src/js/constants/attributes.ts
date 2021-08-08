@@ -1,5 +1,5 @@
 /**
- * Common attributes for editable areas.
+ * Attributes for the editable area.
  *
  * @link https://www.w3.org/TR/wai-aria-1.2/#aria-roledescription
  * @link https://www.w3.org/TR/wai-aria-1.2/#aria-multiline

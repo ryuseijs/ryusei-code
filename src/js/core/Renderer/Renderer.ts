@@ -103,7 +103,7 @@ export class Renderer {
       html += tag( settings[ 1 ], attrs );
     } );
 
-    html += tag( [ CLASS_LINES ], ATTRIBUTES_EDITABLE_AREA );
+    html += tag( [ CLASS_LINES ], assign( { 'aria-label': options.i18n.inputLabel }, ATTRIBUTES_EDITABLE_AREA ) );
     this.renderLines( append );
     html += '</div>';
 
