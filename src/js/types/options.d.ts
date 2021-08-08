@@ -94,7 +94,7 @@ declare module '@ryusei/code' {
     /**
      * Sets focus on the editor after initialization.
      */
-    autofocus?: boolean;
+    autoFocus?: boolean;
 
     /**
      * Makes the editor read-only.

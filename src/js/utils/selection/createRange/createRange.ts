@@ -3,5 +3,9 @@
  * The Range constructor is not supported by IE.
  *
  * @since 0.1.0
+ *
+ * @return A Range instance.
  */
-export const createRange: () => Range = document.createRange.bind( document );
+export function createRange(): Range {
+  return document.createRange();
+}

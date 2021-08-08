@@ -27,7 +27,7 @@ describe( 'Editor#options()', () => {
   } );
 
   test( 'can make the editor focus after initialization.', () => {
-    const ryuseiCode = new RyuseiCode( { autofocus: true } );
+    const ryuseiCode = new RyuseiCode( { autoFocus: true } );
     ryuseiCode.apply( 'pre' );
     expect( ryuseiCode.Editor.isFocused() ).toBe( true );
   } );

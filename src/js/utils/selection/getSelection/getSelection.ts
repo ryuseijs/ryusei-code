@@ -2,5 +2,9 @@
  * The alias of window.getSelection.
  *
  * @since 0.1.0
+ *
+ * @return A Selection instance.
  */
-export const getSelection = window.getSelection;
+export function getSelection(): Selection {
+  return window.getSelection();
+}

@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.4
+ * Version  : 0.1.7
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -1114,17 +1114,26 @@ function compare(position1, position2) {
  * The Range constructor is not supported by IE.
  *
  * @since 0.1.0
+ *
+ * @return A Range instance.
  */
 
 
-var createRange = document.createRange.bind(document);
+function createRange() {
+  return document.createRange();
+}
 /**
  * The alias of window.getSelection.
  *
  * @since 0.1.0
+ *
+ * @return A Selection instance.
  */
 
-var getSelection = window.getSelection;
+
+function getSelection() {
+  return window.getSelection();
+}
 /**
  * Finds a node that the offset number belongs to.
  *
@@ -1133,6 +1142,7 @@ var getSelection = window.getSelection;
  *
  * @return An object that contains a found node and a offset number.
  */
+
 
 function findSelectionBoundary(elm, offset) {
   var children = elm.childNodes;
@@ -1414,10 +1424,10 @@ var Component = /*#__PURE__*/function () {
     off(null, '', this);
   }
   /**
-   * Attaches an event handler with passing this instance as a key.
-   * All handlers can only be detached by the `off()` method below.
+   * Attaches an event handler to an event or events with passing this instance as a key.
+   * They can only be detached by the `off()` member method.
    *
-   * @param events   - An event name or names.
+   * @param events   - An event name, names split by spaces, or an array with names.
    * @param callback - A callback function.
    * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
    * @param priority - Optional. A priority number for the order in which the callbacks are invoked.
@@ -1428,9 +1438,9 @@ var Component = /*#__PURE__*/function () {
     this.event.on(events, thisArg ? callback.bind(thisArg) : callback, this, priority);
   }
   /**
-   * Detaches event handlers registered by `on()` without removing other handlers.
+   * Detaches handlers registered by `on()` without removing handlers attached by other components.
    *
-   * @param events - An event name or names.
+   * @param events - An event name, names split by spaces, or an array with names.
    */
   ;
 
@@ -1438,7 +1448,7 @@ var Component = /*#__PURE__*/function () {
     this.event.off(events, this);
   }
   /**
-   * Triggers callback functions.
+   * Triggers handlers attached to the event.
    *
    * @param event - An event name.
    * @param args  - Optional. Any number of arguments to pass to callback functions.
@@ -1456,10 +1466,10 @@ var Component = /*#__PURE__*/function () {
   }
   /**
    * Listens to native events.
-   * All handlers will be stored for destruction.
+   * This method stores all listeners and automatically removes them on destruction.
    *
    * @param elm      - A document, a window or an element.
-   * @param events   - An event name or names.
+   * @param events   - An event name or names split by spaces.
    * @param callback - A callback function.
    * @param thisArg  - Optional. Specifies the `this` parameter of the callback function.
    */
@@ -1469,16 +1479,18 @@ var Component = /*#__PURE__*/function () {
     on(elm, events, thisArg ? callback.bind(thisArg) : callback, this);
   }
   /**
-   * Returns a Language or LanguageConfig object at the specified position.
+   * Returns a Language or LanguageConfig object at the focus or specified position.
+   * This method can return different objects depending on the position
+   * if the language allows to embed other languages, such as HTML and PHP.
    *
-   * @param position - Optional. A position.
+   * @param position - Optional. Specifies the position to get the language at.
    *
    * @return A main Language object or sub language config object.
    */
   ;
 
   _proto2.getLanguage = function getLanguage(position) {
-    position = position || this.Selection.get().start;
+    position = position || this.Selection.focus;
     var language = this.language;
     var info = this.lines.getInfoAt(position);
 
@@ -1489,7 +1501,15 @@ var Component = /*#__PURE__*/function () {
     return language;
   }
   /**
-   * Attempts to invoke the method of the specified extension.
+   * Attempts to invoke the public method of the specified extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
+   *
+   * @example
+   * ```ts
+   * // Attempts to show the "search" toolbar.
+   * Editor.invoke( 'Toolbar', 'show', 'search' );
+   * ```
    *
    * @param name   - A name of the extension.
    * @param method - A method name to invoke.
@@ -1509,7 +1529,9 @@ var Component = /*#__PURE__*/function () {
     return (_this$Editor = this.Editor).invoke.apply(_this$Editor, [name, method].concat(args));
   }
   /**
-   * Returns the extension of the specified name.
+   * Returns the specified extension.
+   * In terms of the "loose coupling", you'd better try not to use this method.
+   * Using events is enough in most cases.
    *
    * @param name - A name of an extension.
    *
@@ -1522,8 +1544,19 @@ var Component = /*#__PURE__*/function () {
   }
   /**
    * Adds default icon strings. They can be still overridden by options.
+   * The IconSettings is a tuple as `[ string, number?, string? ]` corresponding with `[ path, stroke?, linecap? ]`.
    *
-   * @param icons - Additional icon strings.
+   * @example
+   * ```ts
+   * this.addIcons( {
+   *   myIcon: [
+   *     'm19 18-14-13m0 13 14-13',
+   *     3,
+   *   ],
+   * } );
+   * ```
+   *
+   * @param icons - Icon settings to add.
    */
   ;
 
@@ -1533,6 +1566,13 @@ var Component = /*#__PURE__*/function () {
   }
   /**
    * Adds default i18n strings. They can be still overridden by options.
+   *
+   * @example
+   * ```ts
+   * this.addI18n( {
+   *   myMessage: 'Hello!',
+   * } );
+   * ```
    *
    * @param i18n - Additional i18n strings.
    */
@@ -1544,6 +1584,20 @@ var Component = /*#__PURE__*/function () {
   }
   /**
    * Adds default shortcuts to the keymap object. They can be still overridden by options.
+   * Call this method before RyuseiCode mounts components so that the Keymap component recognizes shortcuts.
+   *
+   * @example
+   * ```js
+   * class MyExtension extends Component {
+   *   constructor( Editor ) {
+   *     super( Editor );
+   *
+   *     this.addKeyBindings( {
+   *       myShortcut: [ 'P', true, true ],
+   *     } );
+   *   }
+   * }
+   * ```
    *
    * @param shortcuts - Additional shortcuts.
    */
@@ -1554,8 +1608,18 @@ var Component = /*#__PURE__*/function () {
     options.keymap = assign$1({}, shortcuts, options.keymap);
   }
   /**
-   * Returns options for each component with merging default values.
-   * If the returned value is `null`, that means the component should not be active.
+   * Returns options for each extension, merging provided default values.
+   *
+   * @example
+   * ```js
+   * class MyExtension extends Component {
+   *   constructor( Editor ) {
+   *     super( Editor );
+   *
+   *     const extensionOptions = this.getOptions( 'myExtension', { option1: true } );
+   *   }
+   * }
+   * ```
    *
    * @param name     - An option name.
    * @param defaults - Default values.
@@ -1824,7 +1888,7 @@ var CustomCaret = /*#__PURE__*/function () {
     addClass(this.caret, CLASS_ACTIVE);
   }
   /**
-   * Hides teh caret.
+   * Hides the caret.
    */
   ;
 
@@ -4379,6 +4443,9 @@ var Code = /*#__PURE__*/function (_Component4) {
   }
   /**
    * Returns the code at the row index.
+   * Although the `Lines[ row ]` also returns the code at the row,
+   * which is much faster than this method,
+   * it may not be the latest before the `Sync` finishes syncing process.
    *
    * @param row - A row index.
    *
@@ -4391,6 +4458,12 @@ var Code = /*#__PURE__*/function (_Component4) {
   }
   /**
    * Slices the code by the specified row range.
+   *
+   * @example
+   * ```ts
+   * // Gets lines from 1 to 9:
+   * const code = Code.sliceLines( 2, 10 );
+   * ```
    *
    * @param startRow - A start row index to start slicing a text.
    * @param endRow   - An end row index to end slicing a text.
@@ -4407,6 +4480,11 @@ var Code = /*#__PURE__*/function (_Component4) {
   /**
    * Slices the code by the specified position range.
    *
+   * @example
+   * ```ts
+   * const code = Code.sliceLines( [ 0, 1 ], [ 2, 9 ] );
+   * ```
+   *
    * @param start - A start position to start slicing a text.
    * @param end   - Optional. An end position to end slicing a text.
    *
@@ -4421,6 +4499,30 @@ var Code = /*#__PURE__*/function (_Component4) {
   }
   /**
    * Replaces lines by the replacement text.
+   *
+   * @example
+   * Consider the following HTML as an example:
+   * ```html
+   * <pre>
+   * function message() {
+   *   console.log( 'Hi!' );
+   * }
+   * </pre>
+   * ```
+   *
+   * Let's modify the line 2 (row index is `1`):
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code, Sync } = ryuseiCode.Editor.Components;
+   *
+   * setTimeout( () => {
+   *   Code.replaceLines( 1, 1, `  console.log( 'Bye!' );\n` );
+   *   Sync.sync( 1, 1 );
+   * }, 2000 );
+   * ```
    *
    * @param startRow    - A start row index.
    * @param endRow      - An end row index.
@@ -4456,6 +4558,38 @@ var Code = /*#__PURE__*/function (_Component4) {
    * Replaces lines by the iteratee function invoked for each line.
    * The returning string of the function will be used as a new line.
    *
+   * @example
+   * Consider the following HTML as an example:
+   *
+   * ```html
+   * <pre>
+   * 1
+   * 2
+   * 3
+   * </pre>
+   * ```
+   *
+   * Let's modify lines by an iteratee function:
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code, Sync } = ryuseiCode.Editor.Components;
+   *
+   * setTimeout( () => {
+   *   Code.replaceLinesBy( 0, 2, line => `Line: ${ line }` );
+   *   Sync.sync( 0, 2 );
+   * }, 2000 );
+   * ```
+   *
+   * The result will be:
+   * ```none
+   * Line: 1
+   * Line: 2
+   * Line: 3
+   * ```
+   *
    * @param startRow - A start row index.
    * @param endRow   - An end row index.
    * @param iteratee - An iteratee function invoked for each line.
@@ -4473,14 +4607,35 @@ var Code = /*#__PURE__*/function (_Component4) {
     }, ''));
   }
   /**
-   * Searches the provided word or regexp.
+   * Searches the provided word or regexp and returns matched ranges.
+   *
+   * @example
+   * ```html
+   * <pre>
+   * foo
+   * bar
+   * foo
+   * </pre>
+   * ```
+   *
+   * ```ts
+   * const ryuseiCode = new RyuseiCode();
+   * ryuseiCode.apply( 'pre' );
+   *
+   * const { Code } = ryuseiCode.Editor.Components;
+   * const ranges = Code.search( 'foo' );
+   *
+   * // The ranges will contain 2 results:
+   * // { start: [ 0, 0 ], end: [ 0, 3 ] }
+   * // { start: [ 2, 0 ], end: [ 2, 3 ] }
+   * ```
    *
    * @param search     - A string or a regexp object.
    * @param ignoreCase - Optional. Whether to perform case-insensitive search or not.
    * @param wholeWord  - Optional. Whether to only match a whole word or not.
    * @param limit      - Optional. Limits the number of matched results.
    *
-   * @return An array with tuples that contains `[ index, length ]`.
+   * @return An array with Range objects.
    */
   ;
 
@@ -5185,7 +5340,7 @@ var ContextMenu = /*#__PURE__*/function (_UIComponent) {
         });
 
         _this16.bind(button, 'click', function () {
-          _this16.emit(EVENT_CONTEXT_MENU_CLICKED, _this16, id, button);
+          _this16.emit(EVENT_CONTEXT_MENU_CLICKED, _this16, group, id, button);
 
           _this16.hide();
         });
@@ -5514,7 +5669,7 @@ var Edit = /*#__PURE__*/function (_Component6) {
     this.bind(editable, 'dragover drop paste cut', function (e) {
       prevent(e, true);
     });
-    this.on(EVENT_CONTEXT_MENU_CLICKED, this.onMenuClick, this);
+    this.on(EVENT_CONTEXT_MENU_CLICKED, this.onMenuClicked, this);
 
     if (isIE()) {
       this.bind(editable, 'compositionstart', function (e) {
@@ -5564,25 +5719,28 @@ var Edit = /*#__PURE__*/function (_Component6) {
   /**
    * Called when the context menu item is clicked.
    *
-   * @param e    - An EventBusEvent object.
-   * @param menu - A ContextMenu instance.
-   * @param id   - The ID of the clicked item.
+   * @param e           - An EventBusEvent object.
+   * @param ContextMenu - A ContextMenu instance.
+   * @param group       - A group ID.
+   * @param id          - The ID of the clicked item.
    */
   ;
 
-  _proto13.onMenuClick = function onMenuClick(e, menu, id) {
-    var Selection = this.Selection;
+  _proto13.onMenuClicked = function onMenuClicked(e, ContextMenu, group, id) {
+    if (group === MAIN_CONTEXT_MENU_ID) {
+      var _Selection2 = this.Selection;
 
-    if (id === 'copy' || id === 'cut') {
-      if (!this.isSelected()) {
-        Selection.selectLine(undefined, id === 'copy', true);
+      if (id === 'copy' || id === 'cut') {
+        if (!this.isSelected()) {
+          _Selection2.selectLine(undefined, id === 'copy', true);
+        }
+
+        this[id]();
+      } else if (id === 'paste') {
+        this.clipboard.paste(this.paste.bind(this));
+      } else if (id === 'selectAll') {
+        _Selection2.selectAll();
       }
-
-      this[id]();
-    } else if (id === 'paste') {
-      this.clipboard.paste(this.paste.bind(this));
-    } else if (id === 'selectAll') {
-      Selection.selectAll();
     }
   }
   /**
@@ -5828,9 +5986,9 @@ var Input = /*#__PURE__*/function (_Component7) {
   _proto14.onCompositionStart = function onCompositionStart(e) {
     if (this.disabled) {
       var _Editor = this.Editor,
-          _Selection2 = this.Selection;
+          _Selection3 = this.Selection;
 
-      var range = _Selection2.get(false);
+      var range = _Selection3.get(false);
 
       getSelection().removeAllRanges();
 
@@ -5839,7 +5997,7 @@ var Input = /*#__PURE__*/function (_Component7) {
       nextTick(function () {
         _Editor.focus();
 
-        _Selection2.set(range.start, range.end);
+        _Selection3.set(range.start, range.end);
       });
       return;
     }
@@ -6068,13 +6226,15 @@ var Input = /*#__PURE__*/function (_Component7) {
    * If the state with the provided type exists, new props will be assigned to it.
    * The props object accepts following values:
    *
-   * - `key?`: The key that makes the input.
-   * - `startRow?`: The start row index to replace lines with the current value from.
-   * - `endRow?`: The end row index to replace lines with the current value to.
-   * - `value?`: The value to replace lines with. If omitted, the current value will be used.
-   * - `insertion?`: Specifies the value to insert at the caret position instead of setting the value.
-   * - `offset?`: The number of offset cols after the state is applied.
-   * - `position?`: Explicitly specifies the position after the state is applied. The `offset` will be ignored.
+   * | State | Description |
+   * |---|---|
+   * | `key?` | The key that makes the input. |
+   * | `startRow?` | The start row index to replace lines with the current value from. |
+   * | `endRow?` | The end row index to replace lines with the current value to. |
+   * | `value?` | The value to replace lines with. If omitted, the current value will be used. |
+   * | `insertion?` | Specifies the value to insert at the caret position instead of setting the value. |
+   * | `offset?` | The number of offset cols after the state is applied. |
+   * | `position?` | Explicitly specifies the position after the state is applied. The `offset` will be ignored. |
    *
    * @param type  - The type of the state.
    * @param props - Optional. An object with state values.
@@ -8828,7 +8988,7 @@ var Sync = /*#__PURE__*/function (_Component14) {
    * ```html
    * <pre>
    * function message() {
-   *   console.log( 'hi' );
+   *   console.log( 'Hi!' );
    * }
    * </pre>
    * ```
@@ -9965,7 +10125,7 @@ var Editor = /*#__PURE__*/function () {
     event.emit(EVENT_MOUNTED, elements);
     this.readOnly = options.readOnly;
 
-    if (options.autofocus) {
+    if (options.autoFocus) {
       this.focus();
     }
   }
@@ -10181,7 +10341,7 @@ var Editor = /*#__PURE__*/function () {
     }
   }
   /**
-   * Returns the extension.
+   * Returns the specified extension.
    * In terms of the "loose coupling", you'd better try not to use this method.
    * Using events is enough in most cases.
    *
@@ -10824,10 +10984,10 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
 
       if (_index4 > -1 && this.validate(_index4, 'skip')) {
         if (closingChars[_index4] === Input["char"]()) {
-          var _Selection3 = this.Selection,
+          var _Selection4 = this.Selection,
               focus = this.Selection.focus;
 
-          _Selection3.set([focus[0], focus[1] + 1]);
+          _Selection4.set([focus[0], focus[1] + 1]);
 
           prevent(e);
         }
@@ -10849,11 +11009,11 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
 
       if (_index5 > -1 && this.validate(_index5, 'remove')) {
         if (this.getChars(true)[_index5] === Input["char"]()) {
-          var _Selection4 = this.Selection,
+          var _Selection5 = this.Selection,
               focus = this.Selection.focus;
           Input.value = Input.before + Input.after.slice(1);
 
-          _Selection4.set(focus);
+          _Selection5.set(focus);
         }
       }
     }
@@ -13782,12 +13942,12 @@ var Search = /*#__PURE__*/function (_Component26) {
     var activeRange = ranges[index];
 
     if (activeRange) {
-      var _Selection5 = this.Selection;
+      var _Selection6 = this.Selection;
       var _start7 = activeRange.start,
           end = activeRange.end;
       var nextRange = ranges[index + 1];
 
-      _Selection5.update(_start7, _start7, true);
+      _Selection6.update(_start7, _start7, true);
 
       this.emit(EVENT_CHANGE, 'replace');
       this.jump(index);

@@ -192,7 +192,7 @@ export class Editor {
 
     this.readOnly = options.readOnly;
 
-    if ( options.autofocus ) {
+    if ( options.autoFocus ) {
       this.focus();
     }
   }
