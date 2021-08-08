@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.8
+ * Version  : 0.1.9
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -8815,7 +8815,9 @@ var Style = /*#__PURE__*/function (_Component13) {
     var _this43 = this;
 
     var options = this.options,
-        lineHeight = this.options.lineHeight;
+        _this$options = this.options,
+        lineHeight = _this$options.lineHeight,
+        tabSize = _this$options.tabSize;
     ['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight'].forEach(function (prop) {
       var value = options[prop];
 
@@ -8823,18 +8825,20 @@ var Style = /*#__PURE__*/function (_Component13) {
         _this43.add('root', prop, unit(value));
       }
     });
+
+    if (tabSize) {
+      this.add('root', '-moz-tab-size', tabSize);
+      this.add('root', 'tabSize', tabSize);
+    }
+
     var height = lineHeight ? lineHeight + "em" : undefined;
-    this.add('root', isGecko() ? '-moz-tab-size' : 'tabSize', options.tabSize);
     this.add("." + CLASS_EDITOR, {
       lineHeight: lineHeight,
       fontFamily: options.monospaceFont
     });
     this.add("." + CLASS_MARKER, 'minHeight', height);
     this.add("." + CLASS_CARET, 'height', height);
-
-    if (!isIE()) {
-      this.add("." + CLASS_LINE + ":not(." + CLASS_EMPTY + "):not(." + CLASS_PRESERVED + ")", 'height', height);
-    }
+    this.add("." + CLASS_LINE + ":not(." + CLASS_EMPTY + "):not(." + CLASS_PRESERVED + ")", 'height', height);
   }
   /**
    * Converts the selectors object into a single style string.

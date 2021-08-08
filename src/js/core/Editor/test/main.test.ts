@@ -34,6 +34,7 @@ describe( 'Editor', () => {
       options.minHeight,
       options.maxWidth,
       options.maxHeight,
+      options.tabSize,
       options.tabSize
     ) );
   } );

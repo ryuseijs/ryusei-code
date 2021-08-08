@@ -6,7 +6,7 @@ $padding-left: 1.5em !default;
 $padding-right: 1.5em !default;
 
 /**
- * - A line must not have any dimension styles so that IE does not show resize handles for editable elements
+ * - A line must not have any dimension styles in IE to prevent it from displaying resize handles
  * - A line must have explicit height for zooming, except for IE
  * - A line should have padding on its side to start selection by a mouse
  */
@@ -21,7 +21,7 @@ $padding-right: 1.5em !default;
     padding: 0 $padding-right 0 $padding-left;
 
     @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-      height: initial;
+      height: initial !important;
     }
 
     &.is-preserved {

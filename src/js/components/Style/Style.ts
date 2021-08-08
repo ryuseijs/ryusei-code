@@ -10,19 +10,7 @@ import {
 } from '../../constants/classes';
 import { EVENT_INIT_STYLE } from '../../constants/events';
 import { Editor } from '../../core/Editor/Editor';
-import {
-  append,
-  camelToKebab,
-  forOwn,
-  isGecko,
-  isIE,
-  isString,
-  isUndefined,
-  query,
-  remove,
-  text,
-  unit,
-} from '../../utils';
+import { append, camelToKebab, forOwn, isString, isUndefined, query, remove, text, unit } from '../../utils';
 import { FontObserver } from './FontObserver';
 
 
@@ -62,7 +50,7 @@ export class Style extends Component {
    * Adds styles defined in options.
    */
   private init(): void {
-    const { options, options: { lineHeight } } = this;
+    const { options, options: { lineHeight, tabSize } } = this;
 
     [ 'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight' ].forEach( prop => {
       const value = options[ prop ];
@@ -72,9 +60,12 @@ export class Style extends Component {
       }
     } );
 
-    const height = lineHeight ? `${ lineHeight }em` : undefined;
+    if ( tabSize ) {
+      this.add( 'root', '-moz-tab-size', tabSize );
+      this.add( 'root', 'tabSize', tabSize );
+    }
 
-    this.add( 'root', isGecko() ? '-moz-tab-size' : 'tabSize', options.tabSize );
+    const height = lineHeight ? `${ lineHeight }em` : undefined;
 
     this.add( `.${ CLASS_EDITOR }`, {
       lineHeight: lineHeight,
@@ -83,10 +74,7 @@ export class Style extends Component {
 
     this.add( `.${ CLASS_MARKER }`, 'minHeight', height );
     this.add( `.${ CLASS_CARET }`, 'height', height );
-
-    if ( ! isIE() ) {
-      this.add( `.${ CLASS_LINE }:not(.${ CLASS_EMPTY }):not(.${ CLASS_PRESERVED })`, 'height', height );
-    }
+    this.add( `.${ CLASS_LINE }:not(.${ CLASS_EMPTY }):not(.${ CLASS_PRESERVED })`, 'height', height );
   }
 
   /**
