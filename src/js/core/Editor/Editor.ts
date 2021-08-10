@@ -312,7 +312,7 @@ export class Editor {
    * Builds the HTML of the editor. This works without `document` and `window` objects,
    * but has no functionality.
    *
-   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
+   * The [`maxInitialLines`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
    * @param code   - The code for the editor.
    * @param source - Optional. Whether to embed the source code into the editor or not.

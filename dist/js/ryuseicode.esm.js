@@ -1690,7 +1690,7 @@ var CLASS_CONTEXT_MENU_ITEM = CLASS_CONTEXT_MENU + "__item";
 var CLASS_CONTEXT_MENU_BUTTON = CLASS_CONTEXT_MENU + "__button";
 var CLASS_CONTEXT_MENU_LABEL = CLASS_CONTEXT_MENU_BUTTON + "__label";
 var CLASS_CONTEXT_MENU_SHORTCUT = CLASS_CONTEXT_MENU_BUTTON + "__shortcut";
-var CLASS_TOKEN = PROJECT_CODE + "__token";
+var CLASS_TOKEN = PROJECT_CODE_SHORT + "__token";
 var CLASS_INPUT = PROJECT_CODE + "__input";
 var CLASS_BUTTON = PROJECT_CODE + "__button";
 var CLASS_ICON = PROJECT_CODE + "__icon";
@@ -10247,7 +10247,7 @@ var Editor = /*#__PURE__*/function () {
    * Builds the HTML of the editor. This works without `document` and `window` objects,
    * but has no functionality.
    *
-   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
+   * The [`maxInitialLines`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
    * @param code   - The code for the editor.
    * @param source - Optional. Whether to embed the source code into the editor or not.
@@ -10646,7 +10646,7 @@ var RyuseiCode = /*#__PURE__*/function () {
    * Builds the HTML of the editor. This works without `document` and `window` objects,
    * but has no functionality.
    *
-   * The [`maxInitialLine`](/guides/options#max-initial-lines) option limits the number of lines to generate.
+   * The [`maxInitialLines`](/guides/options#max-initial-lines) option limits the number of lines to generate.
    *
    * @param code - The code for the editor.
    *

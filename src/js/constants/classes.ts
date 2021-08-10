@@ -1,4 +1,4 @@
-import { PROJECT_CODE } from './project';
+import { PROJECT_CODE, PROJECT_CODE_SHORT } from './project';
 
 
 export const CLASS_ROOT                  = PROJECT_CODE;
@@ -26,7 +26,7 @@ export const CLASS_CONTEXT_MENU_ITEM     = `${ CLASS_CONTEXT_MENU }__item`;
 export const CLASS_CONTEXT_MENU_BUTTON   = `${ CLASS_CONTEXT_MENU }__button`;
 export const CLASS_CONTEXT_MENU_LABEL    = `${ CLASS_CONTEXT_MENU_BUTTON }__label`;
 export const CLASS_CONTEXT_MENU_SHORTCUT = `${ CLASS_CONTEXT_MENU_BUTTON }__shortcut`;
-export const CLASS_TOKEN                 = `${ PROJECT_CODE }__token`;
+export const CLASS_TOKEN                 = `${ PROJECT_CODE_SHORT }__token`;
 export const CLASS_INPUT                 = `${ PROJECT_CODE }__input`;
 export const CLASS_BUTTON                = `${ PROJECT_CODE }__button`;
 export const CLASS_ICON                  = `${ PROJECT_CODE }__icon`;

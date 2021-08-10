@@ -1,3 +1,4 @@
+import { CLASS_TOKEN } from '../../../../constants/classes';
 import { init } from '../../../../test';
 
 
@@ -9,7 +10,7 @@ describe( 'Lines#getInfoAt()', () => {
     expect( lines.getInfoAt( [ 0, 0 ] ) ).toStrictEqual( {
       category: 'identifier',
       code    : 'console',
-      html    : '<code class="ryuseicode__token rc__identifier">console</code>',
+      html    : `<code class="${ CLASS_TOKEN } rc__identifier">console</code>`,
       from    : 0,
       to      : 7,
       index   : 0,
@@ -25,7 +26,7 @@ describe( 'Lines#getInfoAt()', () => {
     expect( lines.getInfoAt( [ 0, 8 ] ) ).toStrictEqual( {
       category: 'function',
       code    : 'log',
-      html    : '<code class="ryuseicode__token rc__function">log</code>',
+      html    : `<code class="${ CLASS_TOKEN } rc__function">log</code>`,
       from    : 8,
       to      : 11,
       index   : 2,
@@ -41,7 +42,7 @@ describe( 'Lines#getInfoAt()', () => {
     expect( lines.getInfoAt( [ 1, 0 ] ) ).toStrictEqual( {
       category: 'keyword',
       code    : 'const',
-      html    : '<code class="ryuseicode__token rc__keyword">const</code>',
+      html    : `<code class="${ CLASS_TOKEN } rc__keyword">const</code>`,
       from    : 0,
       to      : 5,
       index   : 0,

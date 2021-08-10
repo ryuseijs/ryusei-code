@@ -1,4 +1,5 @@
 import { CODE_NUMBERS, init } from '../../../../test';
+import { CLASS_TOKEN } from '../../../../constants/classes';
 
 
 describe( 'Lines#sync()', () => {
@@ -14,7 +15,7 @@ describe( 'Lines#sync()', () => {
     expect( lines.length ).toBe( 9 );
 
     for ( let i = 0; i < lines.length; i++ ) {
-      expect( lines[ i ].html ).toBe( `<code class="ryuseicode__token rc__number">${ i + 1 }</code>` );
+      expect( lines[ i ].html ).toBe( `<code class="${ CLASS_TOKEN } rc__number">${ i + 1 }</code>` );
     }
   } );
 
@@ -26,9 +27,9 @@ describe( 'Lines#sync()', () => {
     for ( let i = 0; i < lines.length; i++ ) {
       if ( i === 2 || i === 3 ) {
         const string = i === 2 ? 'aaa' : 'bbb';
-        expect( lines[ i ].html ).toBe( `<code class="ryuseicode__token rc__identifier">${ string }</code>` );
+        expect( lines[ i ].html ).toBe( `<code class="${ CLASS_TOKEN } rc__identifier">${ string }</code>` );
       } else {
-        expect( lines[ i ].html ).toBe( `<code class="ryuseicode__token rc__number">${ i + 1 }</code>` );
+        expect( lines[ i ].html ).toBe( `<code class="${ CLASS_TOKEN } rc__number">${ i + 1 }</code>` );
       }
     }
   } );
@@ -37,7 +38,7 @@ describe( 'Lines#sync()', () => {
     lines.sync( 0, CODE_NUMBERS, 3 );
 
     for ( let i = 0; i < 3; i++ ) {
-      expect( lines[ i ].html ).toBe( `<code class="ryuseicode__token rc__number">${ i + 1 }</code>` );
+      expect( lines[ i ].html ).toBe( `<code class="${ CLASS_TOKEN } rc__number">${ i + 1 }</code>` );
     }
 
     expect( lines.length ).toBe( 3 );
@@ -47,13 +48,13 @@ describe( 'Lines#sync()', () => {
     lines.sync( 0, CODE_NUMBERS, undefined, '`' );
 
     for ( let i = 0; i < lines.length; i++ ) {
-      expect( lines[ i ].html ).toBe( `<code class="ryuseicode__token rc__string">${ i + 1 }</code>` );
+      expect( lines[ i ].html ).toBe( `<code class="${ CLASS_TOKEN } rc__string">${ i + 1 }</code>` );
     }
 
     lines.sync( 0, CODE_NUMBERS, undefined, '/*' );
 
     for ( let i = 0; i < lines.length; i++ ) {
-      expect( lines[ i ].html ).toBe( `<code class="ryuseicode__token rc__comment">${ i + 1 }</code>` );
+      expect( lines[ i ].html ).toBe( `<code class="${ CLASS_TOKEN } rc__comment">${ i + 1 }</code>` );
     }
   } );
 
