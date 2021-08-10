@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.10
+ * Version  : 0.1.11
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -3022,7 +3022,7 @@ function matchesToken(token, matcher) {
 }
 /*!
  * RyuseiLight.js
- * Version  : 1.1.8
+ * Version  : 1.2.0
  * License  : MIT
  * Copyright: 2020 Naotoshi Fujita
  */

@@ -1,6 +1,6 @@
 {
   "name": "@ryusei/code",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "author": "Naotoshi Fujita",
   "license": "MIT",
   "main": "dist/js/ryuseicode.cjs.js",
@@ -15,7 +15,7 @@
     "extensible"
   ],
   "dependencies": {
-    "@ryusei/light": "^1.1.8"
+    "@ryusei/light": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
