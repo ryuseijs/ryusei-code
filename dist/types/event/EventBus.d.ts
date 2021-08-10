@@ -12,7 +12,7 @@ export declare class EventBus<T = undefined> {
     /**
      * The owner of the instance.
      */
-    private owner;
+    private readonly owner;
     /**
      * The EventBus constructor.
      *

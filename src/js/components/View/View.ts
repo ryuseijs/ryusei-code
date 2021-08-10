@@ -229,8 +229,7 @@ export class View extends Component {
    * @param skipLengthCheck - Optional. Whether to skip checking the number of lines or not.
    */
   autoHeight( skipLengthCheck?: boolean ): void {
-    const { elements } = this;
-    const { length } = this.lines;
+    const { elements, lines: { length } } = this;
 
     if ( skipLengthCheck || length !== this.lastLength ) {
       const { Measure, Measure: { padding } } = this;
@@ -240,7 +239,7 @@ export class View extends Component {
         height = max( height, Measure.scrollerRect.height );
       }
 
-      styles( this.elements.container, { height: unit( height ) } );
+      styles( elements.container, { height: unit( height ) } );
       this.lastLength = length;
 
       this.emit( EVENT_SCROLL_HEIGHT_CHANGED );

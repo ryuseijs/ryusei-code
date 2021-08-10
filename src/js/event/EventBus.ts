@@ -16,7 +16,7 @@ export class EventBus<T = undefined> {
   /**
    * The owner of the instance.
    */
-  private owner: T | undefined;
+  private readonly owner: T | undefined;
 
   /**
    * The EventBus constructor.

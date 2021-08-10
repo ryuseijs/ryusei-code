@@ -79,11 +79,11 @@ export class Measure extends Component {
       this.updatePadding();
       this.createMeasureText();
       this.clearRectCaches();
-    }, 1 );
+    }, null, 1 );
 
     this.on( EVENT_FONT_LOADED, () => {
       this.measureText.clear();
-    }, 1 );
+    }, null, 1 );
 
     this.on( [ EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLLED, EVENT_WINDOW_SCROLL ], this.clearRectCaches, this, 1 );
   }

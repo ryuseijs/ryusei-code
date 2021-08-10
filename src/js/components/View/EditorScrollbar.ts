@@ -19,9 +19,8 @@ export class EditorScrollbar extends Scrollbar {
    * Listens to some events.
    */
   protected listen(): void {
-    this.Editor.event.on(
-      [ EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED ],
-      rafThrottle( this.update )
-    );
+    const { event } = this.Editor;
+    event.on( [ EVENT_MOUNTED, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED ], this.update );
+    event.on( [ EVENT_RESIZE, EVENT_SCROLL ], rafThrottle( this.update ) );
   }
 }

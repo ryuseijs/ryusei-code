@@ -6702,10 +6702,10 @@ var Measure = /*#__PURE__*/function (_Component9) {
       _this28.createMeasureText();
 
       _this28.clearRectCaches();
-    }, 1);
+    }, null, 1);
     this.on(EVENT_FONT_LOADED, function () {
       _this28.measureText.clear();
-    }, 1);
+    }, null, 1);
     this.on([EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLLED, EVENT_WINDOW_SCROLL], this.clearRectCaches, this, 1);
   }
   /**
@@ -9615,7 +9615,9 @@ var EditorScrollbar = /*#__PURE__*/function (_Scrollbar) {
    * Listens to some events.
    */
   _proto32.listen = function listen() {
-    this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], rafThrottle(this.update));
+    var event = this.Editor.event;
+    event.on([EVENT_MOUNTED, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], this.update);
+    event.on([EVENT_RESIZE, EVENT_SCROLL], rafThrottle(this.update));
   };
 
   return EditorScrollbar;
@@ -9850,8 +9852,8 @@ var View = /*#__PURE__*/function (_Component15) {
   ;
 
   _proto33.autoHeight = function autoHeight(skipLengthCheck) {
-    var elements = this.elements;
-    var length = this.lines.length;
+    var elements = this.elements,
+        length = this.lines.length;
 
     if (skipLengthCheck || length !== this.lastLength) {
       var _Measure = this.Measure,
@@ -9863,7 +9865,7 @@ var View = /*#__PURE__*/function (_Component15) {
         _height = max(_height, _Measure.scrollerRect.height);
       }
 
-      styles(this.elements.container, {
+      styles(elements.container, {
         height: unit(_height)
       });
       this.lastLength = length;
