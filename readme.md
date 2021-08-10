@@ -30,21 +30,27 @@ RyuseiCode is a lightweight, extensible and accessible code editor for browsers.
 </p>
 </div>
 
+
 ## Features
 
 ### Lightweight
+
 You can start with the default small package that is about 70Kb (24Kb gzipped), including Indentation, History (Undo/Redo), and Shortcuts extensions.
 
 ### Accessibility Friendly
+
 By using a "contenteditable" element, screen readers are able to read the current and selected code for visually impaired users, which promises your site accessibility.
 
 ### Modular and Extensible
+
 The editor functionality can be extended by adding modular extensions. You can build your custom editor by picking them out or creating your own extensions.
 
 ### Mobiles and IE
+
 The UX is not perfect, but the editor works on mobile devices thanks to the "contenteditable". It also works on the IE11 with some limitations.
 
 ### And more...
+
 - Highlighting the current line
 - Line numbers
 - Auto closing paired characters
@@ -60,6 +66,7 @@ The UX is not perfect, but the editor works on mobile devices thanks to the "con
 - Custom context menus
 
 ## Caveats
+
 - The editor does not support text wrapping and code hint.
 - In IE, scrolling performance is not better. I'm reluctant to improve it because I don't believe there is no programmer who edits code in IE anymore.
 - The editor is not intended to run gigantic code. You will notice the input latency around 20,000 lines.
