@@ -408,9 +408,8 @@ export class Input extends Component {
       this.emit( EVENT_CHANGE, type );
     }
 
-    this.View.jump( endRow );
     this.Code.replaceLines( startRow, endRow, this.settleValue( this.value, endRow ) );
-    this.Sync.sync( startRow, endRow );
+    this.Sync.sync( startRow, endRow, endRow );
 
     Selection.set( this.settlePosition( position ) );
 

@@ -5,18 +5,14 @@
   <title>Empty</title>
   <link href="../../../../dist/css/themes/ryuseicode-ryusei.min.css" rel="stylesheet">
 </head>
-<body style="margin: 1em ">
+<body style="margin: 1em;">
 
 <pre id="code"></pre>
 
 <script src="../../../../dist/js/ryuseicode-complete.min.js"></script>
 <script>
-  const a = new RyuseiCode();
-  a.apply( '#code' )
-
-  setTimeout( () => {
-    a.value = 'console.log( 1 )'
-  }, 1000 );
+  const ryuseiCode = new RyuseiCode( { maxHeight: '20em' } );
+  ryuseiCode.apply( '#code' );
 </script>
 </body>
 </html>

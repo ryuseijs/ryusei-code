@@ -1,6 +1,11 @@
 @use '../foundation/mixin';
 @use '../foundation/colors';
 
+
+/**
+ * - overflow-anchor: Disables the browser scrolls the window
+ *   when removing a previous line via backspace makes the height smaller.
+ */
 .ryuseicode {
   $root: &;
 
@@ -16,6 +21,10 @@
     user-select: text;
     white-space: pre;
     z-index: 1;
+
+    @supports ( overflow-anchor: none ) {
+      overflow-anchor: none;
+    }
   }
 
   &.is-mobile {

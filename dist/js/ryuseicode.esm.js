@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /*!
  * RyuseiCode.js
- * Version  : 0.1.11
+ * Version  : 0.1.12
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -6302,9 +6302,8 @@ var Input = /*#__PURE__*/function (_Component7) {
       this.emit(EVENT_CHANGE, type);
     }
 
-    this.View.jump(endRow);
     this.Code.replaceLines(startRow, endRow, this.settleValue(this.value, endRow));
-    this.Sync.sync(startRow, endRow);
+    this.Sync.sync(startRow, endRow, endRow);
     Selection.set(this.settlePosition(position));
     this.emit(EVENT_CHANGED, type);
     this.state = null;
@@ -9615,9 +9614,7 @@ var EditorScrollbar = /*#__PURE__*/function (_Scrollbar) {
    * Listens to some events.
    */
   _proto32.listen = function listen() {
-    var event = this.Editor.event;
-    event.on([EVENT_MOUNTED, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], this.update);
-    event.on([EVENT_RESIZE, EVENT_SCROLL], rafThrottle(this.update));
+    this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], rafThrottle(this.update));
   };
 
   return EditorScrollbar;
