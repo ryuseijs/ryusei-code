@@ -30,7 +30,8 @@ $padding-right: 1.5em !default;
     }
 
     &:empty {
-      height: 0 !important;
+      height: 0;
+      visibility: hidden !important;
     }
 
     code {

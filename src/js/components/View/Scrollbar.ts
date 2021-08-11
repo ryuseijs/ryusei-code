@@ -2,7 +2,7 @@ import { AbstractDraggableBar } from '../../classes/AbstractDraggableBar/Abstrac
 import { CLASS_ACTIVE, CLASS_SCROLLBAR } from '../../constants/classes';
 import { EVENT_MOUNTED, EVENT_RESIZE } from '../../constants/events';
 import { Editor } from '../../core/Editor/Editor';
-import { attr, isArray, off, on, rafThrottle, round, toggleClass, unit } from '../../utils';
+import { attr, hasClass, isArray, off, on, rafThrottle, round, toggleClass, unit } from '../../utils';
 
 
 /**
@@ -88,9 +88,12 @@ export class Scrollbar extends AbstractDraggableBar {
    * Listens to some events.
    */
   protected listen(): void {
-    const update = rafThrottle( this.update );
-    on( this.scroller, 'scroll', update, this );
-    this.Editor.event.on( [ EVENT_MOUNTED, EVENT_RESIZE ], update );
+    on( this.scroller, 'scroll', rafThrottle( this.update ), this );
+
+    this.Editor.event.on( [ EVENT_MOUNTED, EVENT_RESIZE ], rafThrottle( () => {
+      this.toggle();
+      this.update();
+    } ) );
   }
 
   /**
@@ -117,7 +120,6 @@ export class Scrollbar extends AbstractDraggableBar {
     const sh          = scroller[ names.scrollHeight ];
     const ch          = scroller[ names.clientHeight ];
     const st          = scroller[ names.scrollTop ];
-    const active      = sh > ch;
     const margin      = this.margin();
     const heightRatio = 1 - ( ( margin[ 0 ] + margin[ 1 ] ) / ch );
     const height      = ( ch * ch / sh ) * heightRatio;
@@ -127,15 +129,30 @@ export class Scrollbar extends AbstractDraggableBar {
       this.lastHeight = height;
     }
 
-    if ( active ) {
+    if ( this.isActive() ) {
       const offsetRatio = ( ch * heightRatio - elm[ names.clientHeight ] ) / ( sh - ch );
       style.transform = `${ names.translateY }(${ unit( st * offsetRatio + margin[ 0 ] ) })`;
       attr( elm, { 'aria-valuenow': round( 100 * 100 * st / ( sh - ch ) ) / 100 } );
 
       this.ratio = offsetRatio;
     }
+  }
 
-    toggleClass( elm, CLASS_ACTIVE, active );
+  /**
+   * Checks if the scrollbar is active or not.
+   *
+   * @return `true` if the scrollbar is active, or otherwise `false`.
+   */
+  private isActive(): boolean {
+    return hasClass( this.elm, CLASS_ACTIVE );
+  }
+
+  /**
+   * Toggles the scrollbar.
+   */
+  protected toggle(): void {
+    const { scroller, names, elm } = this;
+    toggleClass( elm, CLASS_ACTIVE, scroller[ names.scrollHeight ] > scroller[ names.clientHeight ] );
   }
 
   /**

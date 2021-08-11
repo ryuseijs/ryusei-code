@@ -60,6 +60,16 @@ export declare class Scrollbar extends AbstractDraggableBar {
      */
     protected update(): void;
     /**
+     * Checks if the scrollbar is active or not.
+     *
+     * @return `true` if the scrollbar is active, or otherwise `false`.
+     */
+    private isActive;
+    /**
+     * Toggles the scrollbar.
+     */
+    protected toggle(): void;
+    /**
      * Destroys the instance.
      */
     destroy(): void;

@@ -35,11 +35,11 @@ describe( 'Scrollbar', () => {
     expect( scrollbars.length ).toBe( 2 );
 
     // The update function is throttled by RAF.
-    requestAnimationFrame( () => {
+    setTimeout( () => {
       expect( scrollbars[ 0 ].classList.contains( CLASS_ACTIVE ) ).toBe( true );
       expect( scrollbars[ 1 ].classList.contains( CLASS_ACTIVE ) ).toBe( true );
       done();
-    } );
+    }, 100 );
   } );
 
   test( 'should be inactive when the clientWidth/Height is greater than the scrollWidth/Height.', done => {
@@ -47,11 +47,11 @@ describe( 'Scrollbar', () => {
     setWidth( EDITOR_WIDTH, EDITOR_WIDTH );
 
     // The update function is throttled by RAF.
-    requestAnimationFrame( () => {
+    setTimeout( () => {
       expect( scrollbars[ 0 ].classList.contains( CLASS_ACTIVE ) ).toBe( false );
       expect( scrollbars[ 1 ].classList.contains( CLASS_ACTIVE ) ).toBe( false );
       done();
-    } );
+    }, 100 );
   } );
 
   test( 'should have aria attributes.', () => {
@@ -71,7 +71,7 @@ describe( 'Scrollbar', () => {
     scroller.scrollLeft = EDITOR_WIDTH / 2;
 
     // The update function is throttled by RAF.
-    requestAnimationFrame( () => {
+    setTimeout( () => {
       expect( ( scrollbars[ 0 ] as HTMLElement ).style.transform ).toBe( `translateY(${ 0.5 * EDITOR_HEIGHT }px)` );
       expect( ( scrollbars[ 1 ] as HTMLElement ).style.transform ).toBe( `translateX(${ 0.5 * EDITOR_WIDTH }px)` );
 
@@ -79,6 +79,6 @@ describe( 'Scrollbar', () => {
       expect( scrollbars[ 1 ].getAttribute( 'aria-valuenow' ) ).toBe( '50' );
 
       done();
-    } );
+    }, 100 );
   } );
 } );

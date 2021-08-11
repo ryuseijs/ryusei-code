@@ -1,6 +1,6 @@
 import { Elements, EventBusEvent } from '@ryusei/code';
 import { Component } from '../../classes/Component/Component';
-import { CLASS_ANCHOR, CLASS_FOCUS, CLASS_LINE, CLASS_PRESERVED } from '../../constants/classes';
+import { CLASS_ANCHOR, CLASS_EMPTY, CLASS_FOCUS, CLASS_LINE, CLASS_PRESERVED } from '../../constants/classes';
 import {
   EVENT_ANCHOR_LINE_CHANGED,
   EVENT_CHUNK_MOVED,
@@ -43,6 +43,7 @@ import {
   removeClass,
   slice,
   tag,
+  text,
 } from '../../utils';
 import { Selection } from '../Selection/Selection';
 import { MARGIN_LINES, SCROLL_END_DEBOUNCE_DURATION } from './constants';
@@ -725,12 +726,12 @@ export class Chunk extends Component {
       const index = row - this.start;
       const { elms } = this;
 
-      if ( between( index, 0, this.length - 1 ) ) {
-        if ( diff > 0 ) {
-          before( elms.slice( -diff ), elms[ index ].nextElementSibling );
-        } else if ( diff < 0 ) {
-          append( this.parent, elms.slice( index + 1, index + 1 - diff ) );
+      if ( diff > 0 ) {
+        if ( elms[ index ] ) {
+          before( elms.slice( - diff ), elms[ index ].nextElementSibling );
         }
+      } else if ( diff < 0 ) {
+        append( this.parent, elms.slice( index + 1, index + 1 - diff ) );
       }
     }
   }

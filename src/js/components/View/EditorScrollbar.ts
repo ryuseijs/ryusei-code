@@ -1,11 +1,11 @@
 import {
   EVENT_MOUNTED,
   EVENT_RESIZE,
+  EVENT_SCROLL,
   EVENT_SCROLL_HEIGHT_CHANGED,
   EVENT_SCROLL_WIDTH_CHANGED,
-  EVENT_SCROLL,
 } from '../../constants/events';
-import { rafThrottle } from '../../utils';
+import { rafThrottle, throttle } from '../../utils';
 import { Scrollbar } from './Scrollbar';
 
 
@@ -19,9 +19,16 @@ export class EditorScrollbar extends Scrollbar {
    * Listens to some events.
    */
   protected listen(): void {
-    this.Editor.event.on(
-      [ EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED ],
-      rafThrottle( this.update )
+    const { event } = this.Editor;
+
+    event.on(
+      [ EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED ],
+      throttle( rafThrottle( () => {
+        this.toggle();
+        this.update();
+      } ), 1 )
     );
+
+    event.on( EVENT_SCROLL, rafThrottle( this.update ) );
   }
 }

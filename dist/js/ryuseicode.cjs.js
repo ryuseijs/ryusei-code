@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.14
+ * Version  : 0.1.13
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -2803,12 +2803,12 @@ var Chunk = /*#__PURE__*/function (_Component3) {
 
       var elms = this.elms;
 
-      if (between(_index, 0, this.length - 1)) {
-        if (diff > 0) {
+      if (diff > 0) {
+        if (elms[_index]) {
           before$1(elms.slice(-diff), elms[_index].nextElementSibling);
-        } else if (diff < 0) {
-          _append(this.parent, elms.slice(_index + 1, _index + 1 - diff));
         }
+      } else if (diff < 0) {
+        _append(this.parent, elms.slice(_index + 1, _index + 1 - diff));
       }
     }
   }
@@ -9524,9 +9524,14 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
   ;
 
   _proto31.listen = function listen() {
-    var update = rafThrottle(this.update);
-    on(this.scroller, 'scroll', update, this);
-    this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE], update);
+    var _this50 = this;
+
+    on(this.scroller, 'scroll', rafThrottle(this.update), this);
+    this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE], rafThrottle(function () {
+      _this50.toggle();
+
+      _this50.update();
+    }));
   }
   /**
    * Called while the bar is dragged.
@@ -9556,7 +9561,6 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
     var sh = scroller[names.scrollHeight];
     var ch = scroller[names.clientHeight];
     var st = scroller[names.scrollTop];
-    var active = sh > ch;
     var margin = this.margin();
     var heightRatio = 1 - (margin[0] + margin[1]) / ch;
     var height = ch * ch / sh * heightRatio;
@@ -9566,7 +9570,7 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
       this.lastHeight = height;
     }
 
-    if (active) {
+    if (this.isActive()) {
       var offsetRatio = (ch * heightRatio - elm[names.clientHeight]) / (sh - ch);
       style.transform = names.translateY + "(" + unit(st * offsetRatio + margin[0]) + ")";
       attr(elm, {
@@ -9574,8 +9578,28 @@ var Scrollbar = /*#__PURE__*/function (_AbstractDraggableBar) {
       });
       this.ratio = offsetRatio;
     }
+  }
+  /**
+   * Checks if the scrollbar is active or not.
+   *
+   * @return `true` if the scrollbar is active, or otherwise `false`.
+   */
+  ;
 
-    _toggleClass(elm, CLASS_ACTIVE, active);
+  _proto31.isActive = function isActive() {
+    return hasClass(this.elm, CLASS_ACTIVE);
+  }
+  /**
+   * Toggles the scrollbar.
+   */
+  ;
+
+  _proto31.toggle = function toggle() {
+    var scroller = this.scroller,
+        names = this.names,
+        elm = this.elm;
+
+    _toggleClass(elm, CLASS_ACTIVE, scroller[names.scrollHeight] > scroller[names.clientHeight]);
   }
   /**
    * Destroys the instance.
@@ -9610,7 +9634,15 @@ var EditorScrollbar = /*#__PURE__*/function (_Scrollbar) {
    * Listens to some events.
    */
   _proto32.listen = function listen() {
-    this.Editor.event.on([EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], rafThrottle(this.update));
+    var _this51 = this;
+
+    var event = this.Editor.event;
+    event.on([EVENT_MOUNTED, EVENT_RESIZE, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_SCROLL_WIDTH_CHANGED], throttle(rafThrottle(function () {
+      _this51.toggle();
+
+      _this51.update();
+    }), 1));
+    event.on(EVENT_SCROLL, rafThrottle(this.update));
   };
 
   return EditorScrollbar;
@@ -9626,20 +9658,20 @@ var View = /*#__PURE__*/function (_Component15) {
   _inheritsLoose(View, _Component15);
 
   function View() {
-    var _this50;
+    var _this52;
 
-    _this50 = _Component15.apply(this, arguments) || this;
+    _this52 = _Component15.apply(this, arguments) || this;
     /**
      * Keeps the previous width of the viewport.
      */
 
-    _this50.lastWidth = 0;
+    _this52.lastWidth = 0;
     /**
      * Holds Scrollbar elements.
      */
 
-    _this50.scrollbars = [];
-    return _this50;
+    _this52.scrollbars = [];
+    return _this52;
   }
   /**
    * Initializes the instance.
@@ -9696,7 +9728,7 @@ var View = /*#__PURE__*/function (_Component15) {
   ;
 
   _proto33.create = function create() {
-    var _this51 = this;
+    var _this53 = this;
 
     var elements = this.elements,
         scroller = this.elements.scroller,
@@ -9705,7 +9737,7 @@ var View = /*#__PURE__*/function (_Component15) {
 
     if (!isMobile()) {
       this.scrollbars = [new EditorScrollbar(Editor, wrapper, scroller, true), new EditorScrollbar(Editor, wrapper, scroller, false, function () {
-        return [_this51.getWidthBeforeContainer(), 0];
+        return [_this53.getWidthBeforeContainer(), 0];
       })];
     }
 
@@ -9820,17 +9852,16 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the width of the container element so that it can contain the longest line in the chunk.
+   * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
    */
   ;
 
   _proto33.autoWidth = function autoWidth() {
-    var Measure = this.Measure,
-        elements = this.elements;
-    var width = elements.editor.clientWidth + this.getWidthBeforeContainer();
+    var Measure = this.Measure;
+    var width = Measure.editorRect.width;
 
-    if (width > Measure.scrollerRect.width && width > this.lastWidth) {
-      styles(elements.container, {
+    if (width > Measure.scrollerRect.width - this.getWidthBeforeContainer() && width > this.lastWidth) {
+      styles(this.elements.lines, {
         minWidth: unit(width)
       });
       this.lastWidth = width;
@@ -9997,7 +10028,7 @@ var Renderer = /*#__PURE__*/function () {
   ;
 
   _proto34.html = function html(source) {
-    var _this52 = this;
+    var _this54 = this;
 
     var html = '';
     var options = this.options,
@@ -10013,7 +10044,7 @@ var Renderer = /*#__PURE__*/function () {
       role: 'code'
     }], ['view', [CLASS_VIEW].concat(options.viewClasses)], ['body', [CLASS_BODY]], ['scroller', [CLASS_SCROLLER]], ['container', [CLASS_CONTAINER]], ['editor', [CLASS_EDITOR]]];
     divs.forEach(function (settings) {
-      _this52.event.emit(settings[0] + ":open", append, settings[1], _this52.lines);
+      _this54.event.emit(settings[0] + ":open", append, settings[1], _this54.lines);
 
       var attrs = assign$1({
         id: id + "-" + settings[0]
@@ -10058,7 +10089,7 @@ var Editor = /*#__PURE__*/function () {
    * @param extensions - An object with additional components.
    */
   function Editor(language, options, extensions) {
-    var _this53 = this;
+    var _this55 = this;
 
     if (extensions === void 0) {
       extensions = {};
@@ -10086,13 +10117,13 @@ var Editor = /*#__PURE__*/function () {
     this.event = new EventBus(this);
     this.options.id = this.options.id || uniqueId(PROJECT_CODE);
     forOwn$1(CoreComponents, function (Component, name) {
-      _this53.Components[name] = new Component(_this53);
+      _this55.Components[name] = new Component(_this55);
     });
     forOwn$1(extensions, function (Extension, name) {
-      var value = _this53.options[name.charAt(0).toLowerCase() + name.slice(1)];
+      var value = _this55.options[name.charAt(0).toLowerCase() + name.slice(1)];
 
       if (isUndefined$1(value) || value) {
-        _this53.Extensions[name] = new Extension(_this53);
+        _this55.Extensions[name] = new Extension(_this55);
       }
     });
   }
@@ -10157,7 +10188,7 @@ var Editor = /*#__PURE__*/function () {
   ;
 
   _proto35.listen = function listen() {
-    var _this54 = this;
+    var _this56 = this;
 
     var elements = this.elements,
         root = this.elements.root,
@@ -10169,7 +10200,7 @@ var Editor = /*#__PURE__*/function () {
     });
     this.bind(elements.editor, 'click', function () {
       if (!isFocused()) {
-        _this54.focus(true);
+        _this56.focus(true);
       }
     });
     this.bind(root, 'focusin', function () {
@@ -10187,7 +10218,7 @@ var Editor = /*#__PURE__*/function () {
     }, FOCUSOUT_DEBOUNCE_DURATION));
     event.on([EVENT_MOUNTED, EVENT_CHANGED, EVENT_COMPOSITION_START, EVENT_RESET], function () {
       nextTick(function () {
-        _toggleClass(root, CLASS_EMPTY, !_this54.value && !_this54.Components.Input.composing);
+        _toggleClass(root, CLASS_EMPTY, !_this56.value && !_this56.Components.Input.composing);
       });
     });
   }
@@ -10597,17 +10628,17 @@ var RyuseiCode = /*#__PURE__*/function () {
   var _proto36 = RyuseiCode.prototype;
 
   _proto36.mergeOptions = function mergeOptions(options) {
-    var _this55 = this;
+    var _this57 = this;
 
     this.options = assign$1({}, DEFAULT_OPTIONS$6);
     forOwn$1(options, function (value, key) {
       if (!isUndefined$1(value)) {
         if (isObject$1(DEFAULT_OPTIONS$6[key])) {
           if (isObject$1(value)) {
-            _this55.options[key] = assign$1({}, DEFAULT_OPTIONS$6[key], value);
+            _this57.options[key] = assign$1({}, DEFAULT_OPTIONS$6[key], value);
           }
         } else {
-          _this55.options[key] = value;
+          _this57.options[key] = value;
         }
       }
     });
@@ -10807,15 +10838,15 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
    * @param Editor - An Editor instance.
    */
   function ActiveLine(Editor) {
-    var _this56;
+    var _this58;
 
-    _this56 = _Component16.call(this, Editor) || this;
+    _this58 = _Component16.call(this, Editor) || this;
 
-    _this56.on(EVENT_INIT_STYLE, function (e, add) {
-      add("." + CLASS_ACTIVE_LINE, 'height', _this56.options.lineHeight);
+    _this58.on(EVENT_INIT_STYLE, function (e, add) {
+      add("." + CLASS_ACTIVE_LINE, 'height', _this58.options.lineHeight);
     });
 
-    return _this56;
+    return _this58;
   }
   /**
    * Initializes the component.
@@ -10827,7 +10858,7 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
   var _proto37 = ActiveLine.prototype;
 
   _proto37.mount = function mount(elements) {
-    var _this57 = this;
+    var _this59 = this;
 
     _Component16.prototype.mount.call(this, elements);
 
@@ -10836,11 +10867,11 @@ var ActiveLine = /*#__PURE__*/function (_Component16) {
     }, elements.background);
     this.on([EVENT_FOCUS, EVENT_FOCUS_LINE_CHANGED, EVENT_READONLY], function (e, readOnly) {
       if (e.type !== EVENT_READONLY || !readOnly) {
-        _this57.activate();
+        _this59.activate();
 
-        _this57.offset();
+        _this59.offset();
       } else {
-        _this57.deactivate();
+        _this59.deactivate();
       }
     });
     this.on(EVENT_BLUR, this.deactivate, this);
@@ -10925,18 +10956,18 @@ var AutoClose = /*#__PURE__*/function (_Component17) {
    * @param elements - A collection of essential elements.
    */
   _proto38.mount = function mount(elements) {
-    var _this58 = this;
+    var _this60 = this;
 
     _Component17.prototype.mount.call(this, elements);
 
     this.on(EVENT_KEYDOWN, function (e, ke) {
-      _this58.skip(ke);
+      _this60.skip(ke);
 
-      _this58.remove(ke);
+      _this60.remove(ke);
     });
     this.on(EVENT_CHANGED, function (e, type) {
       if (type === 'input') {
-        _this58.close();
+        _this60.close();
       }
     });
   }
@@ -11183,7 +11214,7 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
    * @param elements - A collection of essential elements.
    */
   _proto39.mount = function mount(elements) {
-    var _this59 = this;
+    var _this61 = this;
 
     var options = this.getOptions('bracketMatching', DEFAULT_OPTIONS$5);
     this.brackets = options.brackets;
@@ -11192,14 +11223,14 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
     _Component18.prototype.mount.call(this, elements);
 
     this.clear = debounce(function () {
-      _this59.Range.clear(MARKER_ID$2);
+      _this61.Range.clear(MARKER_ID$2);
     }, CLEAR_DEBOUNCE_DURATION);
     this.update = rafThrottle(this.update.bind(this));
     this.on(EVENT_SELECTED, this.onSelected, this);
     this.on(EVENT_BLUR, this.clear);
     this.on(EVENT_READONLY, function (e, readOnly) {
       if (readOnly) {
-        _this59.clear();
+        _this61.clear();
       }
     });
   }
@@ -11226,14 +11257,14 @@ var BracketMatching = /*#__PURE__*/function (_Component18) {
   ;
 
   _proto39.update = function update() {
-    var _this60 = this;
+    var _this62 = this;
 
     var focus = this.Selection.focus;
     var before = focus[1] > 0 ? [focus[0], focus[1] - 1] : null;
     this.clear.invoke();
     [before, focus].some(function (position) {
-      if (position && _this60.Scope.inCategory(CATEGORY_BRACKET, position)) {
-        _this60.draw(position[0], _this60.lines.getInfoAt(position));
+      if (position && _this62.Scope.inCategory(CATEGORY_BRACKET, position)) {
+        _this62.draw(position[0], _this62.lines.getInfoAt(position));
 
         return true;
       }
@@ -11330,13 +11361,13 @@ var Comment = /*#__PURE__*/function (_Component19) {
    * @param Editor - An Editor instance.
    */
   function Comment(Editor) {
-    var _this61;
+    var _this63;
 
-    _this61 = _Component19.call(this, Editor) || this;
+    _this63 = _Component19.call(this, Editor) || this;
 
-    _this61.addKeyBindings(KEYMAP$5);
+    _this63.addKeyBindings(KEYMAP$5);
 
-    return _this61;
+    return _this63;
   }
   /**
    * Initializes the component.
@@ -11648,15 +11679,15 @@ var Dialog = /*#__PURE__*/function (_UIComponent2) {
   ;
 
   _proto41.listen = function listen() {
-    var _this62 = this;
+    var _this64 = this;
 
     this.bind(window, 'click', function (e) {
-      if (!_this62.wrapper.contains(e.target)) {
-        _this62.hide();
+      if (!_this64.wrapper.contains(e.target)) {
+        _this64.hide();
       }
     });
     this.on(EVENT_INIT_STYLE, function (e, add) {
-      add("." + CLASS_DIALOG + " code", 'fontFamily', _this62.options.monospaceFont);
+      add("." + CLASS_DIALOG + " code", 'fontFamily', _this64.options.monospaceFont);
     });
   }
   /**
@@ -12034,19 +12065,19 @@ var Gutter = /*#__PURE__*/function (_Component21) {
    * @param Editor - An Editor instance.
    */
   function Gutter(Editor) {
-    var _this63;
+    var _this65;
 
-    _this63 = _Component21.call(this, Editor) || this;
-    _this63.opts = _this63.getOptions('gutter', DEFAULT_OPTIONS$4);
-    _this63.start = _this63.opts.start;
+    _this65 = _Component21.call(this, Editor) || this;
+    _this65.opts = _this65.getOptions('gutter', DEFAULT_OPTIONS$4);
+    _this65.start = _this65.opts.start;
 
-    _this63.on(EVENT_INIT_STYLE, function (e, add) {
-      add("." + CLASS_GUTTER, 'fontFamily', _this63.options.monospaceFont);
+    _this65.on(EVENT_INIT_STYLE, function (e, add) {
+      add("." + CLASS_GUTTER, 'fontFamily', _this65.options.monospaceFont);
     });
 
-    _this63.render();
+    _this65.render();
 
-    return _this63;
+    return _this65;
   }
   /**
    * Renders a gutter element and rows.
@@ -12056,21 +12087,21 @@ var Gutter = /*#__PURE__*/function (_Component21) {
   var _proto44 = Gutter.prototype;
 
   _proto44.render = function render() {
-    var _this64 = this;
+    var _this66 = this;
 
     this.on('root:open', function (e, append, classes) {
       classes.push(CLASS_HAS_GUTTER);
     });
     this.on('editor:open', function (e, append, classes, lines) {
-      append(tag([CLASS_GUTTER, _this64.opts.sticky ? CLASS_STICKY : ''], {
+      append(tag([CLASS_GUTTER, _this66.opts.sticky ? CLASS_STICKY : ''], {
         'aria-hidden': true
       }));
       append(tag(CLASS_GUTTER_FLOAT));
-      append(_this64.renderRows(lines, append));
+      append(_this66.renderRows(lines, append));
       append(repeat('</div>', 2)); // float and gutter
     });
     this.on(EVENT_INIT_STYLE, function (e, add) {
-      var lineHeight = _this64.options.lineHeight;
+      var lineHeight = _this66.options.lineHeight;
       add("." + CLASS_GUTTER_ROW, {
         height: lineHeight ? lineHeight + "em" : undefined,
         lineHeight: lineHeight
@@ -12145,10 +12176,10 @@ var Gutter = /*#__PURE__*/function (_Component21) {
   ;
 
   _proto44.listen = function listen() {
-    var _this65 = this;
+    var _this67 = this;
 
     this.on(EVENT_CHUNK_SUPPLIED, function (e, chunk, diff) {
-      _this65.supply(diff);
+      _this67.supply(diff);
     });
     this.on([EVENT_CHUNK_MOVED, EVENT_SCROLL_HEIGHT_CHANGED, EVENT_RESIZE], this.update, this);
     this.on('activeLine:updated', this.activate, this);
@@ -12300,23 +12331,23 @@ var History = /*#__PURE__*/function (_Component22) {
    * @param Editor - An Editor instance.
    */
   function History(Editor) {
-    var _this66;
+    var _this68;
 
-    _this66 = _Component22.call(this, Editor) || this;
+    _this68 = _Component22.call(this, Editor) || this;
     /**
      * Holds history records.
      */
 
-    _this66.history = [];
+    _this68.history = [];
     /**
      * Indicates the current history index.
      */
 
-    _this66.index = 0;
+    _this68.index = 0;
 
-    _this66.addKeyBindings(KEYMAP$4);
+    _this68.addKeyBindings(KEYMAP$4);
 
-    return _this66;
+    return _this68;
   }
   /**
    * Initialized the instance.
@@ -12338,19 +12369,19 @@ var History = /*#__PURE__*/function (_Component22) {
   ;
 
   _proto45.listen = function listen() {
-    var _this67 = this;
+    var _this69 = this;
 
     this.on(EVENT_CHANGE, this.onChange, this);
     this.on(EVENT_CHANGED, this.onChanged, this);
     this.on(EVENT_KEYMAP + ":undo " + EVENT_KEYMAP + ":redo", function (e, ke, action) {
       ke.preventDefault();
 
-      if (!_this67.Editor.readOnly) {
-        _this67[action]();
+      if (!_this69.Editor.readOnly) {
+        _this69[action]();
       }
     });
     this.on(EVENT_RESET, function () {
-      _this67.history.length = 0;
+      _this69.history.length = 0;
     });
   }
   /**
@@ -12571,15 +12602,15 @@ var Indentation = /*#__PURE__*/function (_Component23) {
    * @param Editor - An Editor instance.
    */
   function Indentation(Editor) {
-    var _this68;
+    var _this70;
 
-    _this68 = _Component23.call(this, Editor) || this;
+    _this70 = _Component23.call(this, Editor) || this;
 
-    _this68.addI18n(I18N$3);
+    _this70.addI18n(I18N$3);
 
-    _this68.addKeyBindings(KEYMAP$3);
+    _this70.addKeyBindings(KEYMAP$3);
 
-    return _this68;
+    return _this70;
   }
   /**
    * Initializes the component.
@@ -12621,37 +12652,37 @@ var Indentation = /*#__PURE__*/function (_Component23) {
   ;
 
   _proto46.listen = function listen() {
-    var _this69 = this;
+    var _this71 = this;
 
     var focused;
     this.on(EVENT_FOCUS, function (e, type) {
       if (type === 'pointer' && !focused) {
-        _this69.setDisabled(false);
+        _this71.setDisabled(false);
       }
 
       focused = true;
     });
     this.on(EVENT_KEYMAP + ":indent " + EVENT_KEYMAP + ":unindent", function (e, ke, action) {
-      if (!_this69.disabled) {
+      if (!_this71.disabled) {
         if (action === 'indent') {
-          _this69.indent();
+          _this71.indent();
         } else {
-          _this69.unindent();
+          _this71.unindent();
         }
 
         prevent(ke);
       }
     });
     this.on(EVENT_KEYMAP + ":toggleTabMode", function (e, ke) {
-      _this69.setDisabled(!_this69.disabled);
+      _this71.setDisabled(!_this71.disabled);
 
       prevent(ke);
     });
     this.on(EVENT_NEWLINE, function () {
-      _this69.indentNewline();
+      _this71.indentNewline();
 
-      if (_this69.opts.deepIndent) {
-        _this69.indentDeep();
+      if (_this71.opts.deepIndent) {
+        _this71.indentDeep();
       }
     });
     this.on(EVENT_KEYDOWN, this.onKeydown, this);
@@ -12680,7 +12711,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
   ;
 
   _proto46.register = function register() {
-    var _this70 = this;
+    var _this72 = this;
 
     var i18n = this.i18n;
     var body = div();
@@ -12688,9 +12719,9 @@ var Indentation = /*#__PURE__*/function (_Component23) {
     this.Dialog.register(DIALOG_ID, body, i18n.indentNotice, [{
       id: 'activate',
       click: function click() {
-        _this70.setDisabled(false);
+        _this72.setDisabled(false);
 
-        _this70.Dialog.hide();
+        _this72.Dialog.hide();
       }
     }, 'confirm']);
   }
@@ -12732,7 +12763,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
   ;
 
   _proto46.unindent = function unindent() {
-    var _this71 = this;
+    var _this73 = this;
 
     var space = this.space;
 
@@ -12751,7 +12782,7 @@ var Indentation = /*#__PURE__*/function (_Component23) {
         line = line.replace(indent, '');
 
         if (index === 0) {
-          _this71.emit(EVENT_CHANGE);
+          _this73.emit(EVENT_CHANGE);
 
           startOffset -= indent.length;
         }
@@ -12983,15 +13014,15 @@ var Jump = /*#__PURE__*/function (_Component24) {
    * @param Editor - An Editor instance.
    */
   function Jump(Editor) {
-    var _this72;
+    var _this74;
 
-    _this72 = _Component24.call(this, Editor) || this;
+    _this74 = _Component24.call(this, Editor) || this;
 
-    _this72.addI18n(I18N$2);
+    _this74.addI18n(I18N$2);
 
-    _this72.addKeyBindings(KEYMAP$2);
+    _this74.addKeyBindings(KEYMAP$2);
 
-    return _this72;
+    return _this74;
   }
   /**
    * Initializes the component.
@@ -13036,18 +13067,18 @@ var Jump = /*#__PURE__*/function (_Component24) {
   ;
 
   _proto47.listen = function listen() {
-    var _this73 = this;
+    var _this75 = this;
 
     this.on(EVENT_KEYMAP + ":jumpToLine", function (e, ke) {
-      _this73.update();
+      _this75.update();
 
-      _this73.Toolbar.show(TOOLBAR_ID$1);
+      _this75.Toolbar.show(TOOLBAR_ID$1);
 
       prevent(ke);
     });
     this.bind(this.field, 'input', debounce(this.jump.bind(this), JUMP_DEBOUNCE_DURATION));
     this.bind(this.field, 'keydown', function (e) {
-      if (matchesKey(e, _this73.options.keymap.jumpToLine)) {
+      if (matchesKey(e, _this75.options.keymap.jumpToLine)) {
         prevent(e);
       }
     });
@@ -13125,14 +13156,14 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
    * @param vertical - Determines whether to create a vertical or horizontal sizer.
    */
   function ResizeBar(Editor, parent, vertical) {
-    var _this74;
+    var _this76;
 
-    _this74 = _AbstractDraggableBar2.call(this, [CLASS_SIZER_BAR, CLASS_SIZER_BAR + "--" + (vertical ? 'vertical' : 'horizontal')], parent, vertical) || this;
-    _this74.Editor = Editor;
+    _this76 = _AbstractDraggableBar2.call(this, [CLASS_SIZER_BAR, CLASS_SIZER_BAR + "--" + (vertical ? 'vertical' : 'horizontal')], parent, vertical) || this;
+    _this76.Editor = Editor;
 
-    _this74.init();
+    _this76.init();
 
-    return _this74;
+    return _this76;
   }
   /**
    * Initializes the instance.
@@ -13145,7 +13176,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
   var _proto48 = ResizeBar.prototype;
 
   _proto48.init = function init() {
-    var _this75 = this;
+    var _this77 = this;
 
     var Editor = this.Editor;
     var resizeBar = Editor.options.i18n.resizeBar;
@@ -13159,7 +13190,7 @@ var ResizeBar = /*#__PURE__*/function (_AbstractDraggableBar2) {
     });
     Editor.event.on(EVENT_RESIZE, this.updateAria.bind(this));
     on(this.elm, 'dblclick', function () {
-      Editor[_this75.names.height] = '';
+      Editor[_this77.names.height] = '';
     });
   }
   /**
@@ -13256,15 +13287,15 @@ var Resize = /*#__PURE__*/function (_Component25) {
   _inheritsLoose(Resize, _Component25);
 
   function Resize() {
-    var _this76;
+    var _this78;
 
-    _this76 = _Component25.apply(this, arguments) || this;
+    _this78 = _Component25.apply(this, arguments) || this;
     /**
      * Stores ResizeBar instances.
      */
 
-    _this76.bars = [];
-    return _this76;
+    _this78.bars = [];
+    return _this78;
   }
   /**
    * Initializes the component.
@@ -13472,27 +13503,27 @@ var Search = /*#__PURE__*/function (_Component26) {
    * @param Editor - An Editor instance.
    */
   function Search(Editor) {
-    var _this77;
+    var _this79;
 
-    _this77 = _Component26.call(this, Editor) || this;
+    _this79 = _Component26.call(this, Editor) || this;
     /**
      * Holds matched ranges.
      */
 
-    _this77.ranges = [];
+    _this79.ranges = [];
     /**
      * The current range index.
      */
 
-    _this77.index = -1;
+    _this79.index = -1;
 
-    _this77.addIcons(ICONS);
+    _this79.addIcons(ICONS);
 
-    _this77.addI18n(I18N);
+    _this79.addI18n(I18N);
 
-    _this77.addKeyBindings(KEYMAP$1);
+    _this79.addKeyBindings(KEYMAP$1);
 
-    return _this77;
+    return _this79;
   }
   /**
    * Initializes the component.
@@ -13522,7 +13553,7 @@ var Search = /*#__PURE__*/function (_Component26) {
   ;
 
   _proto50.create = function create() {
-    var _this78 = this;
+    var _this80 = this;
 
     var Toolbar = this.Toolbar;
     var wrapper = div();
@@ -13539,10 +13570,10 @@ var Search = /*#__PURE__*/function (_Component26) {
     var searchControls = div(CLASS_SEARCH_CONTROLS, searchBar);
     var replaceControls = div(CLASS_REPLACE_CONTROLS, replaceBar);
     var searchButtons = SEARCH_BUTTONS.filter(function (settings) {
-      return !includes(_this78.opts.hideButtons, settings.id);
+      return !includes(_this80.opts.hideButtons, settings.id);
     });
     var replaceButtons = REPLACE_BUTTONS.filter(function (settings) {
-      return !includes(_this78.opts.hideButtons, settings.id);
+      return !includes(_this80.opts.hideButtons, settings.id);
     });
     this.buttons = assign$1(Toolbar.createButtons(searchButtons, searchControls, this), Toolbar.createButtons(replaceButtons, replaceControls, this));
 
@@ -13560,16 +13591,16 @@ var Search = /*#__PURE__*/function (_Component26) {
   ;
 
   _proto50.listen = function listen() {
-    var _this79 = this;
+    var _this81 = this;
 
     var searchField = this.searchField;
     this.on(EVENT_KEYMAP + ":search", function (e, ke) {
-      _this79.show(!_this79.options.keymap.replace);
+      _this81.show(!_this81.options.keymap.replace);
 
       prevent(ke);
     });
     this.on(EVENT_KEYMAP + ":replace", function (e, ke) {
-      _this79.show(true);
+      _this81.show(true);
 
       prevent(ke);
     });
@@ -13578,20 +13609,20 @@ var Search = /*#__PURE__*/function (_Component26) {
     this.bind(this.replaceField, 'keydown', this.onReplaceFieldKeydown, this);
     this.on('toolbar:opened', function (e, toolbar, id) {
       if (id !== TOOLBAR_ID) {
-        _this79.clear();
+        _this81.clear();
       }
     });
     this.on('toolbar:closed', this.clear, this);
     this.on([EVENT_CHANGED, EVENT_SYNCED], function () {
       var value = searchField.value;
 
-      if (_this79.isActive() && value) {
-        _this79.throttledSearch(value, _this79.index);
+      if (_this81.isActive() && value) {
+        _this81.throttledSearch(value, _this81.index);
       }
     });
     this.on(EVENT_READONLY, function (e, readOnly) {
-      if (_this79.isActive()) {
-        _this79.toggleReplace(!readOnly);
+      if (_this81.isActive()) {
+        _this81.toggleReplace(!readOnly);
       }
     });
   }
@@ -13750,13 +13781,13 @@ var Search = /*#__PURE__*/function (_Component26) {
   ;
 
   _proto50.toggleDisabled = function toggleDisabled() {
-    var _this80 = this;
+    var _this82 = this;
 
     ['prevMatch', 'nextMatch', 'replace', 'replaceAll'].forEach(function (name) {
-      var button = _this80.buttons[name];
+      var button = _this82.buttons[name];
 
       if (button) {
-        button.disabled = !_this80.ranges.length;
+        button.disabled = !_this82.ranges.length;
       }
     });
   }
@@ -13921,7 +13952,7 @@ var Search = /*#__PURE__*/function (_Component26) {
   ;
 
   _proto50.replace = function replace(replacement, index) {
-    var _this81 = this;
+    var _this83 = this;
 
     if (replacement === void 0) {
       replacement = this.replaceField.value;
@@ -13955,7 +13986,7 @@ var Search = /*#__PURE__*/function (_Component26) {
       }
 
       this.jumpTimerAfterReplace = setTimeout(function () {
-        _this81.jump(_this81.index);
+        _this83.jump(_this83.index);
       }, JUMP_DELAY_AFTER_REPLACE);
     }
   }
@@ -13987,7 +14018,7 @@ var Search = /*#__PURE__*/function (_Component26) {
   ;
 
   _proto50.replaceAll = function replaceAll(replacement) {
-    var _this82 = this;
+    var _this84 = this;
 
     if (replacement === void 0) {
       replacement = this.replaceField.value;
@@ -13998,7 +14029,7 @@ var Search = /*#__PURE__*/function (_Component26) {
     if (ranges.length) {
       this.emit(EVENT_CHANGE);
       ranges.forEach(function (range) {
-        _this82.Code.replaceRange(range.start, range.end, replacement);
+        _this84.Code.replaceRange(range.start, range.end, replacement);
       });
       var endRow = ranges[ranges.length - 1].end[0];
       this.View.jump(endRow);
@@ -14073,13 +14104,13 @@ var Shortcut = /*#__PURE__*/function (_Component27) {
    * @param Editor - An Editor instance.
    */
   function Shortcut(Editor) {
-    var _this83;
+    var _this85;
 
-    _this83 = _Component27.call(this, Editor) || this;
+    _this85 = _Component27.call(this, Editor) || this;
 
-    _this83.addKeyBindings(KEYMAP);
+    _this85.addKeyBindings(KEYMAP);
 
-    return _this83;
+    return _this85;
   }
   /**
    * Initializes the component.
