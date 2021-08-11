@@ -16,13 +16,13 @@ export declare class Selection extends Component {
      * | `IDLE` | The editor is not active. |
      * | `COLLAPSED` | The selection is collapsed. |
      * | `START` | The selection will change soon. The native selection has not been updated at this timing. |
-     * | `CHANGED` | Fired every time when the tween is updated. |
-     * | `UPDATE` | The selection has just changed after the `START` state. The native selection has been updated. |
+     * | `CHANGED` | The selection has just changed after the `START` or `EXTEND` state. The native selection has been updated. |
+     * | `UPDATE` | The selection has been manually updated via `update()`. |
      * | `SELECTING` | An user starts selecting texts. |
-     * | `EXTEND` | The existing selection is being extended. |
-     * | `END` | User finishes the selection. The native selection has not been updated at this timing (in FF). |
-     * | `SELECTED` | The selection is settled and it is not collapsed. |
-     * | `SELECTED_ALL` | All contents are selected. |
+     * | `EXTEND` | The existing selection will be extended soon. |
+     * | `END` | An user finishes selection. The native selection has not been updated at this timing (in Gecko). |
+     * | `SELECTED` | The selection which is not collapsed has been settled. |
+     * | `SELECTED_ALL` | All contents has been selected. |
      * | `CLICKED_RIGHT` | The selection is right-clicked. |
      */
     readonly STATES: typeof STATES;

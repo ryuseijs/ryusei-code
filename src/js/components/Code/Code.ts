@@ -143,9 +143,12 @@ export class Code extends Component {
 
   /**
    * Replaces lines by the replacement text.
+   * This method only modifies the raw value,
+   * and you need to call `Sync#sync()` to apply the change to the editor.
    *
    * @example
    * Consider the following HTML as an example:
+   *
    * ```html
    * <pre>
    * function message() {
@@ -154,7 +157,8 @@ export class Code extends Component {
    * </pre>
    * ```
    *
-   * Let's modify the line 2 (row index is `1`):
+   * The following code replaces line 2 (the row index is `1`),
+   * and syncs the change with the editor.
    *
    * ```ts
    * const ryuseiCode = new RyuseiCode();
@@ -180,6 +184,8 @@ export class Code extends Component {
 
   /**
    * Replaces the code in a specified range by the replacement text.
+   * This method only modifies the raw value,
+   * and you need to call `Sync#sync()` to apply the change to the editor.
    *
    * @param start       - A start position.
    * @param end         - An end position.
@@ -200,6 +206,9 @@ export class Code extends Component {
    * Replaces lines by the iteratee function invoked for each line.
    * The returning string of the function will be used as a new line.
    *
+   * This method only modifies the raw value,
+   * and you need to call `Sync#sync()` to apply the change to the editor.
+   *
    * @example
    * Consider the following HTML as an example:
    *
@@ -211,7 +220,7 @@ export class Code extends Component {
    * </pre>
    * ```
    *
-   * Let's modify lines by an iteratee function:
+   * The following code replaces lines from `0` to `2` by an iteratee function:
    *
    * ```ts
    * const ryuseiCode = new RyuseiCode();
