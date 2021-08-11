@@ -226,7 +226,9 @@ export class Gutter extends Component {
    * Offsets the float element to the current Chunk position.
    */
   private offset(): void {
-    styles( this.float, { top: unit( this.Chunk.offsetY ) } );
+    const { Chunk, Chunk: { start } } = this;
+    const offset = Chunk.offsetY + ( start < 0 ? start * this.Measure.lineHeight : 0 );
+    styles( this.float, { top: unit( offset ) } );
   }
 
   /**

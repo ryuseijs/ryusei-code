@@ -415,6 +415,10 @@ export class Chunk extends Component {
 
       this.offsetY += lineHeight * lengthToMove;
 
+      if ( this.start < 0 ) {
+        this.offsetY = max( this.offsetY + this.start * lineHeight, 0 );
+      }
+
       const { elms } = this;
       const html = this.html( this.start + elms.length, lengthToMove );
       elms[ elms.length - 1 ].insertAdjacentHTML( 'afterend', html );
@@ -448,7 +452,7 @@ export class Chunk extends Component {
       elms[ 0 ].insertAdjacentHTML( 'beforebegin', html );
 
       this.start -= lengthToMove;
-      this.offsetY -= lineHeight * lengthToMove;
+      this.offsetY = max( this.offsetY - lineHeight * lengthToMove, 0 );
 
       this.attach();
       this.offset();
@@ -723,7 +727,7 @@ export class Chunk extends Component {
 
       if ( between( index, 0, this.length - 1 ) ) {
         if ( diff > 0 ) {
-          before( elms.slice( - diff ), elms[ index ].nextElementSibling );
+          before( elms.slice( -diff ), elms[ index ].nextElementSibling );
         } else if ( diff < 0 ) {
           append( this.parent, elms.slice( index + 1, index + 1 - diff ) );
         }

@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.13
+ * Version  : 0.1.14
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -2438,6 +2438,11 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     } else if (lengthToMove > 0) {
       var lineHeight = this.Measure.lineHeight;
       this.offsetY += lineHeight * lengthToMove;
+
+      if (this.start < 0) {
+        this.offsetY = max(this.offsetY + this.start * lineHeight, 0);
+      }
+
       var elms = this.elms;
 
       var _html = this.html(this.start + elms.length, lengthToMove);
@@ -2473,7 +2478,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
 
       elms[0].insertAdjacentHTML('beforebegin', _html2);
       this.start -= lengthToMove;
-      this.offsetY -= lineHeight * lengthToMove;
+      this.offsetY = max(this.offsetY - lineHeight * lengthToMove, 0);
       this.attach();
       this.offset();
       this.emit(EVENT_CHUNK_MOVED, this);
@@ -12198,8 +12203,11 @@ var Gutter = /*#__PURE__*/function (_Component21) {
   ;
 
   _proto44.offset = function offset() {
+    var Chunk = this.Chunk,
+        start = this.Chunk.start;
+    var offset = Chunk.offsetY + (start < 0 ? start * this.Measure.lineHeight : 0);
     styles(this["float"], {
-      top: unit(this.Chunk.offsetY)
+      top: unit(offset)
     });
   }
   /**
