@@ -69,7 +69,7 @@ export declare class View extends Component {
      */
     jump(row: number, middle?: boolean, lineOffset?: number): void;
     /**
-     * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
+     * Adjusts the width of the container element so that it can contain the longest line in the chunk.
      */
     autoWidth(): void;
     /**

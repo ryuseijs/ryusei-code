@@ -208,16 +208,15 @@ export class View extends Component {
   }
 
   /**
-   * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
+   * Adjusts the width of the container element so that it can contain the longest line in the chunk.
    */
   autoWidth(): void {
-    const { Measure } = this;
-    const { width } = Measure.editorRect;
+    const { Measure, elements } = this;
+    const width = elements.editor.clientWidth + this.getWidthBeforeContainer();
 
-    if ( width > Measure.scrollerRect.width - this.getWidthBeforeContainer() && width > this.lastWidth ) {
-      styles( this.elements.lines, { minWidth: unit( width ) } );
+    if ( width > Measure.scrollerRect.width && width > this.lastWidth ) {
+      styles( elements.container, { minWidth: unit( width ) } );
       this.lastWidth = width;
-
       this.emit( EVENT_SCROLL_WIDTH_CHANGED );
     }
   }

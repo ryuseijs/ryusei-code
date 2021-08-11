@@ -208,7 +208,7 @@ export class Line {
   get text(): string {
     if ( isUndefined( this.textCache ) ) {
       this.textCache = this.tokens.reduce( ( text, token ) => {
-        if ( token[ 0 ] !== CATEGORY_LINEBREAK ) {
+        if ( token[ 1 ] !== LINE_BREAK ) {
           text += token[ 1 ];
         }
 

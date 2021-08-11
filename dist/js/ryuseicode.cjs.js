@@ -1,6 +1,6 @@
 /*!
  * RyuseiCode.js
- * Version  : 0.1.12
+ * Version  : 0.1.13
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -2415,11 +2415,8 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     var html = '';
 
     for (var i = 0; i < length; i++) {
-      var row = start + i;
-      var line = this.lines[row];
-      html += tag([CLASS_LINE, line ? '' : CLASS_EMPTY]);
-      html += line ? line.html : '';
-      html += '</div>';
+      var line = this.lines[start + i];
+      html += tag(CLASS_LINE) + (line ? line.html : '') + '</div>';
     }
 
     if (where) {
@@ -2441,11 +2438,6 @@ var Chunk = /*#__PURE__*/function (_Component3) {
     } else if (lengthToMove > 0) {
       var lineHeight = this.Measure.lineHeight;
       this.offsetY += lineHeight * lengthToMove;
-
-      if (this.start < 0) {
-        this.offsetY = max(this.offsetY + this.start * lineHeight, 0);
-      }
-
       var elms = this.elms;
 
       var _html = this.html(this.start + elms.length, lengthToMove);
@@ -2481,7 +2473,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
 
       elms[0].insertAdjacentHTML('beforebegin', _html2);
       this.start -= lengthToMove;
-      this.offsetY = max(this.offsetY - lineHeight * lengthToMove, 0);
+      this.offsetY -= lineHeight * lengthToMove;
       this.attach();
       this.offset();
       this.emit(EVENT_CHUNK_MOVED, this);
@@ -2788,15 +2780,7 @@ var Chunk = /*#__PURE__*/function (_Component3) {
 
     for (var i = 0; i < elms.length; i++) {
       var line = this.lines[i + start];
-      var elm = elms[i];
-
-      if (line) {
-        html$2(elm, line.html);
-        removeClass(elm, CLASS_EMPTY);
-      } else {
-        text(elm, '');
-        addClass(elm, CLASS_EMPTY);
-      }
+      html$2(elms[i], line ? line.html : '');
     }
   }
   /**
@@ -2814,10 +2798,12 @@ var Chunk = /*#__PURE__*/function (_Component3) {
 
       var elms = this.elms;
 
-      if (diff > 0) {
-        before$1(elms.slice(-diff), elms[_index].nextElementSibling);
-      } else if (diff < 0) {
-        _append(this.parent, elms.slice(_index + 1, _index + 1 - diff));
+      if (between(_index, 0, this.length - 1)) {
+        if (diff > 0) {
+          before$1(elms.slice(-diff), elms[_index].nextElementSibling);
+        } else if (diff < 0) {
+          _append(this.parent, elms.slice(_index + 1, _index + 1 - diff));
+        }
       }
     }
   }
@@ -3916,7 +3902,7 @@ var Line = /*#__PURE__*/function () {
     get: function get() {
       if (isUndefined$1(this.textCache)) {
         this.textCache = this.tokens.reduce(function (text, token) {
-          if (token[0] !== CATEGORY_LINEBREAK) {
+          if (token[1] !== LINE_BREAK$1) {
             text += token[1];
           }
 
@@ -9829,16 +9815,17 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
+   * Adjusts the width of the container element so that it can contain the longest line in the chunk.
    */
   ;
 
   _proto33.autoWidth = function autoWidth() {
-    var Measure = this.Measure;
-    var width = Measure.editorRect.width;
+    var Measure = this.Measure,
+        elements = this.elements;
+    var width = elements.editor.clientWidth + this.getWidthBeforeContainer();
 
-    if (width > Measure.scrollerRect.width - this.getWidthBeforeContainer() && width > this.lastWidth) {
-      styles(this.elements.lines, {
+    if (width > Measure.scrollerRect.width && width > this.lastWidth) {
+      styles(elements.container, {
         minWidth: unit(width)
       });
       this.lastWidth = width;
@@ -12211,11 +12198,8 @@ var Gutter = /*#__PURE__*/function (_Component21) {
   ;
 
   _proto44.offset = function offset() {
-    var Chunk = this.Chunk,
-        start = this.Chunk.start;
-    var offset = Chunk.offsetY + (start < 0 ? start * this.Measure.lineHeight : 0);
     styles(this["float"], {
-      top: unit(offset)
+      top: unit(this.Chunk.offsetY)
     });
   }
   /**

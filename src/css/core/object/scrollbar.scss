@@ -27,7 +27,9 @@ $thumb-transition: background-color 100ms ease !default;
 
   &__scrollbar {
     box-sizing: border-box;
+    opacity: 0;
     position: absolute;
+    transition: opacity .1s linear;
     visibility: hidden;
 
     &::before {
@@ -64,6 +66,7 @@ $thumb-transition: background-color 100ms ease !default;
     }
 
     &.is-active {
+      opacity: 1;
       pointer-events: auto;
       visibility: visible;
     }

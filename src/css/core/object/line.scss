@@ -29,11 +29,6 @@ $padding-right: 1.5em !default;
       opacity: 0;
     }
 
-    &.is-empty {
-      height: 0;
-      visibility: hidden !important;
-    }
-
     code {
       font-family: inherit;
       pointer-events: auto;

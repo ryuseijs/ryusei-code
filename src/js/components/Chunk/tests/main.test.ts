@@ -1,4 +1,4 @@
-import { CLASS_EMPTY, CLASS_LINE } from '../../../constants/classes';
+import { CLASS_LINE } from '../../../constants/classes';
 import { CODE_NUMBERS, EDITOR_HEIGHT, init, LINE_HEIGHT } from '../../../test';
 
 
@@ -17,13 +17,6 @@ describe( 'Chunk', () => {
     expect( lines.length ).toBe( margin * 2 + visibleLines );
     expect( lines[ 0 ].textContent ).toBe( '1' );
     expect( Chunk.start ).toBe( 0 );
-  } );
-
-  test( 'should set the "empty" class if the line element has no corresponded code.', () => {
-    const lines = document.body.querySelectorAll<HTMLElement>( `.${ CLASS_LINE }` );
-
-    expect( lines[ 0 ].classList.contains( CLASS_EMPTY ) ).toBe( false );
-    expect( lines[ lines.length - 1 ].classList.contains( CLASS_EMPTY ) ).toBe( true );
   } );
 
   test( 'can return the row index corresponding with the provided line element.', () => {

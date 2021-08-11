@@ -1,6 +1,6 @@
 import { Elements, EventBusEvent } from '@ryusei/code';
 import { Component } from '../../classes/Component/Component';
-import { CLASS_ANCHOR, CLASS_EMPTY, CLASS_FOCUS, CLASS_LINE, CLASS_PRESERVED } from '../../constants/classes';
+import { CLASS_ANCHOR, CLASS_FOCUS, CLASS_LINE, CLASS_PRESERVED } from '../../constants/classes';
 import {
   EVENT_ANCHOR_LINE_CHANGED,
   EVENT_CHUNK_MOVED,
@@ -43,7 +43,6 @@ import {
   removeClass,
   slice,
   tag,
-  text,
 } from '../../utils';
 import { Selection } from '../Selection/Selection';
 import { MARGIN_LINES, SCROLL_END_DEBOUNCE_DURATION } from './constants';
@@ -392,12 +391,8 @@ export class Chunk extends Component {
     let html = '';
 
     for ( let i = 0; i < length; i++ ) {
-      const row  = start + i;
-      const line = this.lines[ row ];
-
-      html += tag( [ CLASS_LINE, line ? '' : CLASS_EMPTY ] );
-      html += line ? line.html : '';
-      html += '</div>';
+      const line = this.lines[ start + i ];
+      html += tag( CLASS_LINE ) + ( line ? line.html : '' ) + '</div>';
     }
 
     if ( where ) {
@@ -419,10 +414,6 @@ export class Chunk extends Component {
       const { lineHeight } = this.Measure;
 
       this.offsetY += lineHeight * lengthToMove;
-
-      if ( this.start < 0 ) {
-        this.offsetY = max( this.offsetY + this.start * lineHeight, 0 );
-      }
 
       const { elms } = this;
       const html = this.html( this.start + elms.length, lengthToMove );
@@ -457,7 +448,7 @@ export class Chunk extends Component {
       elms[ 0 ].insertAdjacentHTML( 'beforebegin', html );
 
       this.start -= lengthToMove;
-      this.offsetY = max( this.offsetY - lineHeight * lengthToMove, 0 );
+      this.offsetY -= lineHeight * lengthToMove;
 
       this.attach();
       this.offset();
@@ -714,15 +705,7 @@ export class Chunk extends Component {
   sync( elms = this.elms, start = this.start ): void {
     for ( let i = 0; i < elms.length; i++ ) {
       const line = this.lines[ i + start ];
-      const elm  = elms[ i ];
-
-      if ( line ) {
-        html( elm, line.html );
-        removeClass( elm, CLASS_EMPTY );
-      } else {
-        text( elm, '' );
-        addClass( elm, CLASS_EMPTY );
-      }
+      html( elms[ i ], line ? line.html : '' );
     }
   }
 
@@ -738,10 +721,12 @@ export class Chunk extends Component {
       const index = row - this.start;
       const { elms } = this;
 
-      if ( diff > 0 ) {
-        before( elms.slice( - diff ), elms[ index ].nextElementSibling );
-      } else if ( diff < 0 ) {
-        append( this.parent, elms.slice( index + 1, index + 1 - diff ) );
+      if ( between( index, 0, this.length - 1 ) ) {
+        if ( diff > 0 ) {
+          before( elms.slice( - diff ), elms[ index ].nextElementSibling );
+        } else if ( diff < 0 ) {
+          append( this.parent, elms.slice( index + 1, index + 1 - diff ) );
+        }
       }
     }
   }
