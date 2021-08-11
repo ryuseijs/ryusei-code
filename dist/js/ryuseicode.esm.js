@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /*!
  * RyuseiCode.js
- * Version  : 0.1.14
+ * Version  : 0.1.16
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
