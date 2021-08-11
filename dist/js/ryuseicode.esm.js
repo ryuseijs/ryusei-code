@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /*!
  * RyuseiCode.js
- * Version  : 0.1.13
+ * Version  : 0.1.14
  * License  : MIT
  * Copyright: 2021 Naotoshi Fujita
  */
@@ -9847,16 +9847,17 @@ var View = /*#__PURE__*/function (_Component15) {
     }
   }
   /**
-   * Adjusts the width of the lines element so that it can contain the longest line in the chunk.
+   * Adjusts the width of the container element so that it can contain the longest line in the chunk.
    */
   ;
 
   _proto33.autoWidth = function autoWidth() {
-    var Measure = this.Measure;
-    var width = Measure.editorRect.width;
+    var Measure = this.Measure,
+        elements = this.elements;
+    var width = elements.editor.clientWidth + this.getWidthBeforeContainer();
 
-    if (width > Measure.scrollerRect.width - this.getWidthBeforeContainer() && width > this.lastWidth) {
-      styles(this.elements.lines, {
+    if (width > Measure.scrollerRect.width && width > this.lastWidth) {
+      styles(elements.container, {
         minWidth: unit(width)
       });
       this.lastWidth = width;
