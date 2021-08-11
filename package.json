@@ -61,6 +61,6 @@
     "eslint": "eslint src",
     "stylelint": "npx stylelint --fix ./src/css/**/*.scss",
     "jest": "jest src",
-    "prepublish": "jest & npm run eslint & npm run stylelint"
+    "prepare": "jest & npm run eslint & npm run stylelint"
   }
 }
