@@ -1,6 +1,6 @@
 import { Elements, EventBusEvent } from '@ryusei/code';
 import { Component } from '../../classes/Component/Component';
-import { CLASS_ANCHOR, CLASS_EMPTY, CLASS_FOCUS, CLASS_LINE, CLASS_PRESERVED } from '../../constants/classes';
+import { CLASS_ANCHOR, CLASS_FOCUS, CLASS_LINE, CLASS_PRESERVED } from '../../constants/classes';
 import {
   EVENT_ANCHOR_LINE_CHANGED,
   EVENT_CHUNK_MOVED,
@@ -43,7 +43,6 @@ import {
   removeClass,
   slice,
   tag,
-  text,
 } from '../../utils';
 import { Selection } from '../Selection/Selection';
 import { MARGIN_LINES, SCROLL_END_DEBOUNCE_DURATION } from './constants';
